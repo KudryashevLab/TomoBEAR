@@ -1,0 +1,93 @@
+%% configuration text file
+% at the beginning are comments
+
+%% Linked files in workflow [datagates]
+@ matrix 
+% a total of 1 linked files found
+
+%% Parameter list in workflow
+> settings.computing.cpus 20 
+> settings.computing.gpuSet 0 
+> settings.computing.gpuUse 0 
+> settings.computing.parallelCPUUse 0 
+> settings.general.amplitudeContrast 0.9 
+> settings.general.apix 1.701 
+> settings.general.nominalDefocus -4 
+> settings.general.sphericalAberration 2.7 
+> settings.general.voltage 300 
+> steps.alignWorkingStack.alignmentBinLevel 2 
+> steps.binnedReconstruction.reconstructBinnedSIRT 1 
+> steps.binnedReconstruction.reconstructBinnedWBP 1 
+> steps.binnedReconstruction.reconstructBinnedWBPCTF 0 
+> steps.binnedReconstruction.reconstructionBinnedHeight 400 
+> steps.binner.workingBinningFactor 2 
+> steps.chainSelector.minimumMarkerDistance 100 
+> steps.chainSelector.minimumMarkersPerTilt 3 
+> steps.chainSelector.minimumOccupancy 15 
+> steps.chainSelector.relaxedMinimumOccupancy 5 
+> steps.chainSelector.skipMarkedIndices 1 
+> steps.correctCTF.imodPhaseFlipExecutable ctfphaseflip 
+> steps.correctCTF.phaseflipDefocusTolerance 250 
+> steps.correctCTF.phaseflipInterpolationWidth 4 
+> steps.correctCTF.phaseflipMaximumStripWidth 1024 
+> steps.correctCTF.useImodPhaseFlip 1 
+> steps.detectPeaks.beadRadius 30 
+> steps.detectPeaks.detectionBinningFactor 2 
+> steps.detectPeaks.maskRadius 48 
+> steps.detectPeaks.templateSidelength 96 
+> steps.estimateCTF.ctffind4 ctffind4 
+> steps.estimateCTF.ctffind4Card $DYNAMO_ROOT/examples/ctffind4Card.doc 
+> steps.estimateCTF.ctffind4Use 1 
+> steps.estimateCTF.ctffind4UseCard 1 
+> steps.finalSelection.maximalResidualPerObservation Inf 
+> steps.finalSelection.maximalResidualPerTrace Inf 
+> steps.finalSelection.minimumAmountOfMarkersPerMicrograph 2 
+> steps.fittingModel.psi single 
+> steps.fittingModel.psiRange 2 
+> steps.fullReconstruction.centerBinnedCoordinatesValue 0  0  0 
+> steps.fullReconstruction.reconstructFullSIRT 1 
+> steps.fullReconstruction.reconstructFullWBP 1 
+> steps.fullReconstruction.reconstructFullWBPCTF 0 
+> steps.fullReconstruction.reconstructionFullSize 400  400  400 
+> steps.fullReconstruction.reconstructionShiftCenter 0  0  0 
+> steps.fullReconstruction.useCenterOnbinnedCoordinates 0 
+> steps.independentMarkerRefinement.gaussfiltOutlierDetectionCC 1 
+> steps.independentMarkerRefinement.iterationsRefineAverages 1 
+> steps.independentMarkerRefinement.recenterAverages 1 
+> steps.peakFeatures.symmetryOrder 9 
+> steps.peakSelector.useSobelForSelection 1 
+> steps.peakSelector.useSymmetryOrderForSelection 1 
+> steps.reindexer.excludeMultipleMatches 1 
+> steps.reindexer.exclusionRadiusMultipleMatches 30 
+> steps.reindexer.minimumOccupancy 10 
+> steps.reindexer.proximityThreshold3DThinning 20 
+> steps.reindexer.proximityThresholdReprojection 10 
+> steps.shifter.maximalHysteresis 20 
+> steps.shifter.maximalShift 800 
+> steps.shifter.shiftInterval 20 
+> steps.shifter.skipManualDiscardsInShifts 1 
+> steps.tiltExtensor.knotGridSeparation 20 
+> steps.tiltExtensor.maximumOverlapProjections 50 
+> steps.tiltExtensor.minimalKnotContributions 15 
+> steps.tiltExtensor.rerunIterativeReindexingInExtensor 1 
+> steps.tiltExtensor.rerunTiltGapFillingInExtensor 1 
+> steps.tiltExtensor.separationYStripe 20 
+> steps.tiltExtensor.thresholdKnotDistance 40 
+> steps.tiltExtensor.widthYStripe 40 
+> steps.tiltGapFiller.estimateResidualsThreshold 0 
+> steps.tiltGapFiller.increaseDistanceThreshold 10 
+> steps.tiltGapFiller.initialDistanceThreshold 10 
+> steps.tiltGapFiller.maximalDistanceThreshold 40 
+> steps.tiltGapFiller.maximumMarkersDefiningGap 4 
+> steps.tiltGapFiller.minimumMarkersTargeted 4 
+> steps.tiltGapFiller.minimumOccupancyContributingChain 4 
+> steps.tiltGapFiller.residualsThreshold 4 
+> steps.tiltGapFiller.targetedOccupancyContributingChain 10 
+> steps.traceGapFiller.exclusionRadius 30 
+> steps.traceGapFiller.fastCC 1 
+> steps.traceGapFiller.maximalDeviationFromReprojection 5 
+> steps.trimMarkers.maximalMedianResidualMarker 10 
+> steps.trimMarkers.maximalResidualObservation 10 
+> steps.trimMarkers.minimumOccupancy 15 
+> steps.trimMarkers.proximityDeletionThreshold 80 
+> steps.trimMarkers.proximityFusionThreshold 10 

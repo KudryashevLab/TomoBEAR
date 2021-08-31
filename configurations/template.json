@@ -1,0 +1,56 @@
+{
+    "general": {
+        "project_name": "template project",
+        "project_description": "here goes the project description",
+        "data_path": "/path/to/data/folder",
+        "processing_path": "/path/to/output/folder",
+        "expected_symmetrie": "C#",
+        "template_matching_binning": #,
+        "gold_bead_size_in_nm": ##,
+        "gain": "/path/to/gain_reference",
+        "reconstruction_thickness": ####,
+        "rotation_tilt_axis": ##
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+    },
+    "CreateStacks": {
+    },
+    "DynamoTiltSeriesAlignment": {
+    },
+    "DynamoCleanStacks": {
+    },
+    "BatchRunTomo": {
+        "skip_steps": [4, 5],
+        "ending_step": 8
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 10,
+        "ending_step": 13
+    },
+    "BinStacks": {
+        "binnings": [#, #]
+    },
+    "Reconstruct": {
+        "reconstruct": "binned"
+    },
+    "DynamoImportTomograms": {
+    },
+    "EMDTemplateGeneration": {
+        "template_emd_number": "#####",
+        "template_bandpass_cut_off_resolution_in_angstrom": ##
+    },
+    "DynamoTemplateMatching": {
+        "sampling": ##
+    },
+    "TemplateMatchingPostProcessing": {
+        "particle_count": ###
+    },
+    "DynamoAlignmentProject": {
+    }
+}

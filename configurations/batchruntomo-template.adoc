@@ -1,0 +1,130 @@
+# Set-up
+#Full path to directory should be a string
+#setupset.datasetDirectory = <REPLACE>
+#Root name of data set, should be a string
+#setupset.copyarg.name = <REPLACE>
+
+#setupset.copyarg.gradient = ""
+setupset.copyarg.focus = 0
+setupset.copyarg.bfocus = 0
+
+setupset.copyarg.dual = 0
+setupset.copyarg.montage = 0
+#This is the Etomo batch default
+runtime.Preprocessing.any.archiveOriginal = 1
+
+#Pixel size should be in nm
+setupset.copyarg.pixel = <REPLACE>
+
+setupset.copyarg.gold = <REPLACE>
+setupset.copyarg.rotation = <REPLACE>
+#setupset.copyarg.firstinc = <REPLACE>
+setupset.copyarg.userawtlt = 1
+setupset.copyarg.extract = 0
+setupset.copyarg.voltage = <REPLACE>
+setupset.copyarg.Cs = <REPLACE>
+
+#Defocus should be in nm (positive for underfocus)
+setupset.copyarg.defocus = <REPLACE>
+#setupset.copyarg.ctfnoise = /sbdata/EM/projects/mikudrya/data/_CTF_noise95kx_counted/_k2_ctfconfig.txt
+
+
+# Pre-processing
+runtime.Preprocessing.any.removeXrays = 1
+
+#These are the Etomo batch defaults
+comparam.eraser.ccderaser.LineObjects = 2 
+comparam.eraser.ccderaser.BoundaryObjects = 3 
+comparam.eraser.ccderaser.AllSectionObjects = 1-3
+
+
+# Coarse Alignment
+#Bin by factor 4 for the coarse alignment and fiducial tracking
+comparam.prenewst.newstack.BinByFactor = 2
+
+runtime.RAPTOR.any.useAlignedStack = 1
+runtime.RAPTOR.any.numberOfMarkers = 50
+
+# Fiducial Tracking
+# Tracking method set to "seed and track"
+runtime.Fiducials.any.trackingMethod = 0
+
+# Seeding method set to "autofidseed"
+runtime.Fiducials.any.seedingMethod = 1
+
+#Boolean whether beads are "light"
+comparam.track.beadtrack.LightBeads=0 
+
+#These are the Etomo batch defaults
+comparam.track.beadtrack.RoundsOfTracking = 4
+runtime.BeadTracking.any.numberOfRuns = 2
+
+#Sobel Filter for centering (edge detection)
+comparam.track.beadtrack.SobelFilterCentering = 1
+#Kernel sigma should be 1.5 for cryo data
+comparam.track.beadtrack.KernelSigmaForSobel = 1.5
+
+#Whether beads are on two surfaces
+comparam.autofidseed.autofidseed.TwoSurfaces = 0
+
+#Other autofidseed parameters
+comparam.autofidseed.autofidseed.TargetNumberOfBeads = 20
+comparam.autofidseed.autofidseed.AdjustSizes = 1
+
+
+# Alignment
+comparam.align.tiltalign.SeparateGroup = <REPLACE>
+
+
+#Solve for all magnifications
+comparam.align.tiltalign.MagOption = 0
+
+#Tilt angle solution type: group tilt angles
+comparam.align.tiltalign.TiltOption = 0
+
+#Solve for all rotations
+comparam.align.tiltalign.RotOption = 0
+
+comparam.align.tiltalign.XTiltOption = 0
+comparam.align.tiltalign.AngleOffset = 0
+#No beam tilt solution
+comparam.align.tiltalign.BeamTiltOption = 1
+
+comparam.newst.newstack.AntialiasFilter = -1
+
+#Binning of aligned stack
+runtime.AlignedStack.any.binByFactor = <REPLACE>
+#No CTF correction
+runtime.AlignedStack.any.correctCTF = 1
+#Don't erase gold
+runtime.AlignedStack.any.eraseGold = 1
+
+#This is an Etomo batch default
+comparam.align.tiltalign.RobustFitting = 1
+
+
+# Reconstruction
+comparam.tilt.tilt.THICKNESS = <REPLACE>
+runtime.Reconstruction.any.useSirt = 0
+runtime.Reconstruction.any.doBackprojAlso = 1
+
+
+# Post-processing
+#Trimvol the reconstruction
+runtime.Postprocess.any.doTrimvol = 1
+#Reorients using rotation (2)
+runtime.Trimvol.any.reorient = 2
+
+# Added by Nikita
+runtime.Preprocessing.any.removeExcludedViews = 0
+setupset.copyarg.twodir = 0
+setupset.scanHeader = 0
+comparam.tilt.tilt.LOG = 
+comparam.tilt.tilt.SCALE = 0.0 1.0
+comparam.tilt.tilt.RADIAL = 0.5 0.0
+comparam.tilt.tilt.XAXISTILT = 0.0
+comparam.tilt.tilt.AdjustOrigin = 0
+comparam.align.tiltalign.SurfacesToAnalyze = 1
+comparam.align.tiltalign.LocalAlignments = 0
+runtime.GoldErasing.any.thickness = <REPLACE>
+runtime.GoldErasing.any.extraDiameter = <REPLACE>
