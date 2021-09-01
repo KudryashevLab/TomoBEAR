@@ -1,0 +1,121 @@
+{
+    "general": {
+        "project_name": "HIV1",
+        "project_description": "HIV1 EMPIAR-10064",
+        "data_path": "/path/to/hiv1/data/*.mrc",
+        "processing_path": "/path/to/processing/folder",
+        "expected_symmetrie": "C6",
+        "template_matching_binning": 16,
+        "gold_bead_size_in_nm": 10,
+        "reconstruction_thickness": 4000,
+        "rotation_tilt_axis": 85,
+        "aligned_stack_binning": 2,
+        "pre_aligned_stack_binning": 2,
+        "tomogram_indices": [1, 3, 26, 28, 37],
+        "binnings": [2, 4, 8, 16]
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+    },
+    "CreateStacks": {
+    },
+    "DynamoTiltSeriesAlignment": {
+    },
+    "DynamoCleanStacks": {
+    },
+    "BatchRunTomo": {
+        "skip_steps": [4],
+        "ending_step": 6
+    },
+    "StopPipeline": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 8,
+        "ending_step": 8
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 10,
+        "ending_step": 13
+    },
+    "BinStacks": {
+    },
+    "Reconstruct": {
+        "reconstruct": "binned"
+    },
+    "DynamoImportTomograms": {
+    },
+    "EMDTemplateGeneration": {
+        "template_emd_number": "4015"
+    },
+    "DynamoTemplateMatching": {
+        "sampling": 15
+    },
+    "TemplateMatchingPostProcessing": {
+        "parallel_execution": false,
+        "cc_std": 2.5,
+        "crop_particles": true,
+        "as_boxes": true,
+        "box_size": 1.5
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 4,
+        "use_symmetrie": false,
+        "use_noise_classes": true
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 4,
+        "use_noise_classes": true,
+        "use_symmetrie": false,
+        "selected_classes": [1]
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 4,
+        "use_noise_classes": true,
+        "use_symmetrie": false,
+        "selected_classes": [1]
+    },
+    "BinStacks": {
+        "use_ctf_corrected_aligned_stack": false,
+        "binnings": [2, 4, 8]
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 4,
+        "use_noise_classes": true,
+        "use_symmetrie": true,
+        "selected_classes": [1],
+        "binning": 8
+    },
+    "StopPipeline": {
+    },
+    "DynamoAlignmentProject": {
+        "classes": 1,
+        "iterations": 1,
+        "use_noise_classes": false,
+        "swap_particles": false,
+        "use_symmetrie": true,
+        "cone_flip": 1,
+        "selected_classes": [1,2,3,4],
+        "box_size": 0.666,
+        "binning": 4,
+        "threshold": 0.9
+    },
+    "DynamoAlignmentProject": {
+        "classes": 1,
+        "iterations": 1,
+        "use_noise_classes": false,
+        "swap_particles": false,
+        "use_symmetrie": true,
+        "selected_classes": [1,2],
+        "binning": 2,
+        "threshold": 1
+    }
+}
