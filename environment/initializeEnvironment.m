@@ -3,7 +3,6 @@ function initializeEnvironment(default_configuration_path)
 if ~isdeployed()
     addpath("configuration");
     addpath("json");
-    
     if nargin == 0
         default_configuration_path = "./configurations/defaults.json";
     end
