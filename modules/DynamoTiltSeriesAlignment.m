@@ -179,8 +179,12 @@ classdef DynamoTiltSeriesAlignment < Module
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).dynamo_tilt_series_alignment_folder = obj.output_path + string(filesep) + name + ".AWF";
                         if ~isempty(dynamo_tilt_series_alignment_folder)
                             if dlm == true
-                                tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name, "-mat");
-                                tilt_indices = tilt_indices.contents;
+                                try
+                                    tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name, "-mat");
+                                    tilt_indices = tilt_indices.contents;
+                                catch
+                                    tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name);
+                                end
                             else
                                 tilt_indices = textread(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name);
                             end
