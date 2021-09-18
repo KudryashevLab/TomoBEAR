@@ -50,6 +50,7 @@
         "flip_handedness": true
     },
     "DynamoTemplateMatching": {
+        "execution_method": "sequential"
     },
     "TemplateMatchingPostProcessing": {
         "cc_std": 2.5
