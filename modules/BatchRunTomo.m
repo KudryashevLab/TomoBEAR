@@ -277,6 +277,7 @@ classdef BatchRunTomo < Module
                         
                         % TODO: remove misha flag
                         if (end_steps(j) == 6 || end_steps(j) == 8)...
+                                && ~fileExists(current_location + string(filesep) + splitted_name{1} + ".seed")...
                                 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point")...
                                 && obj.configuration.take_fiducials_from_dynamo && ~obj.configuration.reconstruct_binned_stacks
                             
@@ -367,6 +368,14 @@ classdef BatchRunTomo < Module
                             %                                 + string(filesep) + splitted_name{1}, "s");
                             %                             obj.status = 0;
                             %                             return;
+%                         elseif contains(output, "ERROR: align.com has given processing error 1 times") && contains(output, "ERROR: TILTALIGN - Search failed even after varying step factor") 
+%                             new_output = erase(output, "ERROR: align.com has given processing error 1 times");
+%                             new_output = erase(new_output, "ERROR: TILTALIGN - Search failed even after varying step factor");
+%                             if contains(new_output, "ERROR:")
+%                                 disp("WARNING:NEW_COMMAND_OUTPUT: " + new_output);
+%                                 obj.status = 0;
+%                                 return;
+%                             end                             
                         elseif contains(output, "ERROR:")
                             disp("WARNING:COMMAND_OUTPUT: " + output);
                             obj.status = 0;
@@ -414,16 +423,18 @@ classdef BatchRunTomo < Module
                                 seed_points_y = (point_file_content{1,3} / obj.configuration.pre_aligned_stack_binning)...
                                     + (prexg_file_content{1,6}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
                                 seed_points_tilt = point_file_content{1, 4};
+                                seed_points_contour = point_file_content{1, 1};
                             else
                                 % TODO: input zero tilt instead of projection 16
-                                seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == 16) / obj.configuration.pre_aligned_stack_binning)...
-                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == 16) + 1) / obj.configuration.pre_aligned_stack_binning);
-                                seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == 16)  / obj.configuration.pre_aligned_stack_binning)...
-                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == 16) + 1) / obj.configuration.pre_aligned_stack_binning);
-                                seed_points_tilt = point_file_content{1, 4}(point_file_content{1,4} == 16);
+                                seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == find(angles == 0)) / obj.configuration.pre_aligned_stack_binning)...
+                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0)) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == find(angles == 0))  / obj.configuration.pre_aligned_stack_binning)...
+                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0)) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                seed_points_tilt = point_file_content{1, 4}(point_file_content{1,4} == find(angles == 0));
+                                seed_points_contour = point_file_content{1, 1}(point_file_content{1,4} == find(angles == 0));
                             end
                             for k = 1:length(seed_points_x)
-                                fprintf(fid, "%0.0f %0.2f %0.2f %0.0f\n", k, seed_points_x(k) , seed_points_y(k), seed_points_tilt(k));
+                                fprintf(fid, "%0.0f %0.2f %0.2f %0.0f\n", seed_points_contour(k), seed_points_x(k) , seed_points_y(k), seed_points_tilt(k));
                             end
                             fclose(fid);
                             if fileExists(current_location + string(filesep) + splitted_name{1} + ".preali")
