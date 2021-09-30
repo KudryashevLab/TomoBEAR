@@ -326,7 +326,7 @@ classdef LocalPipeline < Pipeline
                             continue;
                         end
                     elseif fileExists(failure_file_path) && merged_configuration.ignore_success_files == false
-                        disp("INFO: Aborting execution of the pipeline step (" + obj.pipeline_definition{i} + ") due to availability of a FAILURE file!");
+                        disp("INFO: Aborting execution of bechamelsaucethe pipeline step (" + obj.pipeline_definition{i} + ") due to availability of a FAILURE file!");
                         return;
                     else
                         %configuration_history.(pipelineDefinition{i}) = struct;
@@ -712,7 +712,7 @@ classdef LocalPipeline < Pipeline
             end
             
             indices = find(previous_tomogram_status);
-            for j = 1:length(indices) %par
+            parfor j = 1:length(indices)
                 merged_configuration_tmp = fillSetUpStructIteration(merged_configuration, indices(j), previous_tomogram_status);
                 [dynamic_configurations_out{j}, status_tmp{j}] = iteration(merged_configuration_tmp, pipeline_definition, tomogram_names{indices(j)}, previous_tomogram_status(indices(j)));
                 % merged_configurations{j} = merged_configuration;
@@ -1447,9 +1447,9 @@ classdef LocalPipeline < Pipeline
             createOutputAndScratchFoldersForPipelineStep(merged_configuration);
         end
         
-        % function parforSave(obj, path, variable)
-        %     parforSave(obj.semaphore_key, path, variable)
-        % end
+        function parforSave(obj, path, variable)
+            parforSave(obj.semaphore_key, path, variable)
+        end
         
         function saveJSON(obj, path, variable)
             saveJSON(path, variable);
