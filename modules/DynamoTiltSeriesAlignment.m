@@ -175,6 +175,8 @@ classdef DynamoTiltSeriesAlignment < Module
                         if isempty(dynamo_tilt_series_alignment_folder)
                             dynamo_tilt_series_alignment_folder = dir(obj.output_path + string(filesep) + name + ".AWF" + string(filesep) + "align" + string(filesep) + "reconstructionTiltIndices.dlm");
                             dlm = true;
+                        else
+                            dlm = false;
                         end
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).dynamo_tilt_series_alignment_folder = obj.output_path + string(filesep) + name + ".AWF";
                         if ~isempty(dynamo_tilt_series_alignment_folder)
