@@ -36,7 +36,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     [success, message, message_id] = rmdir(name + ".AWF");
                     %                     delete(name + ".log");
                 end
-%                 try
+                try
                     % TODO put log in AWF folder
                     folder = obj.output_path;
                     
@@ -181,8 +181,12 @@ classdef DynamoTiltSeriesAlignment < Module
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).dynamo_tilt_series_alignment_folder = obj.output_path + string(filesep) + name + ".AWF";
                         if ~isempty(dynamo_tilt_series_alignment_folder)
                             if dlm == true
-                                tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name, "-mat");
-                                tilt_indices = tilt_indices.contents;
+                                try
+                                    tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name, "-mat");
+                                    tilt_indices = tilt_indices.contents;
+                                catch
+                                    tilt_indices = load(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name);
+                                end
                             else
                                 tilt_indices = textread(dynamo_tilt_series_alignment_folder.folder + string(filesep) + dynamo_tilt_series_alignment_folder.name);
                             end
@@ -244,14 +248,14 @@ classdef DynamoTiltSeriesAlignment < Module
                     end
                     diary off;
                     
-%                 catch exception
-%                     disp(exception);
-%                     if obj.configuration.propagate_failed_stacks == true
-%                         obj.status = 1;
-%                     else
-%                         obj.status = 0;
-%                     end
-%                 end
+                catch exception
+                    disp(exception);
+                    if obj.configuration.propagate_failed_stacks == true
+                        obj.status = 1;
+                    else
+                        obj.status = 0;
+                    end
+                end
             end
             
             if obj.configuration.test_whole_range == true

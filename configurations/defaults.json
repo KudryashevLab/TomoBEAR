@@ -95,7 +95,7 @@
         "binnings": [16],
         "ignore_file_system_time_stamps": true,
         "automatic_filename_parts_recognition": true,
-        "angle_regex": "_([+-]*[{\\d}2]*[.]+\\d)[_.]",
+        "angle_regex": "_([+-]*[\\d]*[.]+\\d+)[_.]",
         "name_regex": "([A-Za-z\\d_]+[A-Za-z]+)",
         "number_regex": "[_]*([\\d]+[_[\\d]*]*)_",
         "name_number_regex": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)",
@@ -431,7 +431,7 @@
         "template_bandpass_smoothing_pixels": 3,
         "use_bandpassed_template": true,
         "use_smoothed_mask": true,
-        "invert_density": true,
+        "invert_density": false,
         "skip": false,
         "citation": ""
     },

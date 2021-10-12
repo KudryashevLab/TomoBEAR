@@ -59,20 +59,8 @@ classdef EMDTemplateGeneration < Module
             % TODO: what about homogenized data
 %             rescaled_pixelsize = obj.configuration.apix * binning;
 %             rescaled_pixelsize = obj.configuration.greatest_apix * binning; % obj.configuration.smallest_apix 
-            
-            if isfield(obj.configuration, "apix")    
-                rescaled_pixelsize = obj.configuration.apix * obj.configuration.template_matching_binning;
-                apix = obj.configuration.apix;
-            elseif isfield(obj.configuration, "smallest_apix")
-                rescaled_pixelsize = obj.configuration.smallest_apix * obj.configuration.template_matching_binning;
-                apix = obj.configuration.smallest_apix;
-            elseif isfield(obj.configuration, "greatest_apix")
-                rescaled_pixelsize = obj.configuration.greatest_apix * obj.configuration.template_matching_binning;
-                apix = obj.configuration.greatest_apix;
-            else
-                error("ERROR: no pixel size entered or detected!");
-            end
-            
+            [rescaled_pixelsize, apix] = getApix(obj.configuration, obj.configuration.template_matching_binning);
+
             scaling_ratio = str2double(template_pixel_size)/(rescaled_pixelsize);
             
             

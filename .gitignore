@@ -55,6 +55,9 @@ offxca/
 *.mldatx
 *.log
 combine_configurations_and_save_history
+cryo_et_pipeline
+cryo_et_pipeline_local
+#cryo_et_pipeline.prj
 *.sbatch~
 *~
 **/node_modules
@@ -74,6 +77,15 @@ bfg-report/
 
 dynamo/matlab/mbtools/+mbparse/@output
 dynamo/matlab/src/+dpksys
+
+dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepWrapper/compute.m
+dynamo/matlab/src/+dpkproject/readNextIterationFile.m
+dynamo/matlab/src/+dpkproject/writeNextIterationFile.m
+dynamo/matlab/mbtools/+mboop/+flows/+aux/@FullStatusManager/assessWorkflowInput.m
+dynamo/matlab/src/+dpktilt/+aux/+align/+pipeline/+steps/+restorers/@MarkerRestorer/takeSnapshotInput.m
+dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepRestorer/setSnapshotInput.m
+dynamo/matlab/src/+dpktilt/+aux/+align/+pipeline/+steps/+restorers/@MarkerRestorer/takeSnapshotOutput.m
+dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepRestorer/setSnapshotOutput.m
 
 dynamo/matlab/mbtools/+mbgui/+dlg/@msgbox/msgbox.m
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepManager/reload.m

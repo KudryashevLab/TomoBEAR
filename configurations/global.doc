@@ -1,10 +1,10 @@
 %% configuration text file
 % at the beginning are comments
-
+ 
 %% Linked files in workflow [datagates]
-@ matrix 
+@ matrix /sbdata/PTMP/nibalysc/wechen/2019-10-07_wechen_triad/output/5_CreateStacks_1/TriadKrios1_81K_002/TriadKrios1_81K_002.st 
 % a total of 1 linked files found
-
+ 
 %% Parameter list in workflow
 > settings.computing.cpus 20 
 > settings.computing.gpuSet 0 

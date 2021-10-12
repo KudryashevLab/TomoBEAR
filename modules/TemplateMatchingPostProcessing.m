@@ -109,6 +109,7 @@ classdef TemplateMatchingPostProcessing < Module
                     break_flag = false;
                 end
                 
+                % TODO: integrate SUSAN
                 if obj.configuration.crop_particles == true % && obj.configuration.as_boxes == 0
                     if obj.configuration.all_in_one_folder == true
                         particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning  + "_bs_" + box_size;
@@ -124,6 +125,7 @@ classdef TemplateMatchingPostProcessing < Module
                 end
             end
             
+            % TODO: integrate SUSAN
             if obj.configuration.crop_particles == true && obj.configuration.as_boxes == 1
                 %dBoxes('create', char([particles_folder '.Boxes']))
                 if obj.configuration.all_in_one_folder == true

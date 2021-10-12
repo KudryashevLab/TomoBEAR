@@ -2,8 +2,9 @@ function [dynamic_configuration, file_count_changed] = getUnprocessedTomograms(c
 
 dynamic_configuration = struct;
 original_files = getOriginalFiles(configuration, false);
+original_files = original_files(~startsWith({original_files.name}, "."));
 
-if checkForMultipleExtensions({original_files.name})
+if checkForMultipleExtensions({original_files.name});
     error("ERROR: Multiple unknown extensions found!");
 end
 file_count = length(original_files);
@@ -20,27 +21,30 @@ end
 
 if configuration.automatic_filename_parts_recognition == true
     for i = 1:length(original_files)
-        [name_number_mat, name_number_tok, name_number_ext] = regexp(original_files(i).name, configuration.name_number_regex, "match", 'tokens', 'tokenExtents');
-        [angle_mat, angle_tok, angle_ext] = regexp(original_files(i).name, configuration.angle_regex, "match", 'tokens', 'tokenExtents');
-        prefix = original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(1,2));
+        current_file_name = original_files(i).name;
+        current_file_name(current_file_name == '[') = '_';
+        current_file_name(current_file_name == ']') = '';
+        [name_number_mat, name_number_tok, name_number_ext] = regexp(current_file_name, configuration.name_number_regex, "match", 'tokens', 'tokenExtents');
+        [angle_mat, angle_tok, angle_ext] = regexp(current_file_name, configuration.angle_regex, "match", 'tokens', 'tokenExtents');
+        prefix = current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(1,2));
 
         if ~isempty(angle_ext)
-            if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(original_files(i).name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
-                double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
+            if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(current_file_name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
+                double_numbering = length(strsplit(current_file_name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
             else
-                double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
+                double_numbering = length(strsplit(current_file_name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
             end
             
             if double_numbering == false
-                tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
+                tomogram_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
             else
                 break;
             end
          
-            splitted_name = strsplit(original_files(i).name, "_"); 
+            splitted_name = strsplit(current_file_name, "_"); 
             tomogram_numbers(i) = str2double(splitted_name{tomogram_number_position});
 
-        elseif contains(original_files(i).name, ".frames.") || (isfield(configuration, "tilt_stacks") && configuration.tilt_stacks == false)
+        elseif contains(current_file_name, ".frames.") || (isfield(configuration, "tilt_stacks") && configuration.tilt_stacks == false)
             break;
         else
             break;
@@ -51,11 +55,13 @@ if configuration.automatic_filename_parts_recognition == true
         original_files = original_files(idx);
     end
     for i = 1:length(original_files)
+        current_file_name = original_files(i).name;
+        current_file_name(current_file_name == '[') = '_';
+        current_file_name(current_file_name == ']') = '';
         dynamic_configuration.original_files(i).name = original_files(i).name;
         dynamic_configuration.original_files(i).folder = original_files(i).folder;
-        
-        [name_number_mat, name_number_tok, name_number_ext] = regexp(original_files(i).name, configuration.name_number_regex, "match", 'tokens', 'tokenExtents');
-        dynamic_configuration.original_files(i).prefix = original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(1,2));
+        [name_number_mat, name_number_tok, name_number_ext] = regexp(current_file_name, configuration.name_number_regex, "match", 'tokens', 'tokenExtents');
+        dynamic_configuration.original_files(i).prefix = current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(1,2));
         %TODO: probably need to modify prefix extraction
         %         [name_mat, name_tok, name_ext] = regexp(original_files(i).name, configuration.name_regex, "match", 'tokens', 'tokenExtents');
         %         [number_mat, number_tok, number_ext] = regexp(original_files(i).name(name_ext{1}(1,1):name_ext{1}(1,2)), configuration.number_regex, "match", 'tokens', 'tokenExtents');
@@ -63,14 +69,14 @@ if configuration.automatic_filename_parts_recognition == true
         
         
         dynamic_configuration.original_files(i).prefix_length = length(strsplit(dynamic_configuration.original_files(i).prefix, "_"));
-        [angle_mat, angle_tok, angle_ext] = regexp(original_files(i).name, configuration.angle_regex, "match", 'tokens', 'tokenExtents');
+        [angle_mat, angle_tok, angle_ext] = regexp(current_file_name, configuration.angle_regex, "match", 'tokens', 'tokenExtents');
         if ~isempty(angle_ext)
-            dynamic_configuration.original_files(i).angle_position = length(strsplit(original_files(i).name(1:angle_ext{1}(2)), "_"));
+            dynamic_configuration.original_files(i).angle_position = length(strsplit(current_file_name(1:angle_ext{1}(2)), "_"));
             dynamic_configuration.original_files(i).position_adjustment = length(strsplit(dynamic_configuration.original_files(i).prefix, "_")) - 1;
             
             
             dynamic_configuration.original_files(i).angle_extents = angle_ext{1};
-            dynamic_configuration.original_files(i).angle = str2double(original_files(i).name(angle_ext{1}(1):angle_ext{1}(2)));
+            dynamic_configuration.original_files(i).angle = str2double(current_file_name(angle_ext{1}(1):angle_ext{1}(2)));
             if isfield(configuration, "first_tilt_angle") && configuration.first_tilt_angle ~= ""
                 dynamic_configuration.original_files(i).zero_tilt = dynamic_configuration.original_files(i).angle == configuration.first_tilt_angle;
             elseif i == 1
@@ -81,24 +87,24 @@ if configuration.automatic_filename_parts_recognition == true
             end
                 
             
-            if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(original_files(i).name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
-                dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
+            if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(current_file_name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
+                dynamic_configuration.original_files(i).double_numbering = length(strsplit(current_file_name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
             else
-                dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
+                dynamic_configuration.original_files(i).double_numbering = length(strsplit(current_file_name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
             end
             
             if dynamic_configuration.original_files(i).double_numbering == false
-                dynamic_configuration.original_files(i).tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
-                dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).tomogram_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
+                dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
                 
                 dynamic_configuration.original_files(i).tilt_number_position = 0;
                 dynamic_configuration.original_files(i).adjusted_tilt_number_position = 0;
                 
             else
-                dynamic_configuration.original_files(i).tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
-                dynamic_configuration.original_files(i).tilt_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,2)), "_"));
-                dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
-                dynamic_configuration.original_files(i).adjusted_tilt_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).tomogram_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
+                dynamic_configuration.original_files(i).tilt_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,2)), "_"));
+                dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).adjusted_tilt_number_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):name_number_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
             end
             
             if dynamic_configuration.original_files(i).tomogram_number_position == dynamic_configuration.original_files(i).prefix_length
@@ -127,27 +133,22 @@ if configuration.automatic_filename_parts_recognition == true
             
             
             
-            [month_date_time_mat, month_date_time_tok, month_date_time_ext] = regexp(original_files(i).name, configuration.month_date_time_regex, "match", 'tokens', 'tokenExtents');
+            [month_date_time_mat, month_date_time_tok, month_date_time_ext] = regexp(current_file_name, configuration.month_date_time_regex, "match", 'tokens', 'tokenExtents');
             if isempty(month_date_time_ext)
                 dynamic_configuration.original_files(i).date_position = 0;
                 dynamic_configuration.original_files(i).time_position = 0;
             elseif ~isempty(month_date_time_ext)
-                dynamic_configuration.original_files(i).date_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_"));
-                dynamic_configuration.original_files(i).time_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_"));
-                dynamic_configuration.original_files(i).adjusted_date_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
-                dynamic_configuration.original_files(i).adjusted_time_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).date_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_"));
+                dynamic_configuration.original_files(i).time_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_"));
+                dynamic_configuration.original_files(i).adjusted_date_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).adjusted_time_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
             end
             dynamic_configuration.original_files(i).tilt_stack = false;
             dynamic_configuration.tilt_stacks = false;
         elseif contains(dynamic_configuration.original_files(i).name, ".frames.") || (isfield(configuration, "tilt_stacks") && configuration.tilt_stacks == false)
-            dynamic_configuration.original_files(i).zero_tilt = configuration.tilt_angles(i) == configuration.tilt_angles(1);
+            dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
             dynamic_configuration.original_files(i).position_adjustment = length(strsplit(dynamic_configuration.original_files(i).prefix, "_")) - 1;
-%             if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(original_files(i).name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
-%                 dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
-%             else
-                dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):name_number_ext{1}(2,2)), "_")) >= 2;
-%             end
-            
+
             if dynamic_configuration.original_files(i).double_numbering == false
                 dynamic_configuration.original_files(i).tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_"));
                 dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
@@ -161,6 +162,23 @@ if configuration.automatic_filename_parts_recognition == true
                 dynamic_configuration.original_files(i).adjusted_tomogram_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,1)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
                 dynamic_configuration.original_files(i).adjusted_tilt_number_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):name_number_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
             end
+            
+            if ~exist("previous_tomogram_number", "var") || (isfield(configuration, "projections") && mod(i, configuration.projections))
+%                 previous_tomogram_number =  str2double(splitted_name{dynamic_configuration.original_files(i).tomogram_number_position});
+%                 projection_number = 1;
+%             elseif str2double(splitted_name{dynamic_configuration.original_files(i).tomogram_number_position}) ~= previous_tomogram_number
+                projection_number = 1;
+            else
+                projection_number = projection_number + 1;
+            end
+            projection_number = projection_number + 1;
+            dynamic_configuration.original_files(i).zero_tilt = configuration.tilt_angles(projection_number) == configuration.tilt_angles(1);
+%             if name_number_ext{1}(2,2) >= angle_ext{1}(1) || (~isempty(regexp(original_files(i).name, "[-]*" ,"match")) && name_number_ext{1}(2,2) == angle_ext{1}(1) - 1)
+%                 dynamic_configuration.original_files(i).double_numbering = length(strsplit(original_files(i).name(name_number_ext{1}(2,1):angle_ext{1}(1)-2), "_")) >= 2;
+%             else
+%             end
+            
+            
             
             if dynamic_configuration.original_files(i).tomogram_number_position == dynamic_configuration.original_files(i).prefix_length
                 dynamic_configuration.original_files(i).missing_underscore_between_tomogram_name_and_number = true;
@@ -197,7 +215,7 @@ if configuration.automatic_filename_parts_recognition == true
             
             dynamic_configuration.tilt_stacks = false;
             dynamic_configuration.original_files(i).tilt_stack = false;
-            dynamic_configuration.original_files(i).angle = configuration.tilt_angles(i);
+            dynamic_configuration.original_files(i).angle = configuration.tilt_angles(projection_number);
         else
             dynamic_configuration.original_files(i).tilt_stack = true;
             dynamic_configuration.tilt_stacks = true;

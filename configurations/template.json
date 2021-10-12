@@ -39,18 +39,20 @@
     "Reconstruct": {
         "reconstruct": "binned"
     },
-    "DynamoImportTomograms": {
-    },
     "EMDTemplateGeneration": {
         "template_emd_number": "#####",
-        "template_bandpass_cut_off_resolution_in_angstrom": ##
+        "template_bandpass_cut_off_resolution_in_angstrom": 20
     },
     "DynamoTemplateMatching": {
-        "sampling": ##
+        "size_of_chunk": [528, 512, 500], %for 11GB GPU
+        "cone_sampling": ##,
+        "in_plane_sampling": ##
     },
     "TemplateMatchingPostProcessing": {
         "particle_count": ###
     },
     "DynamoAlignmentProject": {
+    },
+    "DynamoImportTomograms": {
     }
 }

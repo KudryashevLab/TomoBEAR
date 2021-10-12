@@ -17,6 +17,30 @@ combined_tdrot = zeros(size(cc_map{1}));
 combined_tilt = zeros(size(cc_map{1}));
 combined_narot = zeros(size(cc_map{1}));
 
+
+%pool = generatePool(int32(20), true);
+% for j = 1:numel(cc_map{1})
+%     max_cc = 0;
+%     max_cc_tdrot = 0;
+%     max_cc_tilt = 0;
+%     max_cc_narot = 0;
+%     
+%     for i = 1:length(cc_map)
+%         if cc_map{i}(j) > max_cc
+%             %disp("old max: " + max_cc + " new max: " + cc_map{i}(j));
+%             max_cc = cc_map{i}(j);
+%             max_cc_tdrot = tdrot_map{i}(j);
+%             max_cc_tilt = tilt_map{i}(j);
+%             max_cc_narot = narot{i};
+%         end
+%     end
+%     
+%     combined_volume(j) = max_cc;
+%     combined_tdrot(j) = max_cc_tdrot;
+%     combined_tilt(j) = max_cc_tilt;
+%     combined_narot(j) = max_cc_narot;
+% end
+
 for i = 1:length(cc_map)
     [indices] = find(cc_map{i} > combined_volume);
     combined_volume(indices) = cc_map{i}(indices);

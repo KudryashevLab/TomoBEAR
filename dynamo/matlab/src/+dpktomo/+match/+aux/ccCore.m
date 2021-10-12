@@ -19,7 +19,7 @@ function mc = ccCore(rotatedTemplatePadded, rotatedMaskPadded, chunkNormalized, 
 %norm_data_moving_mask = sqrt(mcn_joint);
 %clear mcn_joint;
 % mcn_final = sqrt(real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized))))^2) / (Nmask^1)) * norm_rotatedTemplate;
-mcn_final = sqrt(real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized)))).^2) / (Nmask^1)) * norm_rotatedTemplate;
+mcn_final = real(sqrt(complex(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized)))).^2) / (Nmask^1))) * norm_rotatedTemplate;
 % clear norm_data_moving_mask;
 %clear norm_rotatedTemplate ;
 

@@ -41,28 +41,8 @@ classdef DynamoTemplateMatching < Module
             field_names = fieldnames(obj.configuration.tomograms);
             %for i = 1:length(tomograms) / length(obj.configuration.binnings)
             
-            tlt_file_rec = getFilesFromLastModuleRun(obj.configuration, "Reconstruct", "tlt");
-            tlt_file_brt = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt");
-            if (isempty(tlt_file_rec) || ~fileExists(tlt_file_rec{1})) && (isempty(tlt_file_brt) || ~fileExists(tlt_file_brt{1}))
-                min_and_max_tilt_angles = sort(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping(2,:));
-            else
-                if ~isempty(tlt_file_rec) && fileExists(tlt_file_rec{1})
-                    fid = fopen(tlt_file_rec{1});
-                elseif ~isempty(tlt_file_brt) && fileExists(tlt_file_brt{1})
-                    fid = fopen(tlt_file_brt{1});
-                else
-                    error("ERROR: no tlt file found");
-                end
-                high_tilt = fgetl(fid);
-                % TODO:DIRTY -> code clean
-                while ~feof(fid)
-                    low_tilt = fgetl(fid);
-                end
-                min_and_max_tilt_angles = [str2double(high_tilt) str2double(low_tilt)];
-                fclose(fid);
-            end
-            
-            
+            min_and_max_tilt_angles = getTiltAngles(obj.configuration);
+
             %output = executeCommand("header -size " + template_path);
             [status_system, output] = system("header -size " + template_path);
             

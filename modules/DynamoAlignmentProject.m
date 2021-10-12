@@ -394,217 +394,222 @@ classdef DynamoAlignmentProject < Module
                         end
                         template = avge.average;
                     else
-                        error("INFO: functionality is not yet available!")
-%                         new_table = [];
-%                         if obj.configuration.classes == 1 && obj.configuration.swap_particles == false &&  exist("tab_all_path", "var") && contains(tab_all_path(1).folder, "bin_" + previous_binning + "_eo" + filesep)
-%                             for i = 1:length(sub_tables)
-%                                 sub_table = sub_tables{i};
-%                                 if previous_binning/binning > 1
-%                                     
-%                                     sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
-%                                     sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
-%                                     sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
-%                                     sub_table(:,4) = 0;
-%                                     sub_table(:,5) = 0;
-%                                     sub_table(:,6) = 0;
-%                                     if previous_binning > binning
-%                                         sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
-%                                         sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
-%                                         sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
-%                                     else
-%                                         sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
-%                                         sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
-%                                         sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
-%                                     end
-%                                 end
-%                                 %sub_table(:,20) = i;
-%                                 if isempty(new_table)
-%                                     new_table = sub_table;
-%                                 else
-%                                     new_table(end+1:end+size(sub_table, 1),:) = sub_table;
-%                                 end
-%                             end
-%                         else
-%                             for i = 1:length(obj.configuration.selected_classes)
-%                                 sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
-%                                 if previous_binning/binning > 1
-%                                     
-%                                     sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
-%                                     sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
-%                                     sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
-%                                     sub_table(:,4) = 0;
-%                                     sub_table(:,5) = 0;
-%                                     sub_table(:,6) = 0;
-%                                     if previous_binning > binning
-%                                         sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
-%                                         sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
-%                                         sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
-%                                     else
-%                                         sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
-%                                         sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
-%                                         sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
-%                                     end
-%                                 end
-%                                 %sub_table(:,20) = i;
-%                                 if isempty(new_table)
-%                                     new_table = sub_table;
-%                                 else
-%                                     new_table(end+1:end+size(sub_table, 1),:) = sub_table;
-%                                 end
-%                             end
-%                         end
-%                         if binning > 1
-%                             aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(obj.configuration, true, binning);
-%                         else
-%                             aligned_tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
-%                         end
-%                         [width, height, z] = getHeightAndWidthFromHeader(string(aligned_tilt_stacks(1).folder) + filesep + string(aligned_tilt_stacks(1).name), -1);
-%                         %tlt_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt", "last");
-%                         tlt_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".tlt");
-%                         %defocus_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "defocus", "last");
-%                         defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".defocus");
-%                         tomos_id = unique(new_table(:,20));
-%                         
-%                         N = length(tomos_id);
-%                         if isfield(obj.configuration, "tilt_angles")
-%                             P = length(obj.configuration.tilt_angles);
-%                         else
-%                             P = length(obj.configuration.tomograms.tomogram_001.original_angles);
-%                         end
-%                         tomos = SUSAN.Data.TomosInfo(N,P);
-%                         dose_per_projection = obj.configuration.dose / P;
-%                         
-%                         for i = 1:N
-%                             tomos.tomo_id(i) = tomos_id(i);
-%                             stack_path = string(aligned_tilt_stacks(i).folder) + filesep + string(aligned_tilt_stacks(i).name);
-%                             tomos.set_stack  (i, stack_path);
-%                             tomos.set_angles (i, char(string(tlt_files{tomos_id(i)}(1).folder) + filesep + tlt_files{tomos_id(i)}(1).name));
-%                             tomos.set_defocus(i, char(string(defocus_files{tomos_id(i)}(1).folder) + filesep + string(defocus_files{tomos_id(i)}(1).name)));
-%                             if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
-%                                 for j = 1:size(tomos.defocus, 1)
-%                                     tomos.defocus(j,6,i) = obj.configuration.bf * ((obj.configuration.dose_order(j) - 1) * dose_per_projection);
-%                                 end
-%                             end
-%                             if isfield(obj.configuration, "apix") && obj.configuration.apix ~= 0
-%                                 tomos.pix_size(i) = obj.configuration.apix * binning;
-%                             else
-%                                 tomos.pix_size(i) = obj.configuration.greatest_apix * binning;
-%                             end
-%                             tomos.tomo_size(i,:) = [width, height, obj.configuration.reconstruction_thickness / binning];
-%                             
-%                         end
-%                         tomos_name = char("tomos_bin_" + binning + ".tomostxt");
-%                         tomos.save(tomos_name);
-%                         
-%                         %%
-%                         %                         new_table(:,[24 25 26]) = new_table(:,[24 25 26]) + new_table(:,[4 5 6]);
-%                         %                         new_table(:,[4 5 6]) = 0;
-%                         %                         new_table(:,[24 25 26]) = previous_binning/binning*new_table(:,[24 25 26])+1;
-%                         %                         table_name = char("table_bin_" + binning + ".tbl");
-%                         %                         dwrite(new_table,table_name);
-%                         particles_raw = char("particles_bin_" + binning + ".ptclsraw");
-%                         ptcls = SUSAN.Data.ParticlesInfo(new_table, tomos);
-%                         ptcls.save(particles_raw);
-%                         
-%                         %%
-%                         avg = SUSAN.Modules.Averager;
-%                         if obj.configuration.gpu == -1
-%                             avg.gpu_list = 0:gpuDeviceCount - 1;
-%                         else
-%                             avg.gpu_list = obj.configuration.gpu - 1;
-%                         end
-%                         box_size = round((size(template,1) * obj.configuration.box_size) * (previous_binning / binning));
-%                         
-%                         if mod(box_size, 2) == 1
-%                             box_size = box_size + 1;
-%                         end
-%                         
-%                         avg.bandpass.lowpass = min(obj.configuration.susan_lowpass, (box_size / 2) / 2);
-%                         avg.padding = obj.configuration.susan_padding / binning;
-%                         avg.rec_halves = true;
-%                         
-%                         if (obj.configuration.per_particle_ctf_correction == "wiener_ssnr")
-%                             avg.set_ctf_correction(char("wiener_ssnr"),obj.configuration.ssnr(1), obj.configuration.ssnr(2)); % what about SSNR....: set_ctf_correction('wiener_ssnr',1,0.8);
-%                         else
-%                             avg.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % what about SSNR....: set_ctf_correction('wiener_ssnr',1,0.8);
-%                         end
-%                         avg.set_padding_policy(char(obj.configuration.padding_policy));
-%                         avg.set_normalization(char(obj.configuration.normalization));
-%                         
-%                         if obj.configuration.use_symmetrie == true
-%                             avg.set_symmetry(char(obj.configuration.expected_symmetrie));
-%                         end
-%                         %                         if obj.configuration.susan_box_size > 0
-%                         %                             box_size = round((size(template,1) * obj.configuration.susan_box_size) * (previous_binning / binning)); %obj.configuration.susan_box_size;
-%                         %                             obj.dynamic_configuration.susan_box_size = 1;
-%                         %                         else
-%                         
-%                         %                         end
-%                         if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
-%                             particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size + "_dw");
-%                         else
-%                             particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size);
-%                         end
-%                         avg.reconstruct(char("ds_ini_bin_" + binning), tomos_name, particles_raw, box_size);
-%                         %%
-%                         
-%                         subtomos = SUSAN.Modules.SubtomoRec;
-%                         if obj.configuration.gpu == -1
-%                             subtomos.gpu_list = 0:gpuDeviceCount - 1;
-%                         else
-%                             subtomos.gpu_list = obj.configuration.gpu - 1;
-%                         end
-%                         
-%                         subtomos.padding = round(obj.configuration.susan_padding / binning);
-%                         
-%                         subtomos.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % try also wiener if you like
-%                         subtomos.set_padding_policy(char(obj.configuration.padding_policy));
-%                         subtomos.set_normalization(char(obj.configuration.normalization));
-%                         subtomos.reconstruct(char(particles_path), tomos_name, particles_raw, box_size);
-%                         particle_files = dir([particles_path filesep 'particle*.em']);
-%                         ptags = zeros([length(particle_files) 1]);
-%                         for l = 1:length(particle_files)
-%                             particle_name = strsplit(particle_files(l).name, ".");
-%                             particle_number = strsplit(particle_name{1}, "_");
-%                             ptag = str2double(particle_number{2});
-%                             ptags(l) = ptag;
-%                         end
-%                         if ~isempty(setdiff(new_table(:,1), ptags(:)))
-%                             
-%                             set_diff = setdiff(new_table(:,1), ptags(:));
-%                             for i = 1:length(set_diff)
-%                                 new_table(new_table(:, 1) == set_diff(i),:) = [];
-%                             end
-%                         end
-%                         if obj.configuration.as_boxes == 1
-%                             % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
-%                             %     [char("../../particles/particles_bin_" + binning  + "_bs_" + box_size) '.Boxes'],...
-%                             %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-%                             ownDbox(string(particles_path),...
-%                                 string([char(particles_path) '.Boxes']));
-%                             
-%                             [status, message, messageid] = rmdir(char(particles_path), 's');
-%                             particles_path = [char(particles_path) '.Boxes'];
-%                             %                             new_table(:,1) = 1:length(new_table);
-%                             %movefile(char([char("../../particles/particles_bin_" + binning) '.Boxes']), char("../../particles/particles_bin_" + binning));
-%                         end
-%                         %
-%                         %                         if obj.configuration.classes == 1
-%                         %                             for i = 1:2
-%                         %                                 if length(sub_tables) == 1
-%                         %                                     average = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
-%                         %                                 else
-%                         %                                     average = daverage(char(particles_path), '-t', sub_tables{i}, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
-%                         %                                 end
-%                         %                                 template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
-%                         %                                 dwrite(average.average, template_em_files{i});
-%                         %                             end
-%                         %                             obj.configuration.classes = 2;
-%                         %                         else
-%                         avge = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
-%                         template_em_files{1} = char(alignment_project_folder_path + string(filesep) + "average_" + 1 + ".em");
-%                         dwrite(avge.average, template_em_files{1});
-%                         %                         end
+                        new_table = [];
+                        if obj.configuration.classes == 1 && obj.configuration.swap_particles == false &&  exist("tab_all_path", "var") && contains(tab_all_path(1).folder, "bin_" + previous_binning + "_eo" + filesep)
+                            for i = 1:length(sub_tables)
+                                sub_table = sub_tables{i};
+                                if previous_binning/binning > 1
+                                    
+                                    sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
+                                    sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
+                                    sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
+                                    sub_table(:,4) = 0;
+                                    sub_table(:,5) = 0;
+                                    sub_table(:,6) = 0;
+                                    if previous_binning > binning
+                                        sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
+                                    else
+                                        sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
+                                    end
+                                end
+                                %sub_table(:,20) = i;
+                                if isempty(new_table)
+                                    new_table = sub_table;
+                                else
+                                    new_table(end+1:end+size(sub_table, 1),:) = sub_table;
+                                end
+                            end
+                        else
+                            for i = 1:length(obj.configuration.selected_classes)
+                                sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
+                                if previous_binning/binning > 1
+                                    
+                                    sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
+                                    sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
+                                    sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
+                                    sub_table(:,4) = 0;
+                                    sub_table(:,5) = 0;
+                                    sub_table(:,6) = 0;
+                                    if previous_binning > binning
+                                        sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
+                                    else
+                                        sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
+                                    end
+                                end
+                                %sub_table(:,20) = i;
+                                if isempty(new_table)
+                                    new_table = sub_table;
+                                else
+                                    new_table(end+1:end+size(sub_table, 1),:) = sub_table;
+                                end
+                            end
+                        end
+                        if binning > 1
+                            aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(obj.configuration, true, binning);
+                        else
+                            aligned_tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
+                        end
+                        [width, height, z] = getHeightAndWidthFromHeader(string(aligned_tilt_stacks(1).folder) + filesep + string(aligned_tilt_stacks(1).name), -1);
+                        %tlt_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt", "last");
+                        tlt_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".tlt");
+                        %defocus_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "defocus", "last");
+                        defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".defocus");
+                        tomos_id = unique(new_table(:,20));
+                        
+                        N = length(tomos_id);
+                        if isfield(obj.configuration, "tilt_angles")
+                            P = length(obj.configuration.tilt_angles);
+                        else
+                            P = length(obj.configuration.tomograms.tomogram_001.original_angles);
+                        end
+                        tomos = SUSAN.Data.TomosInfo(N,P);
+                        dose_per_projection = obj.configuration.dose / P;
+                        
+                        for i = 1:N
+                            tomos.tomo_id(i) = tomos_id(i);
+                            stack_path = string(aligned_tilt_stacks(i).folder) + filesep + string(aligned_tilt_stacks(i).name);
+                            tomos.set_stack  (i, stack_path);
+                            tomos.set_angles (i, char(string(tlt_files{tomos_id(i)}(1).folder) + filesep + tlt_files{tomos_id(i)}(1).name));
+                            tomos.set_defocus(i, char(string(defocus_files{tomos_id(i)}(1).folder) + filesep + string(defocus_files{tomos_id(i)}(1).name)));
+                            if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
+                                for j = 1:size(tomos.defocus, 1)
+                                    tomos.defocus(j,6,i) = obj.configuration.bf * ((obj.configuration.dose_order(j) - 1) * dose_per_projection);
+                                end
+                            end
+                            if isfield(obj.configuration, "apix") && obj.configuration.apix ~= 0
+                                tomos.pix_size(i) = obj.configuration.apix * binning;
+                            else
+                                tomos.pix_size(i) = obj.configuration.greatest_apix * binning;
+                            end
+                            tomos.tomo_size(i,:) = [width, height, obj.configuration.reconstruction_thickness / binning];
+                            
+                        end
+                        tomos_name = char("tomos_bin_" + binning + ".tomostxt");
+                        tomos.save(tomos_name);
+                        
+                        %%
+                        %                         new_table(:,[24 25 26]) = new_table(:,[24 25 26]) + new_table(:,[4 5 6]);
+                        %                         new_table(:,[4 5 6]) = 0;
+                        %                         new_table(:,[24 25 26]) = previous_binning/binning*new_table(:,[24 25 26])+1;
+                        %                         table_name = char("table_bin_" + binning + ".tbl");
+                        %                         dwrite(new_table,table_name);
+                        particles_raw = char("particles_bin_" + binning + ".ptclsraw");
+                        ptcls = SUSAN.Data.ParticlesInfo(new_table, tomos);
+                        if obj.configuration.SUSAN_use_imod_style_ctf_correction == true
+                            tmp_positions = ptcls.position(:,3);
+                            ptcls.position(:,3) = 0;
+                            ptcls.update_defocus(tomos);
+                            ptcls.position(:,3) = tmp_positions;
+                        end
+                        ptcls.save(particles_raw);
+                        
+                        %%
+                        avg = SUSAN.Modules.Averager;
+                        if obj.configuration.gpu == -1
+                            avg.gpu_list = 0:gpuDeviceCount - 1;
+                        else
+                            avg.gpu_list = obj.configuration.gpu - 1;
+                        end
+                        box_size = round((size(template,1) * obj.configuration.box_size) * (previous_binning / binning));
+                        
+                        if mod(box_size, 2) == 1
+                            box_size = box_size + 1;
+                        end
+                        
+                        avg.bandpass.lowpass = min(obj.configuration.susan_lowpass, (box_size / 2) / 2);
+                        avg.padding = obj.configuration.susan_padding / binning;
+                        avg.rec_halves = true;
+                        
+                        if (obj.configuration.per_particle_ctf_correction == "wiener_ssnr")
+                            avg.set_ctf_correction(char("wiener_ssnr"),obj.configuration.ssnr(1), obj.configuration.ssnr(2)); % what about SSNR....: set_ctf_correction('wiener_ssnr',1,0.8);
+                        else
+                            avg.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % what about SSNR....: set_ctf_correction('wiener_ssnr',1,0.8);
+                        end
+                        avg.set_padding_policy(char(obj.configuration.padding_policy));
+                        avg.set_normalization(char(obj.configuration.normalization));
+                        
+                        if obj.configuration.use_symmetrie == true
+                            avg.set_symmetry(char(obj.configuration.expected_symmetrie));
+                        end
+                        %                         if obj.configuration.susan_box_size > 0
+                        %                             box_size = round((size(template,1) * obj.configuration.susan_box_size) * (previous_binning / binning)); %obj.configuration.susan_box_size;
+                        %                             obj.dynamic_configuration.susan_box_size = 1;
+                        %                         else
+                        
+                        %                         end
+                        if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
+                            particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size + "_dw");
+                        else
+                            particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size);
+                        end
+                        avg.reconstruct(char("ds_ini_bin_" + binning), tomos_name, particles_raw, box_size);
+                        %%
+                        
+                        subtomos = SUSAN.Modules.SubtomoRec;
+                        if obj.configuration.gpu == -1
+                            subtomos.gpu_list = 0:gpuDeviceCount - 1;
+                        else
+                            subtomos.gpu_list = obj.configuration.gpu - 1;
+                        end
+                        
+                        subtomos.padding = round(obj.configuration.susan_padding / binning);
+                        
+                        subtomos.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % try also wiener if you like
+                        subtomos.set_padding_policy(char(obj.configuration.padding_policy));
+                        subtomos.set_normalization(char(obj.configuration.normalization));
+                        subtomos.reconstruct(char(particles_path), tomos_name, particles_raw, box_size);
+                        particle_files = dir([particles_path filesep 'particle*.em']);
+                        ptags = zeros([length(particle_files) 1]);
+                        for l = 1:length(particle_files)
+                            particle_name = strsplit(particle_files(l).name, ".");
+                            particle_number = strsplit(particle_name{1}, "_");
+                            ptag = str2double(particle_number{2});
+                            ptags(l) = ptag;
+                        end
+                        if ~isempty(setdiff(new_table(:,1), ptags(:)))
+                            
+                            set_diff = setdiff(new_table(:,1), ptags(:));
+                            for i = 1:length(set_diff)
+                                new_table(new_table(:, 1) == set_diff(i),:) = [];
+                            end
+                        end
+                        if obj.configuration.as_boxes == 1
+                            % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
+                            %     [char("../../particles/particles_bin_" + binning  + "_bs_" + box_size) '.Boxes'],...
+                            %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
+                            ownDbox(string(particles_path),...
+                                string([char(particles_path) '.Boxes']));
+                            
+                            [status, message, messageid] = rmdir(char(particles_path), 's');
+                            particles_path = [char(particles_path) '.Boxes'];
+                            %                             new_table(:,1) = 1:length(new_table);
+                            %movefile(char([char("../../particles/particles_bin_" + binning) '.Boxes']), char("../../particles/particles_bin_" + binning));
+                        end
+                        %
+                        %                         if obj.configuration.classes == 1
+                        %                             for i = 1:2
+                        %                                 if length(sub_tables) == 1
+                        %                                     average = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                        %                                 else
+                        %                                     average = daverage(char(particles_path), '-t', sub_tables{i}, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                        %                                 end
+                        %                                 template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                        %                                 dwrite(average.average, template_em_files{i});
+                        %                             end
+                        %                             obj.configuration.classes = 2;
+                        %                         else
+                        avge = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                        template_em_files{1} = char(alignment_project_folder_path + string(filesep) + "average_" + 1 + ".em");
+                        dwrite(avge.average, template_em_files{1});
+                        %                         end
                     end
                     tables = {char(alignment_project_folder_path + string(filesep) + "table.tbl")};
                     dwrite(new_table, tables{1});
@@ -897,684 +902,690 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     dwrite_multireference(tables, 'table', char(project_name), 'refs', 1);
                 end
-            else
-                return_path = cd(alignment_project_folder_path);
-            end
-            if ~exist("template", "var")
-                templates_files = dir("template*.em");
-                if ~isempty(templates_files)
-                    template = dread(char(string(templates_files(1).folder) + filesep + templates_files(1).name));
-                else
-                    templates_files = dir("average*.em");
-                    template = dread(char(string(templates_files(1).folder) + filesep + templates_files(1).name));
-                end
-            end
-            if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
-                %                 newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
-                %                 symmetry_order = str2double(newStr);
-                iterations = 0;
-                %                 %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
-                %                 if obj.configuration.sampling == 0
-                %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 else
-                %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                 end
-                %                 obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
-                %                 obj.configuration.("rf_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("rff_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("dim_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("lim_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("limm_r" + (iterations + 1)) = 1;
-                %                 obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
-                %                 obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
-                %                 obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
-                %                 obj.configuration.("area_search_modus_r" + (iterations + 1)) = 1;
-                %                 %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                %
-                %                 %             else
-                %                 %                 obj.configuration.("ir_r" + (iterations + 1)) = 360 / symmetry_order;
-                %                 %                 obj.configuration.("is_r" + (iterations + 1)) = 360;
-                %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                %                 %                 obj.configuration.("cr_r" + (iterations + 1)) = 360;
-                %                 %                 obj.configuration.("cs_r" + (iterations + 1))  = 360;
-                %                 iterations = iterations + 1;
-                %                 if obj.configuration.sampling == 0
-                %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
-                inplane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
-                inplane_sampling = inplane_range / obj.configuration.refine_factor;
-                cone_range = obj.configuration.template_matching_cone_sampling + obj.configuration.discretization_bias;
-                cone_sampling = cone_range / obj.configuration.refine_factor;
-                %                     skipped_iterations = 0;
-                %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
-                %                 else
-                %                     inplane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                     skipped_iterations = (obj.configuration.template_matching_binning / binning) - 1;
-                %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
-                %                 end
-                %                 else
-                %                     if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2
-                %                         inplane_sampling = obj.configuration.template_matching_in_plane_sampling / obj.configuration.refine_factor;
-                %                         cone_sampling = obj.configuration.template_matching_cone_sampling / obj.configuration.refine_factor;
-                %                         skipped_iterations = 0;
-                %                         iterations_to_skip = (template_matching_binning / binning) - 1;
-                %                     else
-                %                         inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                         cone_sampling = obj.dynamic_configuration.cone_sampling / obj.configuration.refine_factor;
-                %                         skipped_iterations = (template_matching_binning / binning) - 1;
-                %                         iterations_to_skip = (template_matching_binning / binning) - 1;
-                %                     end
-                %                 end
-                
-                while inplane_sampling > atand(1/(size(template,1)/2))/obj.configuration.atand_factor
-                    %                     if skipped_iterations < iterations_to_skip
-                    %                         %                         if obj.configuration.sampling == 0
-                    %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
-                    %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         %                             else
-                    %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         %                             end
-                    %                         %                         else
-                    %                         inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
-                    %
-                    %                         %                         end
-                    %                         skipped_iterations = skipped_iterations + 1;
-                    %                         continue;
-                    %                     end
-                    if iterations == 0
-                        %                         if obj.configuration.sampling == 0
-                        %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
-                        %                                 obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + obj.configuration.discretization_bias;
-                        %                                 obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
-                        %                                 obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                        %                                 obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                        %                             else
-                        obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                        obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
-                        obj.configuration.("cr_r" + (iterations + 1)) = cone_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                        obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling / obj.configuration.refine_factor;
-                        %                             end
-                        %                         else
-                        %                             obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + obj.configuration.discretization_bias;
-                        %                             obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
-                        %                             obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + obj.configuration.discretization_bias;
-                        %                             obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
-                        %                         end
+                if ~exist("template", "var")
+                    templates_files = dir("template*.em");
+                    if ~isempty(templates_files)
+                        template = dread(char(string(templates_files(1).folder) + filesep + templates_files(1).name));
                     else
-                        %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
-                        %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
-                        obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                        obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
-                        obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                        obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
-                        %sampling = sampling / obj.configuration.refine_factor;
+                        templates_files = dir("average*.em");
+                        template = dread(char(string(templates_files(1).folder) + filesep + templates_files(1).name));
                     end
-                    obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
-                    obj.configuration.("rf_r" + (iterations + 1)) = 0;
-                    obj.configuration.("rff_r" + (iterations + 1)) = 0;
-                    obj.configuration.("dim_r" + (iterations + 1)) = 0;
-                    obj.configuration.("lim_r" + (iterations + 1)) = 0;
-                    obj.configuration.("limm_r" + (iterations + 1)) = obj.configuration.area_search_mode;
-                    obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
-                    obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
-                    obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
-                    obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
-                    inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                    iterations = iterations + 1;
+                end
+                if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
+                    %                 newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
+                    %                 symmetry_order = str2double(newStr);
+                    iterations = 0;
+                    %                 %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
+                    %                 if obj.configuration.sampling == 0
+                    %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 else
+                    %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                 end
+                    %                 obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
+                    %                 obj.configuration.("rf_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("rff_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("dim_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("lim_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("limm_r" + (iterations + 1)) = 1;
+                    %                 obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
+                    %                 obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
+                    %                 obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
+                    %                 obj.configuration.("area_search_modus_r" + (iterations + 1)) = 1;
+                    %                 %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                    %
+                    %                 %             else
+                    %                 %                 obj.configuration.("ir_r" + (iterations + 1)) = 360 / symmetry_order;
+                    %                 %                 obj.configuration.("is_r" + (iterations + 1)) = 360;
+                    %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                    %                 %                 obj.configuration.("cr_r" + (iterations + 1)) = 360;
+                    %                 %                 obj.configuration.("cs_r" + (iterations + 1))  = 360;
+                    %                 iterations = iterations + 1;
+                    %                 if obj.configuration.sampling == 0
+                    %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
+                    inplane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
+                    inplane_sampling = inplane_range / obj.configuration.refine_factor;
+                    cone_range = obj.configuration.template_matching_cone_sampling + obj.configuration.discretization_bias;
+                    cone_sampling = cone_range / obj.configuration.refine_factor;
+                    %                     skipped_iterations = 0;
+                    %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                 else
+                    %                     inplane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                     skipped_iterations = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                 end
+                    %                 else
+                    %                     if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2
+                    %                         inplane_sampling = obj.configuration.template_matching_in_plane_sampling / obj.configuration.refine_factor;
+                    %                         cone_sampling = obj.configuration.template_matching_cone_sampling / obj.configuration.refine_factor;
+                    %                         skipped_iterations = 0;
+                    %                         iterations_to_skip = (template_matching_binning / binning) - 1;
+                    %                     else
+                    %                         inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                         cone_sampling = obj.dynamic_configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                         skipped_iterations = (template_matching_binning / binning) - 1;
+                    %                         iterations_to_skip = (template_matching_binning / binning) - 1;
+                    %                     end
+                    %                 end
+                    
+                    while inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor
+                        %                     if skipped_iterations < iterations_to_skip
+                        %                         %                         if obj.configuration.sampling == 0
+                        %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
+                        %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         %                             else
+                        %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         %                             end
+                        %                         %                         else
+                        %                         inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
+                        %
+                        %                         %                         end
+                        %                         skipped_iterations = skipped_iterations + 1;
+                        %                         continue;
+                        %                     end
+                        if iterations == 0
+                            %                         if obj.configuration.sampling == 0
+                            %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
+                            %                                 obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + obj.configuration.discretization_bias;
+                            %                                 obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
+                            %                                 obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                            %                                 obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                            %                             else
+                            obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
+                            obj.configuration.("cr_r" + (iterations + 1)) = cone_sampling + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling / obj.configuration.refine_factor;
+                            %                             end
+                            %                         else
+                            %                             obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + obj.configuration.discretization_bias;
+                            %                             obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
+                            %                             obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + obj.configuration.discretization_bias;
+                            %                             obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
+                            %                         end
+                        else
+                            %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
+                            %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
+                            obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                            obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
+                            obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                            obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
+                            %sampling = sampling / obj.configuration.refine_factor;
+                        end
+                        obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
+                        obj.configuration.("rf_r" + (iterations + 1)) = 0;
+                        obj.configuration.("rff_r" + (iterations + 1)) = 0;
+                        obj.configuration.("dim_r" + (iterations + 1)) = 0;
+                        obj.configuration.("lim_r" + (iterations + 1)) = 0;
+                        obj.configuration.("limm_r" + (iterations + 1)) = obj.configuration.area_search_mode;
+                        obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
+                        obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
+                        obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
+                        obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
+                        obj.configuration.("cone_flip_r" + (iterations + 1)) = obj.configuration.cone_flip;
+                        
+                        inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                        iterations = iterations + 1;
+                    end
+                    
+                    obj.dynamic_configuration.in_plane_range = obj.configuration.("ir_r" + (iterations));
+                    obj.dynamic_configuration.in_plane_sampling = obj.configuration.("is_r" + (iterations));
+                    obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
+                    obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
+                    
+                    bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
+                    
+                    for i = 1:iterations
+                        obj.configuration.("high_r" + i) = 2;
+                        obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                    end
+                    
+                    %     dvput project d -sym c1
+                    %     % is equivalent to
+                    %     dvput project d -sym_r1 c1
+                    %             end
+                    
+                    
+                    %
+                    %             if obj.configuration.sampling == 0
+                    %                 if obj.configuration.in_plane_sampling < asind(1/size(template,1))
+                    %                     in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 else
+                    %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 end
+                    %             else
+                    %                 in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                 in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                 cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                 cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %             end
+                else
+                    %                 newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
+                    %                 symmetry_order = str2num(newStr);
+                    
+                    %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
+                    % % % % % % % % %                 if obj.configuration.sampling == 0
+                    % % % % % % % % %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                     in_plane_sampling = obj.configuration.in_plane_sampling / 2;
+                    % % % % % % % % %                     cone_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                     cone_sampling = obj.configuration.in_plane_sampling / 2;
+                    % % % % % % % % %                 else
+                    % % % % % % % % %                     in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                     in_plane_sampling = obj.configuration.sampling / 2;
+                    % % % % % % % % %                     cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                     cone_sampling = obj.configuration.sampling / 2;
+                    % % % % % % % % %                 end
+                    % % % % % % % % %
+                    % % % % % % % % %                 obj.dynamic_configuration.in_plane_range = in_plane_range;
+                    % % % % % % % % %                 obj.dynamic_configuration.in_plane_sampling = in_plane_sampling;
+                    % % % % % % % % %                 obj.dynamic_configuration.cone_range = cone_range;
+                    % % % % % % % % %                 obj.dynamic_configuration.cone_sampling = cone_sampling;
+                    % % % % % % % % %                 %             else
+                    % % % % % % % % %                 iterations = 0;
+                    % % % % % % % % %                 %                 in_plane_range = 360 / symmetry_order;
+                    % % % % % % % % %                 %                 in_plane_sampling = 360;
+                    % % % % % % % % %                 %                 cone_range = 360;
+                    % % % % % % % % %                 %                 cone_sampling = 360;
+                    % % % % % % % % %                 while in_plane_sampling > atand(1/(size(template,1)/2))
+                    % % % % % % % % %                     if iterations == 0
+                    % % % % % % % % %                         if obj.configuration.sampling == 0
+                    % % % % % % % % %                             if obj.configuration.in_plane_sampling < asind(1/size(template,1))
+                    % % % % % % % % %                                 in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                                 in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                                 cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                                 cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                             else
+                    % % % % % % % % %                                 in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                                 in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                                 cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                                 cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                             end
+                    % % % % % % % % %                         else
+                    % % % % % % % % %                             in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                             in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                             cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    % % % % % % % % %                             cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                         end
+                    % % % % % % % % %                     else
+                    % % % % % % % % %                         %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
+                    % % % % % % % % %                         %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
+                    % % % % % % % % %                         in_plane_range = (in_plane_sampling * obj.configuration.refine_factor); % + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                    % % % % % % % % %                         in_plane_sampling = in_plane_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                         cone_range = (cone_sampling * obj.configuration.refine_factor); % + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                    % % % % % % % % %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                         %sampling = sampling / obj.configuration.refine_factor;
+                    % % % % % % % % %                     end
+                    % % % % % % % % %                     iterations = iterations + 1;
+                    % % % % % % % % %                 end
+                    %             end
+                    iterations = 0;
+                    %                 %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
+                    %                 if obj.configuration.sampling == 0
+                    %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 else
+                    %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                 end
+                    %                 obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
+                    %                 obj.configuration.("rf_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("rff_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("dim_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("lim_r" + (iterations + 1)) = 0;
+                    %                 obj.configuration.("limm_r" + (iterations + 1)) = 1;
+                    %                 obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
+                    %                 obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
+                    %                 obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
+                    %                 obj.configuration.("area_search_modus_r" + (iterations + 1)) = 1;
+                    %                 %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                    %
+                    %                 %             else
+                    %                 %                 obj.configuration.("ir_r" + (iterations + 1)) = 360 / symmetry_order;
+                    %                 %                 obj.configuration.("is_r" + (iterations + 1)) = 360;
+                    %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                    %                 %                 obj.configuration.("cr_r" + (iterations + 1)) = 360;
+                    %                 %                 obj.configuration.("cs_r" + (iterations + 1))  = 360;
+                    %                 iterations = iterations + 1;
+                    %                 if obj.configuration.sampling == 0
+                    %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
+                    inplane_range = obj.configuration.template_matching_in_plane_sampling;
+                    inplane_sampling = inplane_range / obj.configuration.refine_factor;
+                    cone_range = obj.configuration.template_matching_cone_sampling;
+                    cone_sampling = cone_range / obj.configuration.refine_factor;
+                    %                     skipped_iterations = 0;
+                    %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                 else
+                    %                     inplane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                     skipped_iterations = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
+                    %                 end
+                    %                 else
+                    %                     if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2
+                    %                         inplane_sampling = obj.configuration.template_matching_in_plane_sampling / obj.configuration.refine_factor;
+                    %                         cone_sampling = obj.configuration.template_matching_cone_sampling / obj.configuration.refine_factor;
+                    %                         skipped_iterations = 0;
+                    %                         iterations_to_skip = (template_matching_binning / binning) - 1;
+                    %                     else
+                    %                         inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                         cone_sampling = obj.dynamic_configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                         skipped_iterations = (template_matching_binning / binning) - 1;
+                    %                         iterations_to_skip = (template_matching_binning / binning) - 1;
+                    %                     end
+                    %                 end
+                    
+                    while inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor
+                        %                     if skipped_iterations < iterations_to_skip
+                        %                         %                         if obj.configuration.sampling == 0
+                        %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
+                        %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         %                             else
+                        %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         %                             end
+                        %                         %                         else
+                        %                         inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
+                        %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
+                        %
+                        %                         %                         end
+                        %                         skipped_iterations = skipped_iterations + 1;
+                        %                         continue;
+                        %                     end
+                        if iterations == 0
+                            %                         if obj.configuration.sampling == 0
+                            %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
+                            %                                 obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + obj.configuration.discretization_bias;
+                            %                                 obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
+                            %                                 obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                            %                                 obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                            %                             else
+                            obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
+                            obj.configuration.("cr_r" + (iterations + 1)) = cone_sampling + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling / obj.configuration.refine_factor;
+                        else
+                            %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
+                            %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
+                            obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                            obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
+                            obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
+                            obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
+                            %sampling = sampling / obj.configuration.refine_factor;
+                        end
+                        obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
+                        %                     obj.configuration.("rf_r" + (iterations + 1)) = 0;
+                        %                     obj.configuration.("rff_r" + (iterations + 1)) = 0;
+                        obj.configuration.("dim_r" + (iterations + 1)) = 0;
+                        obj.configuration.("lim_r" + (iterations + 1)) = 0;
+                        obj.configuration.("limm_r" + (iterations + 1)) = obj.configuration.area_search_mode;
+                        obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
+                        obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
+                        obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
+                        obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
+                        obj.configuration.("cone_flip_r" + (iterations + 1)) = obj.configuration.cone_flip;
+                        inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
+                        iterations = iterations + 1;
+                    end
+                    
+                    obj.dynamic_configuration.in_plane_range = obj.configuration.("ir_r" + (iterations));
+                    obj.dynamic_configuration.in_plane_sampling = obj.configuration.("is_r" + (iterations));
+                    obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
+                    obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
+                    
+                    bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
+                    
+                    for i = 1:iterations
+                        obj.configuration.("high_r" + i) = 2;
+                        obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                    end
+                    
+                    %
+                    %             if obj.configuration.sampling == 0
+                    %                 if obj.configuration.in_plane_sampling < asind(1/size(template,1))
+                    %                     in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 else
+                    %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
+                    %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
+                    %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
+                    %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
+                    %                 end
+                    %             else
+                    %                 in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                 in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %                 cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
+                    %                 cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
+                    %             end
+                    %             dcp.new('subboxBig','d','subboxData','template','subboxRaw.em','masks','default','t','subboxData/crop.tbl','show',0);
+                    %             dcp.new('first','d','particlesData','template','rawTemplate.em','masks','default','t','particlesData/crop.tbl','show',0);
+                    %             dcp.new('central48good','t','central48good.tbl','d','central48Data','show',0);
+                    
+                    %             dvput('mraProject', 'mask', 'maskTooth32.em');
+                    
+                    %             oa = daverage('particlesData','t','particlesData/crop.tbl');
+                    %             dwrite(oa.average,'rawTemplate.em');
+                    %                 if ~isfield(obj.configuration, "inplane_range") && ~isfield(obj.configuration, "cone_range")
+                    if ~exist("tables", "var")
+                        tables_dir = dir("table.tbl");
+                        if ~isempty(tables_dir)
+                            tables{1} = char(string(tables_dir(1).folder) + filesep + tables_dir(1).name);
+                        else
+                            error("ERROR: can not find table, delete processing step folder and rerun!")
+                        end
+                    end
+                    %                 table_tmp = dread(tables{1});
+                    %                 table_tmp(1:2:end, 34) = 1;
+                    %                 table_tmp(2:2:end, 34) = 2;
+                    %                 dwrite(table_tmp, tables{1});
                 end
                 
-                obj.dynamic_configuration.in_plane_range = obj.configuration.("ir_r" + (iterations));
-                obj.dynamic_configuration.in_plane_sampling = obj.configuration.("is_r" + (iterations));
-                obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
-                obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
+                field_names = fieldnames(obj.configuration);
+                ite_r = contains(field_names, "ite_r");
+                cr_r = contains(field_names, "cr_r");
+                cs_r = contains(field_names, "cs_r");
+                ir_r = contains(field_names, "ir_r");
+                is_r = contains(field_names, "is_r");
+                rf_r = contains(field_names, "rf_r");
+                rff_r = contains(field_names, "rff_r");
+                dim_r = contains(field_names, "dim_r");
+                lim_r = contains(field_names, "lim_r");
+                limm_r = contains(field_names, "limm_r");
+                sym_r = contains(field_names, "sym_r");
+                mra_r = contains(field_names, "mra_r");
                 
-                bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
-                
-                for i = 1:iterations
-                    obj.configuration.("high_r" + i) = 2;
-                    obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
-                end
+                low_r = contains(field_names, "low_r");
+                threshold_r = contains(field_names, "threshold_r");
+                threshold_modus_r = contains(field_names, "threshold_modus_r");
+                area_search_modus_r = contains(field_names, "area_search_modus_r");
+                cone_flip_r = contains(field_names, "cone_flip_r");
                 
                 %     dvput project d -sym c1
                 %     % is equivalent to
                 %     dvput project d -sym_r1 c1
-                %             end
+                field_names = field_names(logical(ite_r + cr_r + cs_r...
+                    + ir_r + is_r + rf_r + rff_r + dim_r + lim_r + limm_r...
+                    + area_search_modus_r + sym_r + low_r + threshold_r + threshold_modus_r + cone_flip_r));
                 
-                
-                %
-                %             if obj.configuration.sampling == 0
-                %                 if obj.configuration.in_plane_sampling < asind(1/size(template,1))
-                %                     in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
-                %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 else
-                %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 end
-                %             else
-                %                 in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                 in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                 cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                 cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                %             end
-            else
-                %                 newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
-                %                 symmetry_order = str2num(newStr);
-                
-                %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
-                % % % % % % % % %                 if obj.configuration.sampling == 0
-                % % % % % % % % %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                     in_plane_sampling = obj.configuration.in_plane_sampling / 2;
-                % % % % % % % % %                     cone_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                     cone_sampling = obj.configuration.in_plane_sampling / 2;
-                % % % % % % % % %                 else
-                % % % % % % % % %                     in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                     in_plane_sampling = obj.configuration.sampling / 2;
-                % % % % % % % % %                     cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                     cone_sampling = obj.configuration.sampling / 2;
-                % % % % % % % % %                 end
-                % % % % % % % % %
-                % % % % % % % % %                 obj.dynamic_configuration.in_plane_range = in_plane_range;
-                % % % % % % % % %                 obj.dynamic_configuration.in_plane_sampling = in_plane_sampling;
-                % % % % % % % % %                 obj.dynamic_configuration.cone_range = cone_range;
-                % % % % % % % % %                 obj.dynamic_configuration.cone_sampling = cone_sampling;
-                % % % % % % % % %                 %             else
-                % % % % % % % % %                 iterations = 0;
-                % % % % % % % % %                 %                 in_plane_range = 360 / symmetry_order;
-                % % % % % % % % %                 %                 in_plane_sampling = 360;
-                % % % % % % % % %                 %                 cone_range = 360;
-                % % % % % % % % %                 %                 cone_sampling = 360;
-                % % % % % % % % %                 while in_plane_sampling > atand(1/(size(template,1)/2))
-                % % % % % % % % %                     if iterations == 0
-                % % % % % % % % %                         if obj.configuration.sampling == 0
-                % % % % % % % % %                             if obj.configuration.in_plane_sampling < asind(1/size(template,1))
-                % % % % % % % % %                                 in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                                 in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                                 cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                                 cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                             else
-                % % % % % % % % %                                 in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                                 in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                                 cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                                 cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                             end
-                % % % % % % % % %                         else
-                % % % % % % % % %                             in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                             in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                             cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                % % % % % % % % %                             cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                         end
-                % % % % % % % % %                     else
-                % % % % % % % % %                         %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
-                % % % % % % % % %                         %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
-                % % % % % % % % %                         in_plane_range = (in_plane_sampling * obj.configuration.refine_factor); % + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                % % % % % % % % %                         in_plane_sampling = in_plane_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                         cone_range = (cone_sampling * obj.configuration.refine_factor); % + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                % % % % % % % % %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                         %sampling = sampling / obj.configuration.refine_factor;
-                % % % % % % % % %                     end
-                % % % % % % % % %                     iterations = iterations + 1;
-                % % % % % % % % %                 end
-                %             end
-                iterations = 0;
-                %                 %             if isfield(obj.configuration, "iterations") && (obj.configuration.iterations > 0 || obj.configuration.iterations > -1)
-                %                 if obj.configuration.sampling == 0
-                %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 else
-                %                     obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                     obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                     obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                 end
-                %                 obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
-                %                 obj.configuration.("rf_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("rff_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("dim_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("lim_r" + (iterations + 1)) = 0;
-                %                 obj.configuration.("limm_r" + (iterations + 1)) = 1;
-                %                 obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
-                %                 obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
-                %                 obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
-                %                 obj.configuration.("area_search_modus_r" + (iterations + 1)) = 1;
-                %                 %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                %
-                %                 %             else
-                %                 %                 obj.configuration.("ir_r" + (iterations + 1)) = 360 / symmetry_order;
-                %                 %                 obj.configuration.("is_r" + (iterations + 1)) = 360;
-                %                 inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                %                 %                 obj.configuration.("cr_r" + (iterations + 1)) = 360;
-                %                 %                 obj.configuration.("cs_r" + (iterations + 1))  = 360;
-                %                 iterations = iterations + 1;
-                %                 if obj.configuration.sampling == 0
-                %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
-                inplane_range = obj.configuration.template_matching_in_plane_sampling;
-                inplane_sampling = inplane_range / obj.configuration.refine_factor;
-                cone_range = obj.configuration.template_matching_cone_sampling;
-                cone_sampling = cone_range / obj.configuration.refine_factor;
-                %                     skipped_iterations = 0;
-                %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
-                %                 else
-                %                     inplane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                     skipped_iterations = (obj.configuration.template_matching_binning / binning) - 1;
-                %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
-                %                 end
-                %                 else
-                %                     if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2
-                %                         inplane_sampling = obj.configuration.template_matching_in_plane_sampling / obj.configuration.refine_factor;
-                %                         cone_sampling = obj.configuration.template_matching_cone_sampling / obj.configuration.refine_factor;
-                %                         skipped_iterations = 0;
-                %                         iterations_to_skip = (template_matching_binning / binning) - 1;
-                %                     else
-                %                         inplane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                         cone_sampling = obj.dynamic_configuration.cone_sampling / obj.configuration.refine_factor;
-                %                         skipped_iterations = (template_matching_binning / binning) - 1;
-                %                         iterations_to_skip = (template_matching_binning / binning) - 1;
-                %                     end
-                %                 end
-                
-                while inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor
-                    %                     if skipped_iterations < iterations_to_skip
-                    %                         %                         if obj.configuration.sampling == 0
-                    %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
-                    %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         %                             else
-                    %                         %                                 inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         %                             end
-                    %                         %                         else
-                    %                         inplane_sampling = inplane_sampling / obj.configuration.refine_factor;
-                    %                         cone_sampling = cone_sampling / obj.configuration.refine_factor;
-                    %
-                    %                         %                         end
-                    %                         skipped_iterations = skipped_iterations + 1;
-                    %                         continue;
-                    %                     end
-                    if iterations == 0
-                        %                         if obj.configuration.sampling == 0
-                        %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
-                        %                                 obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + obj.configuration.discretization_bias;
-                        %                                 obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
-                        %                                 obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                        %                                 obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                        %                             else
-                        obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                        obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
-                        obj.configuration.("cr_r" + (iterations + 1)) = cone_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                        obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling / obj.configuration.refine_factor;
-                    else
-                        %	inplane_range [level i+1] = refine_factor * inplane_sampling [level i];
-                        %	cone_range    [level i+1] = refine_factor * cone_sampling [level i];
-                        obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                        obj.configuration.("is_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) / obj.configuration.refine_factor;
-                        obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) + (obj.configuration.discretization_bias / (iterations + 1)); % * obj.configuration.refine_factor;% + (obj.configuration.discretization_bias / (obj.configuration.refine_factor * j))
-                        obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.("cs_r" + iterations) / obj.configuration.refine_factor;
-                        %sampling = sampling / obj.configuration.refine_factor;
+                for i = 1:length(field_names)
+                    %                 if contains(field_names{i}, "ite_")
+                    %                     dvput(project_name, char(field_names{i}), iterations);
+                    %                     continue;
+                    %                 end
+                    if contains(field_names{i}, "rf_")
+                        if obj.configuration.(field_names{i}) == -1
+                            dvput(project_name, char(field_names{i}), iterations);
+                        else
+                            dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                        end
+                        continue;
                     end
-                    obj.configuration.("ite_r" + (iterations + 1)) = obj.configuration.iterations;
-                    %                     obj.configuration.("rf_r" + (iterations + 1)) = 0;
-                    %                     obj.configuration.("rff_r" + (iterations + 1)) = 0;
-                    obj.configuration.("dim_r" + (iterations + 1)) = 0;
-                    obj.configuration.("lim_r" + (iterations + 1)) = 0;
-                    obj.configuration.("limm_r" + (iterations + 1)) = obj.configuration.area_search_mode;
-                    obj.configuration.("sym_r" + (iterations + 1)) = char(obj.configuration.expected_symmetrie);
-                    obj.configuration.("threshold_r" + (iterations + 1)) = obj.configuration.threshold;
-                    obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
-                    obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
-                    inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
-                    iterations = iterations + 1;
-                end
-                
-                obj.dynamic_configuration.in_plane_range = obj.configuration.("ir_r" + (iterations));
-                obj.dynamic_configuration.in_plane_sampling = obj.configuration.("is_r" + (iterations));
-                obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
-                obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
-                
-                bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
-                
-                for i = 1:iterations
-                    obj.configuration.("high_r" + i) = 2;
-                    obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
-                end
-                
-                %
-                %             if obj.configuration.sampling == 0
-                %                 if obj.configuration.in_plane_sampling < asind(1/size(template,1))
-                %                     in_plane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
-                %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 else
-                %                     in_plane_range = obj.configuration.in_plane_sampling + obj.configuration.discretization_bias;
-                %                     in_plane_sampling = obj.configuration.in_plane_sampling / obj.configuration.refine_factor;
-                %                     cone_range = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
-                %                     cone_sampling = obj.configuration.cone_sampling / obj.configuration.refine_factor;
-                %                 end
-                %             else
-                %                 in_plane_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                 in_plane_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                %                 cone_range = obj.configuration.sampling + obj.configuration.discretization_bias;
-                %                 cone_sampling = obj.configuration.sampling / obj.configuration.refine_factor;
-                %             end
-                %             dcp.new('subboxBig','d','subboxData','template','subboxRaw.em','masks','default','t','subboxData/crop.tbl','show',0);
-                %             dcp.new('first','d','particlesData','template','rawTemplate.em','masks','default','t','particlesData/crop.tbl','show',0);
-                %             dcp.new('central48good','t','central48good.tbl','d','central48Data','show',0);
-                
-                %             dvput('mraProject', 'mask', 'maskTooth32.em');
-                
-                %             oa = daverage('particlesData','t','particlesData/crop.tbl');
-                %             dwrite(oa.average,'rawTemplate.em');
-                %                 if ~isfield(obj.configuration, "inplane_range") && ~isfield(obj.configuration, "cone_range")
-                if ~exist("tables", "var")
-                    tables_dir = dir("table.tbl");
-                    if ~isempty(tables_dir)
-                        tables{1} = char(string(tables_dir(1).folder) + filesep + tables_dir(1).name);
-                    else
-                        error("ERROR: can not find table, delete processing step folder and rerun!")
+                    
+                    if contains(field_names{i}, "ite_")
+                        if obj.configuration.(field_names{i}) == -1
+                            dvput(project_name, char(field_names{i}), 1);
+                        else
+                            dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                        end
+                        continue;
                     end
-                end
-                %                 table_tmp = dread(tables{1});
-                %                 table_tmp(1:2:end, 34) = 1;
-                %                 table_tmp(2:2:end, 34) = 2;
-                %                 dwrite(table_tmp, tables{1});
-            end
-            
-            field_names = fieldnames(obj.configuration);
-            ite_r = contains(field_names, "ite_r");
-            cr_r = contains(field_names, "cr_r");
-            cs_r = contains(field_names, "cs_r");
-            ir_r = contains(field_names, "ir_r");
-            is_r = contains(field_names, "is_r");
-            rf_r = contains(field_names, "rf_r");
-            rff_r = contains(field_names, "rff_r");
-            dim_r = contains(field_names, "dim_r");
-            lim_r = contains(field_names, "lim_r");
-            limm_r = contains(field_names, "limm_r");
-            sym_r = contains(field_names, "sym_r");
-            mra_r = contains(field_names, "mra_r");
-            
-            low_r = contains(field_names, "low_r");
-            threshold_r = contains(field_names, "threshold_r");
-            threshold_modus_r = contains(field_names, "threshold_modus_r");
-            area_search_modus_r = contains(field_names, "area_search_modus_r");
-            
-            %     dvput project d -sym c1
-            %     % is equivalent to
-            %     dvput project d -sym_r1 c1
-            field_names = field_names(logical(ite_r + cr_r + cs_r...
-                + ir_r + is_r + rf_r + rff_r + dim_r + lim_r + limm_r...
-                + area_search_modus_r + sym_r + low_r + threshold_r + threshold_modus_r));
-            
-            for i = 1:length(field_names)
-                %                 if contains(field_names{i}, "ite_")
-                %                     dvput(project_name, char(field_names{i}), iterations);
-                %                     continue;
-                %                 end
-                if contains(field_names{i}, "rf_")
-                    if obj.configuration.(field_names{i}) == -1
-                        dvput(project_name, char(field_names{i}), iterations);
-                    else
-                        dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                    
+                    if contains(field_names{i}, "lim_")
+                        dvput(project_name, char(field_names{i}), size(template,1) * obj.configuration.shift_limit_factor);
+                        continue;
                     end
-                    continue;
-                end
-                
-                if contains(field_names{i}, "ite_")
-                    if obj.configuration.(field_names{i}) == -1
+                    
+                    if contains(field_names{i}, "limm_")
                         dvput(project_name, char(field_names{i}), 1);
-                    else
-                        dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                        continue;
                     end
-                    continue;
-                end
-                
-                if contains(field_names{i}, "lim_")
-                    dvput(project_name, char(field_names{i}), size(template,1) * obj.configuration.shift_limit_factor);
-                    continue;
-                end
-                
-                if contains(field_names{i}, "limm_")
-                    dvput(project_name, char(field_names{i}), 1);
-                    continue;
-                end
-                
-                if contains(field_names{i}, "dim_")
-                    dvput(project_name, char(field_names{i}), size(template,1));
-                    continue;
-                end
-                
-                %                 if contains(field_names{i}, "cr_")
-                %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.cone_range);
-                %                     continue;
-                %                 end
-                %
-                %                 if contains(field_names{i}, "cs_")
-                %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.cone_sampling);
-                %                     continue;
-                %                 end
-                %
-                %                 if contains(field_names{i}, "ir_")
-                %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.in_plane_range);
-                %                     continue;
-                %                 end
-                %
-                %                 if contains(field_names{i}, "is_")
-                %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.in_plane_sampling);
-                %                     continue;
-                %                 end
-                
-                if contains(field_names{i}, "sym_")
-                    if obj.configuration.use_symmetrie == true
-                        dvput(project_name, char(field_names{i}), char(obj.configuration.expected_symmetrie));
-                    else
-                        dvput(project_name, char(field_names{i}), 'C1');
+                    
+                    if contains(field_names{i}, "dim_")
+                        dvput(project_name, char(field_names{i}), size(template,1));
+                        continue;
                     end
-                    continue;
-                end
-                
-                if contains(field_names{i}, "low_")
-                    if obj.configuration.(field_names{i}) < 1
-                        dvput(project_name, char(field_names{i}), floor((size(template,1) / 2) * obj.configuration.(field_names{i})));
-                    else
-                        dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                    
+                    %                 if contains(field_names{i}, "cr_")
+                    %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.cone_range);
+                    %                     continue;
+                    %                 end
+                    %
+                    %                 if contains(field_names{i}, "cs_")
+                    %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.cone_sampling);
+                    %                     continue;
+                    %                 end
+                    %
+                    %                 if contains(field_names{i}, "ir_")
+                    %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.in_plane_range);
+                    %                     continue;
+                    %                 end
+                    %
+                    %                 if contains(field_names{i}, "is_")
+                    %                     dvput(project_name, char(field_names{i}), obj.dynamic_configuration.in_plane_sampling);
+                    %                     continue;
+                    %                 end
+                    
+                    if contains(field_names{i}, "sym_")
+                        if obj.configuration.use_symmetrie == true
+                            dvput(project_name, char(field_names{i}), char(obj.configuration.expected_symmetrie));
+                        else
+                            dvput(project_name, char(field_names{i}), 'C1');
+                        end
+                        continue;
                     end
-                    continue;
+                    
+                    if contains(field_names{i}, "low_")
+                        if obj.configuration.(field_names{i}) < 1
+                            dvput(project_name, char(field_names{i}), floor((size(template,1) / 2) * obj.configuration.(field_names{i})));
+                        else
+                            dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i}));
+                        end
+                        continue;
+                    end
+                    
+                    dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i})');
+                    
+                    %                 dvput(obj.configuration.project_name, 'ite_r1', obj.configuration.ite_r1);
+                    %                 dvput(obj.configuration.project_name, 'cr_r1', obj.configuration.cr_r1);
+                    %                 dvput(obj.configuration.project_name, 'cs_r1', obj.configuration.cs_r1);
+                    %                 dvput(obj.configuration.project_name, 'ir_r1', obj.configuration.ir_r1);
+                    %                 dvput(obj.configuration.project_name, 'is_r1', obj.configuration.is_r1);
+                    %                 dvput(obj.configuration.project_name, 'rf_r1', obj.configuration.rf_r1);
+                    %                 dvput(obj.configuration.project_name, 'rff_r1', obj.configuration.rff_r1);
+                    %                 dvput(obj.configuration.project_name, 'dim_r1', obj.configuration.dim_r1);
+                    %                 dvput(obj.configuration.project_name, 'lim_r1', obj.configuration.lim_r1);
+                    %                 dvput(obj.configuration.project_name, 'limm_r1', obj.configuration.lim_r1);
+                    %    For parameters that are defined on different rounds (i.e.: ite_r1, ite_r2,...),
+                    %    you can also invoke the parameter with its general name (i.e.: ite)
+                    %    and then pass the parameter value as a cellarray {}, | separated list or an array []
+                    %    in order to set the value of a given parameter in several rounds at once.
+                    %
+                    %     EXAMPLES:
+                    %     dvput project  -ite [4,5]
+                    %     dvput('project','d','ite',[4,5]);
+                    %     dvput('project','d','sym',{'c1','c8'});
+                    %     dvput project d sym c1|c8;
                 end
                 
-                dvput(project_name, char(field_names{i}), obj.configuration.(field_names{i})');
-                
-                %                 dvput(obj.configuration.project_name, 'ite_r1', obj.configuration.ite_r1);
-                %                 dvput(obj.configuration.project_name, 'cr_r1', obj.configuration.cr_r1);
-                %                 dvput(obj.configuration.project_name, 'cs_r1', obj.configuration.cs_r1);
-                %                 dvput(obj.configuration.project_name, 'ir_r1', obj.configuration.ir_r1);
-                %                 dvput(obj.configuration.project_name, 'is_r1', obj.configuration.is_r1);
-                %                 dvput(obj.configuration.project_name, 'rf_r1', obj.configuration.rf_r1);
-                %                 dvput(obj.configuration.project_name, 'rff_r1', obj.configuration.rff_r1);
-                %                 dvput(obj.configuration.project_name, 'dim_r1', obj.configuration.dim_r1);
-                %                 dvput(obj.configuration.project_name, 'lim_r1', obj.configuration.lim_r1);
-                %                 dvput(obj.configuration.project_name, 'limm_r1', obj.configuration.lim_r1);
-                %    For parameters that are defined on different rounds (i.e.: ite_r1, ite_r2,...),
-                %    you can also invoke the parameter with its general name (i.e.: ite)
-                %    and then pass the parameter value as a cellarray {}, | separated list or an array []
-                %    in order to set the value of a given parameter in several rounds at once.
-                %
-                %     EXAMPLES:
-                %     dvput project  -ite [4,5]
-                %     dvput('project','d','ite',[4,5]);
-                %     dvput('project','d','sym',{'c1','c8'});
-                %     dvput project d sym c1|c8;
-            end
-            
-            %                 else
-            
-            %                 end
-            
-            % TODO: make convenient parametrization 'matlab_parfor', 'matlab_gpu', 'standalone'
-            dvput(project_name, 'dst', char(obj.configuration.destination));
-            
-            %             if obj.configuration.parallel_execution == true
-            %                 dvput(char(project_name), 'dst', 'matlab_parfor')
-            %             else
-            %                 dvput(char(project_name), 'dst', 'standalone')
-            %             end
-            %             if obj.configuration.use_elliptic_mask
-            %                 smoothing_mask_ones = template;
-            %                 smoothing_mask_ones(:,:,:) = 1;
-            %                 dwrite(smoothing_mask_ones, [char(alignment_project_folder_path) '/' char(project_name) '/settings/smoothingMaskOnes.em']);
-            %                 elliptic_mask = gpuEllipsoid(ceil(length(template)/2), length(template));
-            %                 dwrite(elliptic_mask, [char(alignment_project_folder_path) '/' char(project_name) '/settings/automatic_cmask.em']);
-            %                 dwrite(elliptic_mask, [char(alignment_project_folder_path) '/' char(project_name) '/settings/automatic_mask.em']);
-            %             end
-            
-            
-            
-            load([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat']);
-            
-            card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
-            card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
-            
-            if isscalar(obj.configuration.gpu) && obj.configuration.gpu == -1
-                card.gpu_identifier_set = 0:obj.configuration.environment_properties.gpu_count-1;
-                card.how_many_processors = 1;
-            elseif isscalar(obj.configuration.gpu) && obj.configuration.gpu == 0
-                card.gpu_identifier_set = [];
-                card.how_many_processors = 1;
-            else
-                card.gpu_identifier_set = obj.configuration.gpu;
-                card.how_many_processors = 1;
-            end
-            
-            card.gpu_motor = 'spp';
-            if obj.configuration.classes == 0
-                card.nref_r1 = 1;
-                card.nref_r2 = 1;
-                card.nref_r3 = 1;
-                card.nref_r4 = 1;
-                card.nref_r5 = 1;
-                card.nref_r6 = 1;
-                card.nref_r7 = 1;
-                card.nref_r8 = 1;
-            else
-                card.nref_r1 = obj.configuration.classes;
-                card.nref_r2 = obj.configuration.classes;
-                card.nref_r3 = obj.configuration.classes;
-                card.nref_r4 = obj.configuration.classes;
-                card.nref_r5 = obj.configuration.classes;
-                card.nref_r6 = obj.configuration.classes;
-                card.nref_r7 = obj.configuration.classes;
-                card.nref_r8 = obj.configuration.classes;
-            end
-            
-            if obj.configuration.swap_particles == true && obj.configuration.classes >= 2
-                card.mra_r1 = 1;
-                card.mra_r2 = 1;
-                card.mra_r3 = 1;
-                card.mra_r4 = 1;
-                card.mra_r5 = 1;
-                card.mra_r6 = 1;
-                card.mra_r7 = 1;
-                card.mra_r8 = 1;
-            else
-                card.mra_r1 = 0;
-                card.mra_r2 = 0;
-                card.mra_r3 = 0;
-                card.mra_r4 = 0;
-                card.mra_r5 = 0;
-                card.mra_r6 = 0;
-                card.mra_r7 = 0;
-                card.mra_r8 = 0;
-            end
-            if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
-            else
-                apix = obj.configuration.tomograms.tomogram_001.apix;
-            end
-            
-            card.apix = apix * binning;
-            card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_template_initial.sel'];
-            card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_table_initial.sel'];
-            card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_fmask_initial.sel'];
-            card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
-            card.file_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
-            
-            save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
-            if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
-            else
-                card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/fmask_initial_ref_001.em'];
-                
-                %                 if obj.configuration.classes == 2
-                %                     card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings'];
-                %                     card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings'];
-                %
-                %                     save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
                 %                 else
-                card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/template_initial_ref_001.em'];
-                card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/table_initial_ref_001.tbl'];
-                %                 card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
-                card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
-                card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
-                save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
+                
                 %                 end
+                
+                % TODO: make convenient parametrization 'matlab_parfor', 'matlab_gpu', 'standalone'
+                dvput(project_name, 'dst', char(obj.configuration.destination));
+                
+                %             if obj.configuration.parallel_execution == true
+                %                 dvput(char(project_name), 'dst', 'matlab_parfor')
+                %             else
+                %                 dvput(char(project_name), 'dst', 'standalone')
+                %             end
+                %             if obj.configuration.use_elliptic_mask
+                %                 smoothing_mask_ones = template;
+                %                 smoothing_mask_ones(:,:,:) = 1;
+                %                 dwrite(smoothing_mask_ones, [char(alignment_project_folder_path) '/' char(project_name) '/settings/smoothingMaskOnes.em']);
+                %                 elliptic_mask = gpuEllipsoid(ceil(length(template)/2), length(template));
+                %                 dwrite(elliptic_mask, [char(alignment_project_folder_path) '/' char(project_name) '/settings/automatic_cmask.em']);
+                %                 dwrite(elliptic_mask, [char(alignment_project_folder_path) '/' char(project_name) '/settings/automatic_mask.em']);
+                %             end
+                
+                
+                
+                load([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat']);
+                
+                card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                
+                if isscalar(obj.configuration.gpu) && obj.configuration.gpu == -1
+                    card.gpu_identifier_set = 0:obj.configuration.environment_properties.gpu_count-1;
+                    card.how_many_processors = 1;
+                elseif isscalar(obj.configuration.gpu) && obj.configuration.gpu == 0
+                    card.gpu_identifier_set = [];
+                    card.how_many_processors = 1;
+                else
+                    card.gpu_identifier_set = obj.configuration.gpu;
+                    card.how_many_processors = 1;
+                end
+                
+                card.gpu_motor = 'spp';
+                if obj.configuration.classes == 0
+                    card.nref_r1 = 1;
+                    card.nref_r2 = 1;
+                    card.nref_r3 = 1;
+                    card.nref_r4 = 1;
+                    card.nref_r5 = 1;
+                    card.nref_r6 = 1;
+                    card.nref_r7 = 1;
+                    card.nref_r8 = 1;
+                else
+                    card.nref_r1 = obj.configuration.classes;
+                    card.nref_r2 = obj.configuration.classes;
+                    card.nref_r3 = obj.configuration.classes;
+                    card.nref_r4 = obj.configuration.classes;
+                    card.nref_r5 = obj.configuration.classes;
+                    card.nref_r6 = obj.configuration.classes;
+                    card.nref_r7 = obj.configuration.classes;
+                    card.nref_r8 = obj.configuration.classes;
+                end
+                
+                if obj.configuration.swap_particles == true && obj.configuration.classes >= 2
+                    card.mra_r1 = 1;
+                    card.mra_r2 = 1;
+                    card.mra_r3 = 1;
+                    card.mra_r4 = 1;
+                    card.mra_r5 = 1;
+                    card.mra_r6 = 1;
+                    card.mra_r7 = 1;
+                    card.mra_r8 = 1;
+                else
+                    card.mra_r1 = 0;
+                    card.mra_r2 = 0;
+                    card.mra_r3 = 0;
+                    card.mra_r4 = 0;
+                    card.mra_r5 = 0;
+                    card.mra_r6 = 0;
+                    card.mra_r7 = 0;
+                    card.mra_r8 = 0;
+                end
+                if isfield(obj.configuration, "apix")
+                    apix = obj.configuration.apix;
+                else
+                    apix = obj.configuration.tomograms.tomogram_001.apix;
+                end
+                
+                card.apix = apix * binning;
+                card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_template_initial.sel'];
+                card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_table_initial.sel'];
+                card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_fmask_initial.sel'];
+                card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                card.file_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                
+                save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
+                if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
+                else
+                    card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/fmask_initial_ref_001.em'];
+                    
+                    %                 if obj.configuration.classes == 2
+                    %                     card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings'];
+                    %                     card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings'];
+                    %
+                    %                     save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
+                    %                 else
+                    card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/template_initial_ref_001.em'];
+                    card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/table_initial_ref_001.tbl'];
+                    %                 card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                    card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
+                    card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
+                    save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
+                    %                 end
+                    dvcheck(char(project_name));
+                    dvunfold(char(project_name));
+                    dynamo_vpr_eo(project_name);
+                    %                 [status, message, messageid] = rmdir(project_name, 's');
+                    project_name = [project_name '_eo'];
+                end
+                
                 dvcheck(char(project_name));
                 dvunfold(char(project_name));
-                dynamo_vpr_eo(project_name);
-                %                 [status, message, messageid] = rmdir(project_name, 's');
-                project_name = [project_name '_eo'];
-            end
-            
-            dvcheck(char(project_name));
-            dvunfold(char(project_name));
-            
-            if (obj.configuration.classes > 1 && obj.configuration.swap_particles == true) || obj.configuration.split_by_y == false
+                
+                if (obj.configuration.classes > 1 && obj.configuration.swap_particles == true) || obj.configuration.split_by_y == false
+                else
+                    tomos_id = unique( new_table(:,20) );
+                    
+                    if obj.configuration.randomize_angles == true
+                        new_table(:,[7 8 9]) = new_table(:,[7 8 9]) + ((rand() - 1.0) * card.cone_sampling_r1);
+                        % new_table(:,[4 5 6]) = new_table(:,[4 5 6]) + ((rand() - 0.5) * card.cone_sampling_r1);
+                    end
+                    h_id = [];
+                    new_table = sortrows(new_table, 20);
+                    
+                    for i = 1:length(tomos_id)
+                        t_idx = (new_table(:,20) == tomos_id(i));
+                        cur_y = new_table(t_idx,25);
+                        cur_hid = ones(sum(t_idx),1);
+                        cur_hid( cur_y > quantile(cur_y,0.5) ) = 2;
+                        h_id = [h_id; cur_hid];
+                    end
+                    
+                    half_id = h_id;
+                    half_table_1 = new_table(half_id == 1,:);
+                    half_table_1(:,34) = 1;
+                    half_table_2 = new_table(half_id == 2,:);
+                    half_table_2(:,34) = 2;
+                    
+                    eo_tables = dir("mraProject_bin_" + binning + "_eo" + filesep + "**" + filesep + "*.tbl");
+                    dwrite(half_table_1, char(string(eo_tables(1).folder) + filesep + eo_tables(1).name));
+                    dwrite(half_table_1, char(string(eo_tables(3).folder) + filesep + eo_tables(3).name));
+                    dwrite(half_table_2, char(string(eo_tables(2).folder) + filesep + eo_tables(2).name));
+                    dwrite(half_table_2, char(string(eo_tables(4).folder) + filesep + eo_tables(4).name));
+                    %                 eo_mask = dir("mraProject_bin_" + binning + "_eo" + filesep + "settings" + filesep + "mask*.em");
+                    %                 dwrite(mask, char(string(eo_mask(1).folder) + filesep + eo_mask(1).name));
+                    %                 dwrite(mask, char(string(eo_mask(2).folder) + filesep + eo_mask(2).name));
+                end
             else
-                tomos_id = unique( new_table(:,20) );
                 
-                if obj.configuration.randomize_angles == true
-                    new_table(:,[7 8 9]) = new_table(:,[7 8 9]) + ((rand() - 1.0) * card.cone_sampling_r1);
-                    % new_table(:,[4 5 6]) = new_table(:,[4 5 6]) + ((rand() - 0.5) * card.cone_sampling_r1);
-                end
-                h_id = [];
-                new_table = sortrows(new_table, 20);
-                
-                for i = 1:length(tomos_id)
-                    t_idx = (new_table(:,20) == tomos_id(i));
-                    cur_y = new_table(t_idx,25);
-                    cur_hid = ones(sum(t_idx),1);
-                    cur_hid( cur_y > quantile(cur_y,0.5) ) = 2;
-                    h_id = [h_id; cur_hid];
-                end
-                
-                half_id = h_id;
-                half_table_1 = new_table(half_id == 1,:);
-                half_table_1(:,34) = 1;
-                half_table_2 = new_table(half_id == 2,:);
-                half_table_2(:,34) = 2;
-                
-                eo_tables = dir("mraProject_bin_" + binning + "_eo" + filesep + "**" + filesep + "*.tbl");
-                dwrite(half_table_1, char(string(eo_tables(1).folder) + filesep + eo_tables(1).name));
-                dwrite(half_table_1, char(string(eo_tables(3).folder) + filesep + eo_tables(3).name));
-                dwrite(half_table_2, char(string(eo_tables(2).folder) + filesep + eo_tables(2).name));
-                dwrite(half_table_2, char(string(eo_tables(4).folder) + filesep + eo_tables(4).name));
-                %                 eo_mask = dir("mraProject_bin_" + binning + "_eo" + filesep + "settings" + filesep + "mask*.em");
-                %                 dwrite(mask, char(string(eo_mask(1).folder) + filesep + eo_mask(1).name));
-                %                 dwrite(mask, char(string(eo_mask(2).folder) + filesep + eo_mask(2).name));
+                return_path = cd(alignment_project_folder_path);
             end
+            
             %run mraProject/mraProject.m
             
             %             if obj.configuration.slurm == true
@@ -1582,7 +1593,11 @@ classdef DynamoAlignmentProject < Module
             %             else
             %                 dvrun(char(project_name));
             %             end
-            dynamo_execute_project(char(project_name));
+            if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
+                dynamo_execute_project(char(project_name));
+            else
+                dynamo_execute_project(char(string(project_name) + "_eo"));
+            end
             %             fid = fopen(obj.output_path + filesep + "SUCCESS_" + binning, "w");
             %             fclose(fid);
             

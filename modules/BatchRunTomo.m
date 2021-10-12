@@ -7,6 +7,7 @@ classdef BatchRunTomo < Module
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             output_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.pipeline_step_output_folder;
+            % string(filesep) = getstring(filesep)();
             splitted_path = strsplit(output_folder, string(filesep));
             % NOTE -1 because now the pipelinestep is executed for every
             % tomogram separately
@@ -28,6 +29,8 @@ classdef BatchRunTomo < Module
                     if number < obj.configuration.set_up.i - 1
                         copyOrLinkFilesBasedOnSizeThreshold(dir_list(k).folder + string(filesep) + dir_list(k).name,...
                             output_folder, threshold, obj.log_file_id);
+                        %[status, message, message_id] = copyfile(dir_list(j).folder + string(filesep) + dir_list(j).name, output_folder);
+%                         executeCommand("rm -f " + output_folder + string(filesep) + "SUCCESS");
                         executeCommand("rm -f " + output_folder + string(filesep) + obj.configuration.directive_file_name + ".adoc");
                         break;
                     end
@@ -56,10 +59,14 @@ classdef BatchRunTomo < Module
                 % TODO: restructure next statement, extract
                 % configuration.tomogram_output_prefix or
                 % configuration.tomogram_input_prefix into a variable
+                %if isfield(obj.configuration, "tomogram_output_prefix") && ~isempty(obj.configuration.tomogram_output_prefix)
                 tilt_stacks_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.tilt_stacks_folder;
                 dir_list = dir(tilt_stacks_path + string(filesep) + "**" + string(filesep) + "*.st");
                 field_names = fieldnames(obj.configuration.tomograms);
                 dir_list = dir_list(contains({dir_list.name}, field_names(obj.configuration.set_up.j)));
+                %else
+                %dir_list = dir(obj.input_path + string(filesep) + "*.st");
+                %end
                 % NOTE: filter dir list for ".mat" files
                 %dir_list = dir_list(~contains({dir_list.name}, ".mat"));
                 %tomogram_counter = length(dir_list);
@@ -232,8 +239,13 @@ classdef BatchRunTomo < Module
                                 angles = sort(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(2,:));
                                 angles = angles(find(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(3,:)));
                             end
+%                             angles = sort(angles);
                             for k = 1:length(angles)
+%                                 if obj.configuration.tomograms.(splitted_name{1}).tilt_index_angle_mapping(5,k) == 0
                                     fprintf(fid, "%0.2f\n", angles(k));
+%                                 else
+%                                     fprintf(fid, "%0.2f\n", 0);
+%                                 end
                             end
                             fclose(fid);
                         end
@@ -277,7 +289,7 @@ classdef BatchRunTomo < Module
                         
                         % TODO: remove misha flag
                         if (end_steps(j) == 6 || end_steps(j) == 8)...
-                                && ~fileExists(current_location + string(filesep) + splitted_name{1} + ".seed")...
+                                && (~fileExists(current_location + string(filesep) + splitted_name{1} + ".seed") || ~fileExists(current_location + string(filesep) + splitted_name{1} + ".fid"))...
                                 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point")...
                                 && obj.configuration.take_fiducials_from_dynamo && ~obj.configuration.reconstruct_binned_stacks
                             
@@ -375,7 +387,7 @@ classdef BatchRunTomo < Module
 %                                 disp("WARNING:NEW_COMMAND_OUTPUT: " + new_output);
 %                                 obj.status = 0;
 %                                 return;
-%                             end                             
+%                             end 
                         elseif contains(output, "ERROR:")
                             disp("WARNING:COMMAND_OUTPUT: " + output);
                             obj.status = 0;
@@ -387,7 +399,9 @@ classdef BatchRunTomo < Module
                         end
                         
                         % TODO: remove misha flag
-                        if end_steps(j) == 3 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point") && ~obj.configuration.reconstruct_binned_stacks && obj.configuration.take_fiducials_from_dynamo == true
+                        if end_steps(j) == 3 ...
+                                && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point")...
+                                && ~obj.configuration.reconstruct_binned_stacks && obj.configuration.take_fiducials_from_dynamo == true
                             point_file = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point");
                             % TODO: parse output from executeCommand and
                             % replace system, make symbolic link instead of
@@ -416,8 +430,9 @@ classdef BatchRunTomo < Module
                             %
                             % TODO: needs to be adapted for other angular
                             % increments
+                            
                             fid = fopen(current_location + string(filesep) + splitted_name{1} + ".seed_model", "wt+");
-                            if obj.configuration.generate_seed_model_with_all_fiducials_from_dynamo
+                            if obj.configuration.generate_seed_model_with_all_fiducials_from_dynamo == true
                                 seed_points_x = (point_file_content{1,2} / obj.configuration.pre_aligned_stack_binning)...
                                     + (prexg_file_content{1,5}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
                                 seed_points_y = (point_file_content{1,3} / obj.configuration.pre_aligned_stack_binning)...
@@ -426,21 +441,29 @@ classdef BatchRunTomo < Module
                                 seed_points_contour = point_file_content{1, 1};
                             else
                                 % TODO: input zero tilt instead of projection 16
-                                seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == find(angles == 0)) / obj.configuration.pre_aligned_stack_binning)...
-                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0)) + 1) / obj.configuration.pre_aligned_stack_binning);
-                                seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == find(angles == 0))  / obj.configuration.pre_aligned_stack_binning)...
-                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0)) + 1) / obj.configuration.pre_aligned_stack_binning);
-                                seed_points_tilt = point_file_content{1, 4}(point_file_content{1,4} == find(angles == 0));
-                                seed_points_contour = point_file_content{1, 1}(point_file_content{1,4} == find(angles == 0));
+                                seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == find(angles == 0) - 1) / obj.configuration.pre_aligned_stack_binning)...
+                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == find(angles == 0) - 1)  / obj.configuration.pre_aligned_stack_binning)...
+                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                seed_points_tilt = point_file_content{1, 4}(point_file_content{1,4} == find(angles == 0) - 1);
+                                seed_points_contour = point_file_content{1, 1}(point_file_content{1,4} == find(angles == 0) - 1);
                             end
                             for k = 1:length(seed_points_x)
                                 fprintf(fid, "%0.0f %0.2f %0.2f %0.0f\n", seed_points_contour(k), seed_points_x(k) , seed_points_y(k), seed_points_tilt(k));
                             end
                             fclose(fid);
-                            if fileExists(current_location + string(filesep) + splitted_name{1} + ".preali")
-                            	[status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".seed -image " + current_location + string(filesep) + splitted_name{1} + ".preali"); % -circle
-                            else
-                                [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".seed -image " + current_location + string(filesep) + splitted_name{1} + "_preali.mrc"); % -circle
+                            if begin_steps(j+1) == 5
+                                if fileExists(current_location + string(filesep) + splitted_name{1} + ".preali")
+                                    [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".seed -image " + current_location + string(filesep) + splitted_name{1} + ".preali"); % -circle
+                                else
+                                    [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".seed -image " + current_location + string(filesep) + splitted_name{1} + "_preali.mrc"); % -circle
+                                end
+                            elseif begin_steps(j+1) == 6
+                                if fileExists(current_location + string(filesep) + splitted_name{1} + ".preali")
+                                    [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".fid -image " + current_location + string(filesep) + splitted_name{1} + ".preali"); % -circle
+                                else
+                                    [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".fid -image " + current_location + string(filesep) + splitted_name{1} + "_preali.mrc"); % -circle
+                                end
                             end
                             
                             % % % % % %                             %[success, message, message_id] = copyfile(current_location + string(filesep) + splitted_name{1} + ".fid", current_location + string(filesep) + splitted_name{1} + ".seed");
@@ -935,6 +958,14 @@ classdef BatchRunTomo < Module
                     json_output = endsWith({files(:).name}, "output.json");
                     files = files(~(file_ali + file_tlt + file_xf + file_rawtlt + file_defocus + file_success + file_time + file_failure + json_output));
                     obj.deleteFilesOrFolders(files);
+                    
+                    %                     for i = 1:length(files)
+                    %                         if files(i).isdir == true
+                    %                             [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
+                    %                         else
+                    %                             delete(files(i).folder + string(filesep) + files(i).name)
+                    %                         end
+                    %                     end
                 end
             end
             obj = cleanUp@Module(obj);

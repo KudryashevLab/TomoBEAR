@@ -184,6 +184,7 @@ classdef LocalPipeline < Pipeline
                     end
                     
                 elseif file_count_changed == false && length(sucess_files_to_be_deleted) < length(pipeline_definition)
+                elseif file_count_changed == false && isfield(configuration.general, "skip_data_check") && configuration.general.skip_data_check == true
                 else
                     disp("INFO: File count has not changed therefor further execution of the pipeline is abandoned!")
                     break;

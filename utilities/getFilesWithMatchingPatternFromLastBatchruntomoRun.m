@@ -9,6 +9,9 @@ for i = 1:length(original_mrcs)
     [path, name, extension] = fileparts(original_mrcs{i});
     file_paths{i} = dir(batchruntomo_folders(order(1)).folder + string(filesep)...
         + batchruntomo_folders(order(1)).name + string(filesep) + name + string(filesep) + "*" + pattern);
+    if pattern == ".tlt"
+        file_paths{i} = file_paths{i}(~contains({file_paths{i}(:).name}, "_fid.tlt"));
+    end
 end
 end
 
