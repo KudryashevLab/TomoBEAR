@@ -10,6 +10,7 @@ tomoBEAR/
 test
 load_modules.sh
 SUSAN/
+SUSAN_old/
 extern/semaphore/
 extern/CTFcorrection_v1_2/
 test_cry/

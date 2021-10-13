@@ -270,14 +270,25 @@ classdef DynamoAlignmentProject < Module
                         else
                             particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size;
                         end
-                        
-                        binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
-                        if isempty(binned_tomograms_paths) == true
-                            binned_tomograms_paths = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
-                        end
-                        binned_tomograms_paths_filtered = binned_tomograms_paths(contains({binned_tomograms_paths.name}, "bin_" + binning));
-                        if isempty(binned_tomograms_paths_filtered)
-                            error("ERROR: no tomograms to crop particles are available for the selected binning level(" + binning + ")!");
+                        if binning == 1
+                            
+                            binned_tomograms_paths = getTomogramsFromStandardFolder(obj.configuration, true, binning);
+                            if isempty(binned_tomograms_paths) == true
+                                binned_tomograms_paths = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true, binning);
+                            end
+                            binned_tomograms_paths_filtered = binned_tomograms_paths(contains({binned_tomograms_paths.name}, "bin_" + binning));
+                            if isempty(binned_tomograms_paths_filtered)
+                                error("ERROR: no tomograms to crop particles are available for the selected binning level(" + binning + ")!");
+                            end
+                        else
+                            binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
+                            if isempty(binned_tomograms_paths) == true
+                                binned_tomograms_paths = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
+                            end
+                            binned_tomograms_paths_filtered = binned_tomograms_paths(contains({binned_tomograms_paths.name}, "bin_" + binning));
+                            if isempty(binned_tomograms_paths_filtered)
+                                error("ERROR: no tomograms to crop particles are available for the selected binning level(" + binning + ")!");
+                            end
                         end
                         new_table = [];
                         if obj.configuration.classes == 1 && obj.configuration.swap_particles == false &&  exist("tab_all_path", "var") && contains(tab_all_path(1).folder, "bin_" + previous_binning + "_eo" + filesep)

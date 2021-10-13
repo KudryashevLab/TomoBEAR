@@ -1,4 +1,4 @@
-function tomograms = getTomogramsFromStandardFolder(configuration, flatten)
+function tomograms = getCtfCorrectedTomogramsFromStandardFolder(configuration, flatten)
 
 
 if nargin == 1

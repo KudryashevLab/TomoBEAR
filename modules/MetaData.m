@@ -48,64 +48,71 @@ classdef MetaData < Module
                     num_images_1 = [];
                     size_output_1 = [];
                     size_output_2 = [];
-                    
-                    if configuration.tomograms.(field_name).tif ~= true
-                        [status_header, output_1] = system("header -s " + configuration.tomograms.(field_name).file_paths(1));
-                        size_output_1 = str2num(output_1);
+                    if isfield(configuration, "tilt_stacks") && configuration.tilt_stacks == true
+                        tomograms{i}.apix = configuration.apix;
+                        apix_list(i) = tomograms{i}.apix;
+                        tomograms{i}.high_dose = false;
+                        tomograms{i}.low_dose_frames = 1;
+                        tomograms{i}.high_dose_frames = 1;
                     else
-                        info = imfinfo(char(configuration.tomograms.(field_name).file_paths(1)));
-                        num_images_1 = numel(info);
-                        %tmp_image_size_1 = [info(1).Width info(1).Height];
-                    end
-                    if length(configuration.tomograms.(field_name).file_paths) >= 2
                         if configuration.tomograms.(field_name).tif ~= true
-                            [status_header, output_2] = system("header -s " + configuration.tomograms.(field_name).file_paths(2));
-                            size_output_2 = str2num(output_2);
-                            tomograms{i}.high_dose = size_output_1(3) > size_output_2(3);
+                            [status_header, output_1] = system("header -s " + configuration.tomograms.(field_name).file_paths(1));
+                            size_output_1 = str2num(output_1);
                         else
-                            info = imfinfo(char(configuration.tomograms.(field_name).file_paths(2)));
-                            num_images_2 = numel(info);
-                            %tmp_image_size_2 = [info(1).Width info(1).Height];
-                            tomograms{i}.high_dose = num_images_1 > num_images_2;
-                        end                        
-                    else
-                        tomograms{i}.high_dose = true;
-                    end
-                    if isfield(tomograms{i}, "high_dose") && tomograms{i}.high_dose == true
-                        if configuration.tomograms.(field_name).tif ~= true
-                            tomograms{i}.high_dose_frames = size_output_1(3);
-                            if length(configuration.tomograms.(field_name).file_paths) >= 2
-                                tomograms{i}.low_dose_frames = size_output_2(3);
+                            info = imfinfo(char(configuration.tomograms.(field_name).file_paths(1)));
+                            num_images_1 = numel(info);
+                            %tmp_image_size_1 = [info(1).Width info(1).Height];
+                        end
+                        if length(configuration.tomograms.(field_name).file_paths) >= 2
+                            if configuration.tomograms.(field_name).tif ~= true
+                                [status_header, output_2] = system("header -s " + configuration.tomograms.(field_name).file_paths(2));
+                                size_output_2 = str2num(output_2);
+                                tomograms{i}.high_dose = size_output_1(3) > size_output_2(3);
                             else
-                                tomograms{i}.low_dose_frames = [];
+                                info = imfinfo(char(configuration.tomograms.(field_name).file_paths(2)));
+                                num_images_2 = numel(info);
+                                %tmp_image_size_2 = [info(1).Width info(1).Height];
+                                tomograms{i}.high_dose = num_images_1 > num_images_2;
                             end
                         else
-                            tomograms{i}.high_dose_frames = num_images_1;
-                            if length(configuration.tomograms.(field_name).file_paths) >= 2
-                                tomograms{i}.low_dose_frames = num_images_2;
+                            tomograms{i}.high_dose = false;
+                        end
+                        if isfield(tomograms{i}, "high_dose") && tomograms{i}.high_dose == true
+                            if configuration.tomograms.(field_name).tif ~= true
+                                tomograms{i}.high_dose_frames = size_output_1(3);
+                                if length(configuration.tomograms.(field_name).file_paths) >= 2
+                                    tomograms{i}.low_dose_frames = size_output_2(3);
+                                else
+                                    tomograms{i}.low_dose_frames = [];
+                                end
                             else
-                                tomograms{i}.low_dose_frames = [];
+                                tomograms{i}.high_dose_frames = num_images_1;
+                                if length(configuration.tomograms.(field_name).file_paths) >= 2
+                                    tomograms{i}.low_dose_frames = num_images_2;
+                                else
+                                    tomograms{i}.low_dose_frames = [];
+                                end
+                            end
+                        else
+                            if configuration.tomograms.(field_name).tif ~= true
+                                tomograms{i}.high_dose_frames = size_output_1(3);
+                                tomograms{i}.low_dose_frames =  size_output_1(3);
+                            else
+                                tomograms{i}.high_dose_frames = num_images_1;
+                                tomograms{i}.low_dose_frames = num_images_1;
                             end
                         end
-                    else
-                        if configuration.tomograms.(field_name).tif ~= true
-                            tomograms{i}.high_dose_frames = size_output_1(3);
-                            tomograms{i}.low_dose_frames =  size_output_1(3);
-                        else
-                            tomograms{i}.high_dose_frames = num_images_1;
-                            tomograms{i}.low_dose_frames = num_images_1;
-                        end
+                        tomograms{i}.apix = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
+                        apix_list(i) = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
                     end
-                    tomograms{i}.apix = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
-                    apix_list(i) = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
                 end
-                
                 for i = 1:length(field_names)
                     obj.dynamic_configuration.tomograms.(field_names{i}) = tomograms{i};
                     obj.dynamic_configuration.apix_list = apix_list;
                     obj.dynamic_configuration.greatest_apix = max(apix_list);
                     obj.dynamic_configuration.smallest_apix = min(apix_list);
                 end
+                
             else
                 for i = 1:length(obj.field_names)
                     obj.dynamic_configuration.tomograms.(obj.field_names{i}) = struct();
@@ -132,7 +139,7 @@ classdef MetaData < Module
                         end
                         
                     else
-                        obj.dynamic_configuration.tomograms.(obj.field_names{i}).high_dose = true;
+                        obj.dynamic_configuration.tomograms.(obj.field_names{i}).high_dose = false;
                     end
                     
                     

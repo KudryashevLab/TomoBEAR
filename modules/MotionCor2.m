@@ -27,13 +27,21 @@ classdef MotionCor2 < Module
                 [motion_corrected_files, symbolic_link_standard_folder] =  obj.correctWithAlignFrames(mrc_list);
             end
             
-            
-            
+            motion_corrected_dose_weighted_files = dir(obj.output_path + filesep + "*_DWS.mrc");
+            if ~isempty(motion_corrected_dose_weighted_files)
+                for i = 1:length(motion_corrected_dose_weighted_files)
+                    obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i} = "" + motion_corrected_dose_weighted_files(i).folder + filesep + motion_corrected_dose_weighted_files(i).name;
+                end
+                obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+            else
+                obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
+            end
+            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
             % TODO: check if next line is needed
             obj.dynamic_configuration.motioncor_output_postfix = obj.configuration.output_postfix;
             
-            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
-            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
+%             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
+%             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
             disp("INFO: Motion correction done!");
         end
         

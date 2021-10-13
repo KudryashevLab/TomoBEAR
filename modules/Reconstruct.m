@@ -151,7 +151,12 @@ classdef Reconstruct < Module
                 rotated_tomogram_destination = obj.output_path + string(filesep) + name + ".rec";
                 executeCommand("trimvol -rx " + tomogram_destination...
                     + " " + rotated_tomogram_destination, false, obj.log_file_id);
-                createSymbolicLinkInStandardFolder(obj.configuration, rotated_tomogram_destination, "tomograms_folder", obj.log_file_id);
+                
+                if contains(name, obj.configuration.ctf_corrected_stack_suffix) || obj.configuration.use_ctf_corrected_stack == true
+                    createSymbolicLinkInStandardFolder(obj.configuration, rotated_tomogram_destination, "ctf_corrected_tomograms_folder", obj.log_file_id);
+                else
+                    createSymbolicLinkInStandardFolder(obj.configuration, rotated_tomogram_destination, "tomograms_folder", obj.log_file_id);
+                end
                 %                 if obj.configuration.generate_exact_filtered_tomograms == true
                 %                     disp("INFO: tomograms with exact filter (size: " + obj.configuration.exact_filter_size + ") will be generated.");
                 %
