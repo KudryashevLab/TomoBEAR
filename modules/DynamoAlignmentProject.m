@@ -315,9 +315,13 @@ classdef DynamoAlignmentProject < Module
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
                                     if previous_binning >= binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
+%                                         if binning > 1
+                                            dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+%                                         else
+%                                             dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', 0, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+%                                         end
                                     elseif previous_binning < binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
                                     end
                                 end
                                 %                             if previous_binning == binning
@@ -360,9 +364,9 @@ classdef DynamoAlignmentProject < Module
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
                                     if previous_binning >= binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
                                     elseif previous_binning < binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
                                     end
                                 end
                                 
@@ -381,17 +385,19 @@ classdef DynamoAlignmentProject < Module
                                 end
                             end
                         end
-                        if obj.configuration.as_boxes == 1
-                            % dBoxes.convertSimpleData(char(particles_path),...
-                            %     [char(particles_path) '.Boxes'],...
-                            %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-                            ownDbox(string(particles_path),string([char(particles_path) '.Boxes']));
-                            
-                            [status, message, messageid] = rmdir(char(particles_path), 's');
-                            %                             new_table(:,1) = 1:length(new_table);
-                            %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
-                        end
-                        
+                        %TODO: needs to be tested if that is faster or make
+                        %option for decision
+%                         if obj.configuration.as_boxes == 1
+%                             % dBoxes.convertSimpleData(char(particles_path),...
+%                             %     [char(particles_path) '.Boxes'],...
+%                             %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
+%                             ownDbox(string(particles_path),string([char(particles_path) '.Boxes']));
+%                             
+%                             [status, message, messageid] = rmdir(char(particles_path), 's');
+%                             %                             new_table(:,1) = 1:length(new_table);
+%                             %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
+%                         end
+%                         
                         if obj.configuration.use_noise_classes == true
                             for i = length(obj.configuration.selected_classes)+1:obj.configuration.classes
                                 noise_template{i} = rand(size(template) * (previous_binning / binning)) * obj.configuration.noise_scaling_factor;
