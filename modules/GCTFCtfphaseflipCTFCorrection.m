@@ -153,7 +153,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                             file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0));
                         end
                     else
-                        if obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0) < 10
+                        if obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0) < 10
                             file = sprintf("%d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
                         else
                             file = sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));

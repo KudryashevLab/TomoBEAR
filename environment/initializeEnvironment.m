@@ -99,9 +99,9 @@ if ~isdeployed
         concatAndAddPathsRecursive(astra_path, astra_sub_paths);
         pyversion(default_configuration.general.python_path);
         pyversion();
-
-        %run /home/nibalysc/Projects/public/matconvnet/matlab/vl_setupnn
-        %     end
+        if isfield(default_configuration.general, "conv_net_path") && default_configuration.general.conv_net_path ~= ""
+            run(default_configuration.general.conv_net_path + filesep + vl_setupnn);
+        end
     end
 
     if isfield(default_configuration.general, "dip_image_path") && default_configuration.general.dip_image_path ~= ""
