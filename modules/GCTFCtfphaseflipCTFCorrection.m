@@ -147,24 +147,20 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         + " "...
                         + name + "_" + obj.configuration.slice_suffix + "_";
                     if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, name)
-                        command = command + sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0))...
-                            + ".mrc";
+                        file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0));
                     else
-                        command = command + sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0))...
-                            + ".mrc";
+                        file = sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
                     end
+                    command = command + file + ".mrc";
                     
                     output = executeCommand(command, false, obj.log_file_id);
+
                     delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
                         + sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0))...
                         + "_EPA.log");
                     delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + "micrographs_all_gctf.star");
-                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
-                        + sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0))...
-                        + "_gctf.log")
-                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
-                        + sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0))...
-                        + ".ctf")
+                    delete(file + "_gctf.log")
+                    delete(file + ".ctf")
                     line_divided_text = textscan(output, '%s', 'delimiter', '\n');
                     final_values = line_divided_text{1}{contains(line_divided_text{1}, "Final Values")};
                     final_values_splitted = strsplit(final_values);
