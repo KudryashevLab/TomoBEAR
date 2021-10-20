@@ -10,7 +10,6 @@ end
 configuration_parser = ConfigurationParser();
 [default_configuration, ~] = configuration_parser.parse(default_configuration_path);
 
-project_path = string(pwd);
 environment = struct();
 environment.matlab_version = string(version());
 environment.matlab_release = string(version('-release'));
@@ -24,6 +23,9 @@ if ~verLessThan('matlab', '9.2')
 else
     environment.matlab_toolboxes_string = string(evalc('ver()'));
 end
+
+emClarity_path = default_configuration.general.em_clarity_path;
+dynamo_path = default_configuration.general.dynamo_path;
 
 if isunix()
     environment.system = "unix";
@@ -42,7 +44,7 @@ elseif ismac()
     environment.system = "mac";
     [status, host_name] = unix("hostname");
     % TODO: check if needed
-    host_name = string(host_name(1:end-1));    
+    host_name = string(host_name(1:end-1));
 elseif ispc()
     environment.system = "windows";
     [status, host_name] = system("hostname");
@@ -52,9 +54,12 @@ else
     error("Platform not supported!");
 end
 
-emClarity_path = default_configuration.general.em_clarity_path;
-dynamo_path = default_configuration.general.dynamo_path;
-project_path = default_configuration.general.pipeline_location;
+if isfield(default_configuration.general, "pipeline_location") && default_configuration.general.pipeline_location ~= ""
+    project_path = default_configuration.general.pipeline_location;
+else
+    project_path = string(pwd);
+end
+
 disp("HOSTNAME = " + host_name);
 
 % NOTE: imod specific code, chose old naming style for imod projects
@@ -100,18 +105,23 @@ if ~isdeployed
         pyversion(default_configuration.general.python_path);
         pyversion();
         if isfield(default_configuration.general, "conv_net_path") && default_configuration.general.conv_net_path ~= ""
-            run(default_configuration.general.conv_net_path + filesep + vl_setupnn);
+            run(default_configuration.general.conv_net_path + filesep + "vl_setupnn");
         end
     end
-
+    
     if isfield(default_configuration.general, "dip_image_path") && default_configuration.general.dip_image_path ~= ""
-         addpath(default_configuration.general.dip_image_path);
+        addpath(default_configuration.general.dip_image_path);
+        addpath(default_configuration.general.dip_image_path + filesep + "common");
+        addpath(default_configuration.general.dip_image_path + filesep + "common/dipimage");
+        addpath(default_configuration.general.dip_image_path + filesep + "common/dipimage/demos");
         if isfield(default_configuration.general, "dip_image_images_path") && default_configuration.general.dip_image_images_path ~= ""
             dipsetpref('imagefilepath',char(default_configuration.general.dip_image_images_path));
         end
+        dip_initialise;
     end
+    
     project_sub_paths = {"dynamo", {"matlab", {"mbtools", {"src"}, "src", {"shorthands"}}, "mex", {"bin"}}, "utilities", "configuration", "json", "modules", "pipeline", "helper", {"gpu"}}; %, "extern", {"semaphore"}, "imod", "offxca", "database", "nn", "playground", {"matlab", {"astra"}}, "extern", {"av3", {"utils"}, "bol_scripts", "tom", {"Filtrans", "Geom"}, "irt", "flatten", "window2"}
-    concatAndAddPathsRecursive(project_path, project_sub_paths, string(filesep));    
+    concatAndAddPathsRecursive(project_path, project_sub_paths, string(filesep));
     
     if ~fileExists("DYNAMO_INITIALIZED")
         createDynamoLinks(default_configuration.general.dynamo_path)
@@ -121,35 +131,5 @@ if ~isdeployed
     
     addpath(default_configuration.general.SUSAN_path);
 end
-
-% if host_name ~= "xps9570linux"
-%     project_sub_paths{end + 1} = "extern";
-%     project_sub_paths{end + 1} = {"dip", {"common", {"dipimage", {"demos"}}}};
-% else
-%     addpath("/home/nibalysc/Programs/dip");
-%     addpath("/home/nibalysc/Programs/dip/common");
-%     addpath("/home/nibalysc/Programs/dip/common/dipimage");
-%     addpath("/home/nibalysc/Programs/dip/common/dipimage/demos");
-% end
-
-
-% TODO: check if it is needed here because variable project_path is not available
-% or implement some logic to detect the project_path if it is not in pwd
-% change pwd
-% project_path = string(pwd);
-% cd(project_path);
-
-
-
-% dip_initialise;
-%
-%  if string(host_name) ~= "xps9570linux"
-% %     dipsetpref('imagefilepath','/home/nibalysc/Projects/phd/extern/dip/images');
-%     generatePool(environment.cpu_count_physical, true);
-%  else
-% %     dipsetpref('imagefilepath','/home/nibalysc/Programs/dip/images');
-%     generatePool(environment.cpu_count_physical, true);
-% end
-
 end
 
