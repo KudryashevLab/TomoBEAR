@@ -17,9 +17,9 @@ classdef BinStacks < Module
             disp("INFO: Creating binned aligned stacks...");
 
             if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
             else
-                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
             end
             integer_check = true;
             for i = 1:length(obj.configuration.binnings)
@@ -91,7 +91,7 @@ classdef BinStacks < Module
                         continue;
                     end
                     
-                    bin_factor = obj.configuration.binnings(j) / obj.configuration.aligned_stack_binning;
+                    bin_factor = obj.configuration.binnings(j) / (obj.configuration.aligned_stack_binning);
                     binned_stack_suffix = "bin_" + num2str(bin_factor * obj.configuration.aligned_stack_binning);
                     disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali...");
                     stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + ".ali";
@@ -100,7 +100,7 @@ classdef BinStacks < Module
                         + " -input " + stack_source...
                         + " -output " + stack_output_path...
                         + " -antialias " + obj.configuration.antialias_filter...
-                        + " -bin " + num2str(bin_factor), false, obj.log_file_id);
+                        + " -bin " + num2str(bin_factor / obj.configuration.ft_bin), false, obj.log_file_id);
                     
                     [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{j}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "ctf_corrected_binned_aligned_tilt_stacks_folder", obj.log_file_id);
                 end
@@ -161,7 +161,7 @@ classdef BinStacks < Module
                         + " -output " + stack_output_path...
                         + " -xform " + xf_file_destination...
                         + " -antialias " + obj.configuration.antialias_filter...
-                        + " -bin " + num2str(obj.configuration.binnings(j)), false, obj.log_file_id);
+                        + " -bin " + num2str(obj.configuration.binnings(j) / obj.configuration.ft_bin), false, obj.log_file_id);
                     
                     if obj.configuration.binnings(j) > 1
                         [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{j}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "binned_aligned_tilt_stacks_folder", obj.log_file_id);

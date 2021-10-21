@@ -120,7 +120,7 @@ classdef DynamoImportTomograms < Module
                     tomogram_number = idivide(int32(i)-1,(length(tomograms)/length(unique({tomograms.folder})))) + 1;
                     fprintf(vll_file_id, "* ytilt = %.2f %.2f\n",min_and_max_tilt_angles{tomogram_number}(2,1),...
                         min_and_max_tilt_angles{tomogram_number}(2,end));
-                    fprintf(vll_file_id, "* apix = %.3f\n", obj.configuration.tomograms.(field_names{tomogram_number}).apix);
+                    fprintf(vll_file_id, "* apix = %.3f\n", obj.configuration.tomograms.(field_names{tomogram_number}).apix  * obj.configuration.ft_bin);
                     fprintf(vll_file_id, "\n");
                 end
             end
@@ -146,7 +146,7 @@ classdef DynamoImportTomograms < Module
                     fprintf(vll_file_id, "* ytilt = %.2f %.2f\n",min_and_max_tilt_angles{binned_tomogram_number}(2,1),...
                         min_and_max_tilt_angles{binned_tomogram_number}(2,end));
                     
-                    fprintf(vll_file_id, "* apix = %.3f\n", obj.configuration.tomograms.(strjoin({splitted_name{1:2}}, "_")).apix * str2double(splitted_binning{1}));
+                    fprintf(vll_file_id, "* apix = %.3f\n", obj.configuration.tomograms.(strjoin({splitted_name{1:2}}, "_")).apix * obj.configuration.ft_bin * str2double(splitted_binning{1}));
                     fprintf(vll_file_id, "\n");
                 end
             end

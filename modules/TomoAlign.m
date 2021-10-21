@@ -159,7 +159,7 @@ classdef TomoAlign < Module
                     
                     if isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == true
                         tomoalign_command = tomoalign_command...
-                            + " -b " + obj.configuration.aligned_stack_binning;
+                            + " -b " + obj.configuration.aligned_stack_binning / obj.configuration.ft_bin;
                     end
                     
                     output = executeCommand(tomoalign_command);

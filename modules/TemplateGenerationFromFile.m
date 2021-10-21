@@ -33,9 +33,9 @@ classdef TemplateGenerationFromFile < Module
             % TODO: what about homogenized data
             %                 rescaled_pixelsize = obj.configuration.apix * binning;
             if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
             else
-                apix = obj.configuration.smallest_apix;
+                apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
             end
 
             rescaled_pixelsize = apix * binning;

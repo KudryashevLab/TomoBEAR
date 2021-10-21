@@ -203,7 +203,7 @@ classdef BatchRunTomo < Module
                         binning_and_extension_splitted = strsplit(splitted_name{end}, ".");
                         directive_file_path = obj.configuration.processing_path + string(filesep) + obj.configuration.pipeline_step_output_folder + string(filesep) + obj.configuration.directive_file_name + "_" + "bin_" + string(binning_and_extension_splitted{1}) + ".adoc";
                         directives.setupset_copyarg_userawtlt = 0;
-                        directives.runtime_AlignedStack_any_binByFactor = str2double(binning_and_extension_splitted{1});
+                        directives.runtime_AlignedStack_any_binByFactor = str2double(binning_and_extension_splitted{1}) / obj.configuration.ft_bin;
                         directives.comparam_tilt_tilt_THICKNESS = obj.configuration.reconstruction_thickness / directives.runtime_AlignedStack_any_binByFactor;
                         source = obj.output_path + string(filesep) + dir_list(i).name;
                         destination = obj.output_path + string(filesep) + strjoin(splitted_name(1:obj.configuration.angle_position - 1), "_");
@@ -787,15 +787,13 @@ classdef BatchRunTomo < Module
                         switch key_trimmed
                             case "setupset.copyarg.pixel"
                                 if isfield(obj.configuration, "apix")
-                                    apix = obj.configuration.apix;
+                                    apix = obj.configuration.apix * obj.configuration.ft_bin;
                                 else
-                                    apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                                    apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                                 end
-                    
                                 value_trimmed = num2str(apix / 10);
-                                %                                 value_trimmed = num2str(obj.configuration.apix / 10);
                             case "runtime.AlignedStack.any.binByFactor"
-                                value_trimmed = num2str(obj.configuration.aligned_stack_binning);
+                                value_trimmed = num2str(obj.configuration.aligned_stack_binning / obj.configuration.ft_bin);
                             case "setupset.copyarg.Cs"
                                 value_trimmed = num2str(obj.configuration.spherical_aberation);
                             case "comparam.tilt.tilt.THICKNESS"
@@ -806,7 +804,7 @@ classdef BatchRunTomo < Module
                                 value_trimmed = num2str(obj.configuration.keV);
                             case "comparam.prenewst.newstack.BinByFactor"
                                 %value = num2str(obj.configuration.aligned_stack_binning);
-                                value_trimmed = num2str(obj.configuration.pre_aligned_stack_binning);
+                                value_trimmed = num2str(obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin);
                             case "setupset.copyarg.firstinc"
                                 value_trimmed = num2str(starting_angle) + " " + num2str(angle_increment);
                             case "setupset.copyarg.gold"
@@ -819,7 +817,7 @@ classdef BatchRunTomo < Module
                                 %value_trimmed = num2str(starting_angle_index) + "-" + num2str(ending_angle_index);%"";
                                 value_trimmed = "";
                             case "runtime.GoldErasing.any.extraDiameter"
-                                value_trimmed = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning));
+                                value_trimmed = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning / obj.configuration.ft_bin));
                             otherwise
                                 error("ERROR: Key to be replaced not found!");
                         end
@@ -830,7 +828,7 @@ classdef BatchRunTomo < Module
                     % TODO:NOTE: special case to keep gold beads, perhaps exclude in
                     % own parameter name
                     if key_trimmed == "runtime.AlignedStack.any.eraseGold" && obj.configuration.reconstruct_binned_stacks == true
-                        value_trimmed = "0";
+                        value_trimmed = "1";
                     end
                     
                     directives_new = rmfield(directives, key_cleaned);
@@ -855,14 +853,13 @@ classdef BatchRunTomo < Module
                     switch key_cleaned
                         case "setupset.copyarg.pixel"
                             if isfield(obj.configuration, "apix")
-                                apix = obj.configuration.apix;
+                                apix = obj.configuration.apix * obj.configuration.ft_bin;
                             else
-                                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                             end
                             value = num2str(apix / 10);
-                            %                             value = num2str(obj.configuration.apix / 10);
                         case "runtime.AlignedStack.any.binByFactor"
-                            value = num2str(obj.configuration.aligned_stack_binning);
+                            value = num2str(obj.configuration.aligned_stack_binning / obj.configuration.ft_bin);
                         case "setupset.copyarg.Cs"
                             value = num2str(obj.configuration.spherical_aberation);
                         case "comparam.tilt.tilt.THICKNESS"
@@ -873,7 +870,7 @@ classdef BatchRunTomo < Module
                             value = num2str(obj.configuration.keV);
                         case "comparam.prenewst.newstack.BinByFactor"
                             %value = num2str(obj.configuration.aligned_stack_binning);
-                            value = num2str(obj.configuration.pre_aligned_stack_binning);
+                            value = num2str(obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin);
                         case "setupset.copyarg.firstinc"
                             value = num2str(starting_angle) + " " + num2str(angle_increment);
                         case "setupset.copyarg.gold"
@@ -886,7 +883,7 @@ classdef BatchRunTomo < Module
                             %value = num2str(starting_angle_index) + "-" + num2str(ending_angle_index);
                             value = "";
                         case "runtime.GoldErasing.any.extraDiameter"
-                            value = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning));
+                            value = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning / obj.configuration.ft_bin));
                         otherwise
                             error("ERROR: Key to be replaced not found!");
                     end
@@ -896,7 +893,7 @@ classdef BatchRunTomo < Module
                 % TODO:NOTE: special case to keep gold beads, perhaps exclude in
                 % own parameter name
                 if key_cleaned == "runtime.AlignedStack.any.eraseGold" && obj.configuration.reconstruct_binned_stacks == true
-                    value = "0";
+                    value = "1";
                 end
                 
                 directive_file_struct.(key) = value;

@@ -74,7 +74,7 @@ environment.gpu_count = gpuDeviceCount;
 
 % NOTE: doesn't work with double quotes, tested in MATLAB R2018b
 environment.cpu_count_physical = feature('numcores');
-if environment.matlab_release == "2018a" || environment.matlab_release == "2018b" || environment.matlab_release == "2019a"
+if ~verLessThan('matlab', '9.2')
     core_info = evalc("feature('numcores')");
     environment.system_architecture = computer("arch");
 else
@@ -119,7 +119,7 @@ if ~isdeployed
         end
         dip_initialise;
     end
-    
+
     project_sub_paths = {"dynamo", {"matlab", {"mbtools", {"src"}, "src", {"shorthands"}}, "mex", {"bin"}}, "utilities", "configuration", "json", "modules", "pipeline", "helper", {"gpu"}}; %, "extern", {"semaphore"}, "imod", "offxca", "database", "nn", "playground", {"matlab", {"astra"}}, "extern", {"av3", {"utils"}, "bol_scripts", "tom", {"Filtrans", "Geom"}, "irt", "flatten", "window2"}
     concatAndAddPathsRecursive(project_path, project_sub_paths, string(filesep));
     

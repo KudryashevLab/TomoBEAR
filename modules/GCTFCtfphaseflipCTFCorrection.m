@@ -12,7 +12,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
             % configuration for unbinned data
             field_names = fieldnames(obj.configuration.tomograms);
             if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
             elseif obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix == 0
                 folder_contents = getOriginalMRCs(obj.configuration);
                 disp("INFO: determining pixel size from header");
@@ -22,10 +22,10 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 
                 matching_results = regexp(output, "(\d+.\d+)", "match");
                 obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix = str2double(matching_results{1});
-                apix = str2double(matching_results{1});
+                apix = str2double(matching_results{1} * obj.configuration.ft_bin);
             else
                 disp("INFO: taking pixel size from configuration");
-                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                 printVariable(apix);
             end
             %
@@ -135,9 +135,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     upper_l = round(obj.configuration.nominal_defocus_in_nm * obj.configuration.defocus_limit_factor) * 10^4;
                 else
                     if isfield(obj.configuration, "apix")
-                        apix = obj.configuration.apix;
+                        apix = obj.configuration.apix * obj.configuration.ft_bin;
                     else
-                        apix = obj.configuration.greatest_apix;
+                        apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
                     end
                     disp("INFO: Starting Gctf estimation on " + name + "!");
                     

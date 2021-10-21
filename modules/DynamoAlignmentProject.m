@@ -503,9 +503,9 @@ classdef DynamoAlignmentProject < Module
                                 end
                             end
                             if isfield(obj.configuration, "apix") && obj.configuration.apix ~= 0
-                                tomos.pix_size(i) = obj.configuration.apix * binning;
+                                tomos.pix_size(i) = obj.configuration.apix * obj.configuration.ft_bin * binning;
                             else
-                                tomos.pix_size(i) = obj.configuration.greatest_apix * binning;
+                                tomos.pix_size(i) = obj.configuration.greatest_apix * obj.configuration.ft_bin * binning;
                             end
                             tomos.tomo_size(i,:) = [width, height, obj.configuration.reconstruction_thickness / binning];
                             
@@ -1525,9 +1525,13 @@ classdef DynamoAlignmentProject < Module
                     card.mra_r8 = 0;
                 end
                 if isfield(obj.configuration, "apix")
-                    apix = obj.configuration.apix;
+                    apix = obj.configuration.apix * obj.configuration.ft_bin;
                 else
-                    apix = obj.configuration.tomograms.tomogram_001.apix;
+                    if isfield(obj.configuration, "greatest_apix")
+                        apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
+                    else
+                        apix = obj.configuration.tomograms.tomogram_001.apix * obj.configuration.ft_bin;
+                    end
                 end
                 
                 card.apix = apix * binning;

@@ -46,7 +46,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).config_file_path = config_file_path;
                     if obj.configuration.use_newstack_for_binning == true
                         [folder, name, extension] = fileparts(file);
-                        system("newstack -in " + file + " -ou binned_stack.st -bin " + obj.configuration.pre_aligned_stack_binning);
+                        system("newstack -in " + file + " -ou binned_stack.st -bin " + obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin);
                         file = 'binned_stack.st';
                     end
                     
@@ -65,9 +65,9 @@ classdef DynamoTiltSeriesAlignment < Module
                     end
 
                     if isfield(obj.configuration, "apix")
-                        apix = obj.configuration.apix;
+                        apix = obj.configuration.apix * obj.configuration.ft_bin;
                     else
-                        apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                        apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                     end
                     if obj.configuration.use_newstack_for_binning == true
                         u.enter.settingAcquisition.apix(apix * obj.configuration.pre_aligned_stack_binning);
@@ -97,9 +97,9 @@ classdef DynamoTiltSeriesAlignment < Module
                         u.enter.settingComputing.cpus(1);
                     end
                     if obj.configuration.use_newstack_for_binning == true
-                        bead_radius = round(((z * 10) / (apix * obj.configuration.ft_bin * obj.configuration.pre_aligned_stack_binning)) / 2);
+                        bead_radius = round(((z * 10) / (apix * obj.configuration.pre_aligned_stack_binning)) / 2);
                     else
-                        bead_radius = round(((z * 10) / (apix * obj.configuration.ft_bin)) / 2);
+                        bead_radius = round(((z * 10) / (apix)) / 2);
                     end
                     u.enter.settingDetection.beadRadius(bead_radius);
                     u.enter.settingDetection.maskRadius(round(bead_radius * obj.configuration.mask_radius_factor));
@@ -158,7 +158,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     if obj.configuration.use_newstack_for_binning == true
                         u.enter.settingDetection.detectionBinningFactor(0);
                     else
-                        u.enter.settingDetection.detectionBinningFactor(log2(obj.configuration.detection_binning_factor));
+                        u.enter.settingDetection.detectionBinningFactor(log2(obj.configuration.detection_binning_factor / obj.configuration.ft_bin));
                     end
                     % TODO: check how to input reconstruction full size
                     %             tilt_series = dread(file);
@@ -205,7 +205,7 @@ classdef DynamoTiltSeriesAlignment < Module
                                 for j = 1:length(working_markers.contents.shapes(1,z).coordinates)
                                     if ~isempty(working_markers.contents.shapes(1,z).coordinates{1,j}) && any(tilt_indices == j)
                                         if obj.configuration.use_newstack_for_binning == true
-                                            fprintf(fileID, "%0.0f %0.2f %0.2f %0.0f\n", z, working_markers.contents.shapes(1,z).coordinates{1,j}(1)*obj.configuration.pre_aligned_stack_binning, working_markers.contents.shapes(1,z).coordinates{1,j}(2)*obj.configuration.pre_aligned_stack_binning, cum_sum_tilt_series_indices(j)-1);
+                                            fprintf(fileID, "%0.0f %0.2f %0.2f %0.0f\n", z, working_markers.contents.shapes(1,z).coordinates{1,j}(1) * obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin, working_markers.contents.shapes(1,z).coordinates{1,j}(2) * obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin, cum_sum_tilt_series_indices(j)-1);
                                         else
                                             fprintf(fileID, "%0.0f %0.2f %0.2f %0.0f\n", z, working_markers.contents.shapes(1,z).coordinates{1,j}(1), working_markers.contents.shapes(1,z).coordinates{1,j}(2), cum_sum_tilt_series_indices(j)-1);
                                         end
@@ -310,13 +310,13 @@ classdef DynamoTiltSeriesAlignment < Module
                     if obj.configuration.use_newstack_for_binning == true
                         fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(0))));
                     else
-                        fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(log2(obj.configuration.pre_aligned_stack_binning)))));
+                        fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(log2(obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin)))));
                     end
                 elseif string(field_names{i}) == "steps_detectPeaks_detectionBinningFactor"
                     if obj.configuration.use_newstack_for_binning == true
                         fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(0))));
                     else
-                        fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(log2(obj.configuration.detection_binning_factor)))));
+                        fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(log2(obj.configuration.detection_binning_factor / obj.configuration.ft_bin)))));
                     end
                 elseif isnumeric(original_parameters.(field_names{i}))
                     fprintf(directive_file_id,"> %s %s\n", key_cleaned, strjoin(string(num2str(original_parameters.(field_names{i})))));
