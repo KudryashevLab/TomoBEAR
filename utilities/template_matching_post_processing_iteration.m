@@ -155,10 +155,7 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
     %                 cc = gpuArray(single(cc));
     %                 mask_erase = gpuArray(single(mask_erase));
     precision = configuration.precision;
-    point_file_name = char(output_path + string(filesep)...
-        + "tab_" + num2str(number) + "_ini_bin_"...
-        + configuration.template_matching_binning + ".points");
-    fid = fopen(point_file_name, "w+");
+
     % this part is under construction
     %L = round(size(mask_erase,1)/2); % distance to zero-in from the edges
     counter = 0;
@@ -173,6 +170,12 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
         
         if configuration.particle_count == 0 && ((b < mean_val + (configuration.cc_std * std_val)) || ~any(cc(:)))
             break;
+        end
+        if counter == 0 
+        	point_file_name = char(output_path + string(filesep)...
+                + "tab_" + num2str(number) + "_ini_bin_"...
+                + configuration.template_matching_binning + ".points");
+            fid = fopen(point_file_name, "w+");
         end
         counter = counter + 1;
         %if (p < 5) disp([p a b]);end
@@ -215,13 +218,13 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
             round(tab_tomo(counter,25),precision),...
             round(tab_tomo(counter,26),precision));
     end
-    
-    model_file_name = char(output_path + string(filesep)...
-        + "tab_" + num2str(number) + "_ini_bin_"...
-        + configuration.template_matching_binning + "_" + num2str(counter) + ".model");
-    system("point2model " + point_file_name + " " + model_file_name);
-    fclose(fid);
-    
+    if counter ~= 0 
+        model_file_name = char(output_path + string(filesep)...
+            + "tab_" + num2str(number) + "_ini_bin_"...
+            + configuration.template_matching_binning + "_" + num2str(counter) + ".model");
+        system("point2model " + point_file_name + " " + model_file_name);
+        fclose(fid);
+    end
     if configuration.cross_correlation_mask == true
         dwrite(result_binarized_morphed, output_path + string(filesep)...
             + "tab_" + num2str(number) + "_ini_bin_"...
@@ -255,9 +258,14 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
     %catch
     %disp(lasterr);
     %end
-    dwrite(tab_tomo, char(output_path + string(filesep) + "tab_" + num2str(number) + "_ini_bin_" + configuration.template_matching_binning + "_" + num2str(counter) + ".tbl"));
-    fid = fopen(output_path + string(filesep) + "SUCCESS_" + num2str(number), "w");
-    fclose(fid);
+    if tab_tomo(1,20) ~= 0
+        dwrite(tab_tomo, char(output_path + string(filesep) + "tab_" + num2str(number) + "_ini_bin_" + configuration.template_matching_binning + "_" + num2str(counter) + ".tbl"));
+        fid = fopen(output_path + string(filesep) + "SUCCESS_" + num2str(number), "w");
+        fclose(fid);
+    else
+        fid = fopen(output_path + string(filesep) + "FAILURE_" + num2str(number), "w");
+        fclose(fid);
+    end
 else
     table_file_path = dir(output_path + string(filesep) + "tab_" + num2str(number) + "_ini_bin_" + configuration.template_matching_binning + "_*.tbl");
     tab_tomo = dread(char(table_file_path(1).folder + string(filesep) + table_file_path(1).name));

@@ -994,7 +994,7 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     %                 end
                     
-                    while inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor
+                    while (inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor) || iterations == 0
                         %                     if skipped_iterations < iterations_to_skip
                         %                         %                         if obj.configuration.sampling == 0
                         %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))

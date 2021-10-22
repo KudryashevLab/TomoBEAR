@@ -19,7 +19,7 @@ classdef JSON < handle
         end
         
         function parsed_content = parse(obj, filePath)
-            assert(fileExists(filePath), "Specified file does not exist!")
+%             assert(~fileExists(filePath), "Specified file does not exist!")
 
             % NOTE: not compatible with matlab coder
             file_content = fileread(filePath);

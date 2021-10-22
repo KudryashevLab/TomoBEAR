@@ -318,9 +318,9 @@ classdef BatchRunTomo < Module
                             % x_shifts = (point_file_content{1,2} + prexg_file_content{1,5}(point_file_content{1,4} + 1)) / obj.configuration.pre_aligned_stack_binning;
                             % y_shifts = (point_file_content{1,3} + prexg_file_content{1,6}(point_file_content{1,4} + 1)) / obj.configuration.pre_aligned_stack_binning;
                             x_shifts = (point_file_content{1,2} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                + (prexg_file_content{1,5}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
+                                + (prexg_file_content{1,5}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                             y_shifts = (point_file_content{1,3} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                + (prexg_file_content{1,6}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
+                                + (prexg_file_content{1,6}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                             fid = fopen(current_location + string(filesep) + point_file(1).name, "wt+");
                             for k = 1:length(point_file_content{1,1})
                                 fprintf(fid, "%0.0f %0.2f %0.2f %0.0f\n", point_file_content{1,1}(k), x_shifts(k), y_shifts(k), point_file_content{1,4}(k));
@@ -434,17 +434,17 @@ classdef BatchRunTomo < Module
                             fid = fopen(current_location + string(filesep) + splitted_name{1} + ".seed_model", "wt+");
                             if obj.configuration.generate_seed_model_with_all_fiducials_from_dynamo == true
                                 seed_points_x = (point_file_content{1,2} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                    + (prexg_file_content{1,5}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
+                                    + (prexg_file_content{1,5}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                                 seed_points_y = (point_file_content{1,3} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                    + (prexg_file_content{1,6}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning);
+                                    + (prexg_file_content{1,6}(point_file_content{1,4} + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                                 seed_points_tilt = point_file_content{1, 4};
                                 seed_points_contour = point_file_content{1, 1};
                             else
                                 % TODO: input zero tilt instead of projection 16
                                 seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == find(angles == 0) - 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                    + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                                 seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == find(angles == 0) - 1)  / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
-                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning);
+                                    + (prexg_file_content{1,6}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                                 seed_points_tilt = point_file_content{1, 4}(point_file_content{1,4} == find(angles == 0) - 1);
                                 seed_points_contour = point_file_content{1, 1}(point_file_content{1,4} == find(angles == 0) - 1);
                             end
