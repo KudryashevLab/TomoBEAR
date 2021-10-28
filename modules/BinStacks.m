@@ -91,7 +91,7 @@ classdef BinStacks < Module
                         continue;
                     end
                     
-                    bin_factor = obj.configuration.binnings(j) / (obj.configuration.aligned_stack_binning * obj.configuration.ft_bin);
+                    bin_factor = obj.configuration.binnings(j) / (obj.configuration.aligned_stack_binning / obj.configuration.ft_bin);
                     binned_stack_suffix = "bin_" + num2str(bin_factor * obj.configuration.aligned_stack_binning);
                     disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali...");
                     stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + ".ali";

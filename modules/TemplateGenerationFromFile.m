@@ -29,7 +29,7 @@ classdef TemplateGenerationFromFile < Module
             
             
             %for i = 1:length(obj.configuration.binning)
-            binning = obj.configuration.template_matching_binning;% * obj.configuration.aligned_stack_binning;
+            binning = obj.configuration.template_matching_binning / obj.configuration.ft_bin;% * obj.configuration.aligned_stack_binning;
             % TODO: what about homogenized data
             %                 rescaled_pixelsize = obj.configuration.apix * binning;
             if isfield(obj.configuration, "apix")
