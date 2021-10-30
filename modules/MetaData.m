@@ -41,7 +41,7 @@ classdef MetaData < Module
             if obj.configuration.parallel_execution == true
                 field_names = obj.field_names;
                 configuration = obj.configuration;
-                parfor i = 1:length(obj.field_names)
+                for i = 1:length(obj.field_names) %par
                     tomograms{i} = struct();
                     field_name = field_names{i};
                     num_images_2 = [];

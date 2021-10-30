@@ -2,9 +2,8 @@ function order = sortDirOutputByPipelineStepNumbering(dir_list, configuration)
 for j = 1:length(dir_list)
     dir_list_real_indices{j} = strsplit(dir_list(j).name, "_");
     dir_list_real_indices{j} = str2double(dir_list_real_indices{j}(1));
-    % TODO:NOTE: for compatibility reasons
     if isnan(dir_list_real_indices{j})
-        folder_splitted = strsplit(dir_list(j).folder, "/");
+        folder_splitted = strsplit(dir_list(j).folder, string(filesep));
         dir_list_real_indices{j} = strsplit(folder_splitted{end}, "_");
         dir_list_real_indices{j} = str2double(dir_list_real_indices{j}(1));
     end

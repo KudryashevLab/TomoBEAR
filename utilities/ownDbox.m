@@ -1,7 +1,20 @@
 function ownDbox(source_folder, destination_folder, batch, delete_source_folder, padding)
+if nargin < 2
+    error("ERROR: to create dbox folder source and destination is needed!");
+end
+
 if nargin == 2
     batch = 1000;
     delete_source_folder = false;
+    padding = 6;
+end
+
+if nargin == 3
+    delete_source_folder = false;
+    padding = 6;
+end
+
+if nargin == 4
     padding = 6;
 end
 

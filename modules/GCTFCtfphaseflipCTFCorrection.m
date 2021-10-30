@@ -28,28 +28,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                 printVariable(apix);
             end
-            %
-            % if configuration.binning == true
-            %     disp("INFO: binning set to TRUE (aligned stacks which are binned to 2, 4, and 8 will be generated)");
-            % else
-            %     disp("INFO: binning set to FALSE");
-            % end
-            
-            % if configuration.generate_exact_filtered_tomograms == true
-            % else
-            %     disp("INFO: no exact filter will be applied");
-            % end
-            
-            % NOTE: this loop is dissecting tiltstacks, better to work on motion
-            % corrected mrcs because of data duplication, still usefull if uncombined raw or
-            % motion corrected data is unavailable
-            % TODO: better to use flag configuration.use_aligned_stack if not then use
-            % motion_corrected_files, but what about binning?
-            % if isfield(configuration, "tomogram_output_prefix") && ~isempty(configuration.tomogram_output_prefix)
-            %     dir_list = dir(configuration.previous_step_output_folder + string(filesep) + configuration.tomogram_output_prefix + "*");
-            % else
-            %     dir_list = dir(configuration.previous_step_output_folder + string(filesep) + configuration.tomogram_input_prefix + "*");
-            % end
             if obj.configuration.use_rawtlt == true
                 tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
             else
@@ -61,9 +39,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
             else
                 xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
                 xf_files = xf_files{1};
-                % xf_files = xf_files{obj.configuration.set_up.j};
                 tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
-                
                 tilt_stacks = tilt_stacks(contains({tilt_stacks(:).name}, sprintf("%s_%03d", obj.configuration.tomogram_output_prefix, obj.configuration.set_up.j)));
             end
             [path, name, extension] = fileparts(tilt_files{1});
@@ -75,52 +51,35 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 else
                     [folder, tilt_stack_name, extension] = fileparts(tilt_stacks(i).folder + string(filesep) + tilt_stacks(i).name);
                 end
-                
                 destination_folder = obj.output_path;
-                
-                
                 slice_folder = destination_folder + string(filesep) + obj.configuration.slice_folder;
-                
                 obj.dynamic_configuration.defocus_slice_folder_path = slice_folder;
-                
                 [status_mkdir, message, message_id] = mkdir(slice_folder);
-                
                 defocus_file_destination = destination_folder + string(filesep) + name + ".defocus";
                 defocus_file_id = fopen(defocus_file_destination, "w");
-                
-                % TODO: check why am I getting here .XF and .TLT file
-                %     tilt_file_list = dir(dir_list(i).folder + string(filesep)...
-                %         + dir_list(i).name + string(filesep) + "*.tlt");
                 tilt_file_destination = destination_folder + string(filesep) + name + ".tlt";
                 createSymbolicLink(tilt_files{i}, tilt_file_destination, obj.log_file_id);
                 tilt_file_id = fopen(tilt_file_destination, "r");
                 if tilt_file_id == -1
                     obj.status = 0;
                 end
-                
                 % NOTE: use the raw stack if aligned stack binning is
                 % higher than 1
                 if (isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == false) || obj.configuration.aligned_stack_binning > 1
                     xf_file_destination = destination_folder + string(filesep) + name + ".xf";
                     output = createSymbolicLink(xf_files{i}, xf_file_destination, obj.log_file_id);
                 end
-                
-                
                 disp("INFO: splitting " + tilt_stack_name + "...");
-                %                 source = tilt_stacks(i).folder + string(filesep) + tilt_stacks(i).name;
                 if iscell(tilt_stacks)
                     source = tilt_stacks{i};
                 else
                     source = string(tilt_stacks(i).folder) + string(filesep) + string(tilt_stacks(i).name);
                 end
-                
                 % TODO: introduce checks
                 [status_mkdir, message, message_id] = mkdir(destination_folder);
                 % TODO: add default "configuration.slice_folder" to simplify configuration, could also be done
                 % in default configuration, both ways are acceptable
-                %                 [folder, name, extension] = fileparts(tilt_stacks{i});
                 destination = destination_folder + string(filesep) + tilt_stack_name;
-                
                 output = createSymbolicLink(source, destination, obj.log_file_id);
                 output = executeCommand("newstack -split 1 -append mrc "...
                     + destination + " "...
@@ -140,8 +99,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
                     end
                     disp("INFO: Starting Gctf estimation on " + name + "!");
-                    
-                    
                     command = "CUDA_VISIBLE_DEVICES=" + (obj.configuration.set_up.gpu - 1) + " " +obj.configuration.ctf_correction_command...
                         + " --apix " + apix...
                         + " "...
@@ -160,9 +117,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         end
                     end
                     command = command + file + ".mrc";
-                    
                     output = executeCommand(command, false, obj.log_file_id);
-
                     delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
                         + file...
                         + "_EPA.log");
@@ -179,7 +134,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     global_defocus_1_in_angstrom = str2double(final_values_splitted{1});
                     global_defocus_2_in_angstrom = str2double(final_values_splitted{2});
                     global_defocus_average_in_angstrom = (global_defocus_1_in_angstrom + global_defocus_2_in_angstrom) / 2;
-                    
                     % TODO: use cosine for defocus interval to be used for
                     % optimization
                     lower_l = global_defocus_average_in_angstrom / 2;
@@ -190,15 +144,12 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     + " --apix " + apix...
                     + " --defL " + lower_l...
                     + " --defH " + upper_l;
-                
                 if obj.configuration.do_phase_flip ==  true
                     command = command + " --do_phase_flip";
                 end
-                
                 if obj.configuration.do_EPA ==  true
                     command = command + " --do_EPA";
                 end
-                
                 command = command + " " + name + "*.mrc";
                 output = executeCommand(command, false, obj.log_file_id);
                 view_list = dir(slice_folder + string(filesep) + name + "_*_" + "gctf.log");
@@ -208,8 +159,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     j_length = length(view_list) + 1;
                 end
                 for j = 1:j_length
-                    
-                    
                     if obj.configuration.defocus_file_version <= 2
                         gctf_obj.log_file_id = fopen(view_list(j).folder + string(filesep) + view_list(j).name, "r");
                         line_divided_text = textscan(gctf_obj.log_file_id, "%s", "delimiter", "\n");
@@ -220,7 +169,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         astigmatism_angle = str2double(final_values_splitted{3});
                         local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
                         local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
-                        
                         if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
                             local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
                             local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
@@ -266,7 +214,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
                         + "_" + obj.configuration.ctf_corrected_stack_suffix...
                         + "." + splitted_tilt_stack_path_name(2);
-                    
                     command = "ctfphaseflip -input " + destination...
                         + " -output " + ctf_corrected_stack_destination...
                         + " -angleFn " + tilt_file_destination...
@@ -277,16 +224,13 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         + " -volt " + obj.configuration.keV...
                         + " -cs " + obj.configuration.spherical_aberation...
                         + " -ampContrast " + obj.configuration.ampContrast;
-                    
                     if obj.configuration.use_aligned_stack == false
                         command = command + " -xform " + xf_file_destination;
                     end
-                    
                     % TODO: get number as numeric for better version check
                     if obj.configuration.set_up.gpu > 0 && versionGreaterThan(obj.configuration.environment_properties.imod_version, "4.10.9")
                         command = command + " -gpu " + obj.configuration.set_up.gpu;
                     end
-                    
                     executeCommand(command, false, obj.log_file_id);
                     % TODO: link ctf corrected stack
                 end
@@ -296,47 +240,38 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         + obj.configuration.ctf_corrected_stack_suffix + "_"...
                         + obj.configuration.tomogram_suffix + "."...
                         + splitted_tilt_stack_path_name(2);
-                    
                     command = "tilt -InputProjections " + ctf_corrected_stack_destination...
                         + " -OutputFile " + ctf_corrected_tomogram_destination...
                         + " -TILTFILE " + tilt_file_destination...
                         + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning;
-                    
                     if obj.configuration.set_up.gpu > 0
                             command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
                     end
-                    
                     executeCommand(command, false, obj.log_file_id);
                     % TODO: if time and motivation implement exclude views by
                     % parametrization not by truncation
                     %                + " -EXCLUDELIST2 $EXCLUDEVIEWS");
-                    
                     ctf_corrected_rotated_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
                         + obj.configuration.ctf_corrected_stack_suffix + "_"...
                         + obj.configuration.tomogram_suffix + "."...
                         + splitted_tilt_stack_path_name(2);
                     executeCommand("trimvol -rx " + ctf_corrected_tomogram_destination...
                         + " " + ctf_corrected_rotated_tomogram_destination, false, obj.log_file_id);
-                    
                     if obj.configuration.generate_exact_filtered_tomograms == true
                         disp("INFO: tomograms with exact filter (size: " + obj.configuration.exact_filter_size + ") will be generated.");
-                        
                         ctf_corrected_exact_filtered_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
                             + obj.configuration.ctf_corrected_stack_suffix + "_"...
                             + obj.configuration.exact_filter_suffix + "_"...
                             + obj.configuration.tomogram_suffix + "."...
                             + splitted_tilt_stack_path_name(2);
-                        
                         command = "tilt -InputProjections " + ctf_corrected_stack_destination...
                             + " -OutputFile " + ctf_corrected_exact_filtered_tomogram_destination...
                             + " -TILTFILE " + tilt_file_destination...
                             + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning...
                             + " -ExactFilterSize " + obj.configuration.exact_filter_size;
-                        
                         if obj.configuration.set_up.gpu > 0
                             command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
                         end
-                        
                         executeCommand(command, false, obj.log_file_id);
                         % TODO: if time and motivation implement exclude views by
                         % parametrization not by truncation
@@ -367,8 +302,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         delete(files(i).folder + string(filesep) + files(i).name);
                     end
                 end
-                
-                %             [success, message,message_id] = rmdir(obj.dynamic_configuration.defocus_slice_folder_path);
             end
             obj = cleanUp@Module(obj);
         end

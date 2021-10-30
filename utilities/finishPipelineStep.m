@@ -16,6 +16,7 @@ disp("INFO: Skipping processing step " + num2str(i - 1) +...
 % dynamic_configuration_temporary and possibly overwrites
 % with new values
 if ~isempty(fieldnames(dynamic_configuration_temporary))
-    dynamic_configuration = mergeConfigurations(dynamic_configuration, dynamic_configuration_temporary, 0, "dynamic");
+    dynamic_configuration = mergeConfigurations(dynamic_configuration,...
+        dynamic_configuration_temporary, 0, "dynamic");
 end
 end

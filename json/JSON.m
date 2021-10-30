@@ -3,32 +3,11 @@ classdef JSON < handle
     end
     
     methods
-        function obj = JSON()%filePath
-            % TODO: convert to string if needed
-            %obj.file_path = filePath;
-
-            % TODO: convert parsed contents from char to string
-            %obj.parse(filePath);
-            % NOTE: Alternative, more verbose error handling
-            %if fileExists(filePath)
-            %    % TODO: convert parsed contents from char to string
-            %    obj.parse(filePath);
-            %else
-            %    error("Specified file does not exist!");
-            %end
+        function obj = JSON()
         end
         
         function parsed_content = parse(obj, filePath)
-%             assert(~fileExists(filePath), "Specified file does not exist!")
-
-            % NOTE: not compatible with matlab coder
             file_content = fileread(filePath);
-            %obj.file_content = file_content;
-            
-            %obj.file_content = string(file_content);
-            
-            %obj.parsed_content = jsondecode(obj.file_content);
-            %obj.parsed_content = jsondecode(file_content);
             parsed_content = jsondecode(file_content);
         end
         

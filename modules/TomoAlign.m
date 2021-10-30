@@ -156,7 +156,6 @@ classdef TomoAlign < Module
                         end
                     end
                     
-                    
                     if isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == true
                         tomoalign_command = tomoalign_command...
                             + " -b " + obj.configuration.aligned_stack_binning / obj.configuration.ft_bin;
@@ -196,10 +195,10 @@ classdef TomoAlign < Module
                     tilt_stack_link_path = output_destination + string(filesep) + name + extension;
                     createSymbolicLink(tilt_stack_file_path, tilt_stack_link_path, log_file_id);
                     
-                    
                     tomowarpalign_command = "tomowarpalign "...
                         + " -a " + align_com_link_path...
                         + " -n " + newst_com_link_path;
+                    % TODO: find out what flag -t means
                     %           + " -t " + tilt_stack_link_path;
                     
                     if isfield(obj.configuration, "warp_image_range") && ~isempty(obj.configuration.warp_image_range)

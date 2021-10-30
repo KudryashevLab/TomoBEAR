@@ -1,7 +1,6 @@
 function saveJSON(path, variable)
 fid_json = fopen(path, "wt" );
 variable_json = jsonencode(variable, "ConvertInfAndNaN", false);
-% variable_json = strrep(variable_json, ",", "," + newline);
 variable_json = strrep(variable_json, ",", sprintf("," + newline));
 variable_json = strrep(variable_json, "[{", sprintf("[" + newline + "{" + newline));
 variable_json = strrep(variable_json, "}]", sprintf( newline + "}" + newline + "]"));

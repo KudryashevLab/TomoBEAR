@@ -1,6 +1,7 @@
 function mask = getMask(configuration, path)
-
-file_path = configuration.processing_path + string(filesep) + configuration.output_folder + string(filesep) + configuration.templates_folder;
+file_path = configuration.processing_path + string(filesep)...
+    + configuration.output_folder + string(filesep)...
+    + configuration.templates_folder;
 files = dir(file_path);
 files(1) = [];
 files(1) = [];

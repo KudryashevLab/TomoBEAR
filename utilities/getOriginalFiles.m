@@ -3,9 +3,9 @@ if nargin == 1
     grouped = false;
 end
 
-
-
-if isfield(configuration, "tomogram_input_prefix") && ~isStringScalar(configuration.tomogram_input_prefix) && ~isStringScalar(configuration.data_path)
+if isfield(configuration, "tomogram_input_prefix")...
+        && ~isStringScalar(configuration.tomogram_input_prefix)...
+        && ~isStringScalar(configuration.data_path)
     counter = 1;
     for i = 1:length(configuration.tomogram_input_prefix)
         for j = 1:length(configuration.data_path)
@@ -14,10 +14,16 @@ if isfield(configuration, "tomogram_input_prefix") && ~isStringScalar(configurat
             counter = counter + 1;
         end
     end
-elseif isfield(configuration, "tomogram_input_prefix") && isStringScalar(configuration.tomogram_input_prefix) && configuration.tomogram_input_prefix ~= "" && ~isStringScalar(configuration.data_path)
+elseif isfield(configuration, "tomogram_input_prefix")...
+        && isStringScalar(configuration.tomogram_input_prefix)...
+        && configuration.tomogram_input_prefix ~= ""...
+        && ~isStringScalar(configuration.data_path)
     file_paths = configuration.data_path + string(filesep)...
         + configuration.tomogram_input_prefix;
-elseif isfield(configuration, "tomogram_input_prefix") && isStringScalar(configuration.tomogram_input_prefix) && configuration.tomogram_input_prefix ~= "" && isStringScalar(configuration.data_path)
+elseif isfield(configuration, "tomogram_input_prefix")...
+        && isStringScalar(configuration.tomogram_input_prefix)...
+        && configuration.tomogram_input_prefix ~= ""...
+        && isStringScalar(configuration.data_path)
     file_paths = configuration.data_path + string(filesep)...
         + configuration.tomogram_input_prefix;
 else
@@ -37,18 +43,16 @@ for i=1:length(file_paths)
         end
     end
 end
-    
-
 
 original_files = getOriginalFilesFromFilePaths(file_paths, grouped);
-
 
 if isempty(original_files)
 	error("ERROR: No micrographs found at location " + file_paths);
 end
 
 if iscell(original_files) && grouped ~= true
-    original_files_tmp = struct("name",'',"folder",'',"date",'',"bytes",0,"isdir",false,"datenum",0);
+    original_files_tmp = struct("name", '', "folder", '', "date", '',...
+        "bytes", 0, "isdir", false, "datenum", 0);
     for i = 1:length(original_files)
         if i == 1
             original_files_tmp(1:length(original_files{i})) = original_files{i};
@@ -59,4 +63,3 @@ if iscell(original_files) && grouped ~= true
     original_files = original_files_tmp;
 end
 end
-
