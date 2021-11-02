@@ -218,6 +218,7 @@
         "in_fm_motion": 1,
         "apply_dose_weighting": false,
         "fm_dose": 0.3,
+        "split_sum": false,
         "tilt": "",
         "magnification_anisotropy_major_scale": 1,
         "magnification_anisotropy_minor_scale": 1,

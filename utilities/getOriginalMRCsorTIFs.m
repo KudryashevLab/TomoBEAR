@@ -1,7 +1,7 @@
 function [original_files, tif_flag] = getOriginalMRCsorTIFs(configuration, grouped)
 if nargin == 1
     grouped = false;
-else
+end
     
 tif_flag = 0;
 if isfield(configuration, "tomogram_input_prefix") && iscell(configuration.tomogram_input_prefix)

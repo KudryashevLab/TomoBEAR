@@ -1618,7 +1618,11 @@ classdef DynamoAlignmentProject < Module
             if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
                 dynamo_execute_project(char(project_name));
             else
-                dynamo_execute_project(char(string(project_name) + "_eo"));
+                if ~contains(string(project_name), "_eo")
+                    dynamo_execute_project(char(string(project_name) + "_eo"));
+                else
+                    dynamo_execute_project(char(string(project_name)));
+                end
             end
             %             fid = fopen(obj.output_path + filesep + "SUCCESS_" + binning, "w");
             %             fclose(fid);
