@@ -1,6 +1,5 @@
 function file_paths = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, pattern)
-
-% original_mrcs = getOriginalMRCsFromStandardFolder(configuration);
+% TODO: check for "." in pattern
 original_mrcs = fieldnames(configuration.tomograms);
 batchruntomo_folders = dir(configuration.processing_path + string(filesep)...
     + configuration.output_folder + string(filesep) + "*_BatchRunTomo_*");

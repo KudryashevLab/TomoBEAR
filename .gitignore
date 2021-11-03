@@ -9,6 +9,7 @@ tomoBEAR/
 
 test
 load_modules.sh
+SUSAN_new/
 SUSAN/
 SUSAN_old/
 extern/semaphore/
@@ -79,6 +80,7 @@ bfg-report/
 dynamo/matlab/mbtools/+mbparse/@output
 dynamo/matlab/src/+dpksys
 
+dynamo/matlab/src/dynamo_read_subtomogram.m
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepWrapper/compute.m
 dynamo/matlab/src/+dpkproject/readNextIterationFile.m
 dynamo/matlab/src/+dpkproject/writeNextIterationFile.m
@@ -197,7 +199,6 @@ dynamo/matlab/src/@dDataOld/getParticleFile.m
 dynamo/matlab/src/+dpkdata/+aux/facts2dData.m
 dynamo/matlab/src/+dpkproject/+pipeline/+gpu/createParticleFileListAssignations.m
 dynamo/matlab/src/dynamo_guitool_information.m
-dynamo/matlab/src/dynamo__iteration_setup_gpu.m
 dynamo/matlab/src/dynamo_sphere.m
 dynamo/matlab/src/dynamo_resize_mask.m
 dynamo/matlab/src/dynamo_pipeline_resize.m

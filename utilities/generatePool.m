@@ -1,18 +1,16 @@
-function generatePool(cores, force, path)
+function generatePool(cores, force, path, debug)
 persistent previous_cores;
 if isempty(previous_cores)
 	previous_cores = 0;
 end
-% global DEBUG
-% NOTE: build in mode for interpretation
-poolobj = gcp('nocreate'); % If no pool, do not create new one.
 
+poolobj = gcp('nocreate');
 pc = parcluster('local');
 if string(path) ~= ""
     pc.JobStorageLocation = char(path);
 end
 
-if force || previous_cores == 0 || previous_cores ~= cores %~DEBUG && 
+if force || previous_cores == 0 || previous_cores ~= cores
     if isempty(poolobj)
         if cores <= 1
             poolsize = round(feature('numcores') / (1/cores));

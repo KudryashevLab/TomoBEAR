@@ -67,7 +67,7 @@ classdef EMDTemplateGeneration < Module
             %             tilt_geometry = obj.configuration.tilt_geometry;
             %             projections = abs(tilt_geometry(1)-tilt_geometry(2)) / tilt_geometry(3);
             %             m = projections;
-            template_scaled_to_actual_data = length(template) * (1/ apix);
+            template_scaled_to_actual_data = length(template) * (1 / apix * obj.configuration.ft_bin);
             %             if obj.configuration.use_half_template_size == true
             %                 template_scaled_to_actual_data = template_scaled_to_actual_data / 2;
             %             end
@@ -84,9 +84,9 @@ classdef EMDTemplateGeneration < Module
             dz = obj.configuration.template_bandpass_cut_off_resolution_in_angstrom;
             fsc = 1:template_scaled_to_actual_data;
             
-            obj.dynamic_configuration.fp = ceil((2*apix)*length(fsc)/dz);
+            obj.dynamic_configuration.fp = ceil((2 * apix * obj.configuration.ft_bin)*length(fsc)/dz);
             
-            obj.dynamic_configuration.angstrom_template = (2*apix)*length(fsc)/obj.dynamic_configuration.fp;
+            obj.dynamic_configuration.angstrom_template = (2*apix * obj.configuration.ft_bin)*length(fsc)/obj.dynamic_configuration.fp;
             
             
             if obj.configuration.use_bandpassed_template == true

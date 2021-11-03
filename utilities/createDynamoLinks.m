@@ -47,10 +47,4 @@ for i = 1:length(dynamo_source_paths)
     else
     end
 end
-
-% if feature('IsDebugMode') || debug == true
-%     cd(return_dir);
-% else
-%     runPipeline("configurations/hiv2t_susan.json")
-% end
 end

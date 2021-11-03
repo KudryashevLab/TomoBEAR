@@ -1,9 +1,8 @@
 function [original_files, tif_flag] = getOriginalMRCsorTIFs(configuration, grouped)
-if nargin == 2
+if nargin == 1
     grouped = false;
-else
+end
     
-
 tif_flag = 0;
 if isfield(configuration, "tomogram_input_prefix") && iscell(configuration.tomogram_input_prefix)
     counter = 1;
@@ -37,8 +36,10 @@ end
 if isempty(original_files)
 	error("ERROR: No micrographs found at location " + mrc_path);
 end
+
 if iscell(original_files)
-    original_files_tmp = struct("name",'',"folder",'',"date",'',"bytes",0,"isdir",false,"datenum",0);
+    original_files_tmp = struct("name", '', "folder", '', "date", '',...
+        "bytes", 0, "isdir", false, "datenum", 0);
     for i = 1:length(original_files)
         if i == 1
             original_files_tmp(1:length(original_files{i})) = original_files{i};

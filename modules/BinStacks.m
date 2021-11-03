@@ -9,7 +9,6 @@ classdef BinStacks < Module
             createStandardFolder(obj.configuration, "binned_aligned_tilt_stacks_folder", false);
             createStandardFolder(obj.configuration, "binned_tilt_stacks_folder", false);
             createStandardFolder(obj.configuration, "ctf_corrected_binned_aligned_tilt_stacks_folder", false);
-            %             createStandardFolder(obj.configuration, "ctf_corrected_binned_tilt_stacks_folder", false);
         end
         
         function obj = process(obj)
@@ -17,9 +16,9 @@ classdef BinStacks < Module
             disp("INFO: Creating binned aligned stacks...");
 
             if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
             else
-                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
             end
             integer_check = true;
             for i = 1:length(obj.configuration.binnings)
@@ -42,14 +41,6 @@ classdef BinStacks < Module
                     % TODO: better take obj.output_path
                     output_path_splitted = strsplit(obj.output_path, "/");
                     name = output_path_splitted(end);
-                    %                     if obj.configuration.tomogram_begin > 1 ||  (~isempty(obj.configuration.tomogram_interval) && obj.configuration.tomogram_interval(1) > 1)
-                    %                         tilt_stacks_path = tilt_stacks_path...
-                    %                             + string(filesep) + obj.field_names(obj.configuration.set_up.adjusted_j); %index should be set to adjusted_j if tomograms in the beginning are skipped
-                    %                     else
-                    %                         tilt_stacks_path = tilt_stacks_path...
-                    %                             + string(filesep) + obj.field_names(obj.configuration.set_up.j);
-                    %                     end
-                    %
                     tilt_stacks_path = tilt_stacks_path...
                         + string(filesep) + name;
                     
@@ -68,19 +59,7 @@ classdef BinStacks < Module
                     tilt_stacks = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
                     tilt_stacks = tilt_stacks{1};
                 end
-                % tilt_stacks = tilt_stacks{current_tomogram_index};
-                
-                %                 [path, name, extension] = fileparts(tilt_stacks);
-                %
-                %                 if obj.configuration.aligned_stack_binning > 1
-                %                     %TODO: take name from obj.output_path
-                %                     if obj.configuration.tomogram_begin > 1 ||  (~isempty(obj.configuration.tomogram_interval) && obj.configuration.tomogram_interval(1) > 1)
-                %                         name = obj.field_names(obj.configuration.set_up.adjusted_j);
-                %                     else
-                %                         name = obj.field_names(obj.configuration.set_up.j);
-                %                     end
-                %                 end
-                
+
                 destination_path = obj.output_path;
                 [status_mkdir, message, message_id] = mkdir(destination_path);
                 
@@ -91,8 +70,8 @@ classdef BinStacks < Module
                         continue;
                     end
                     
-                    bin_factor = obj.configuration.binnings(j) / obj.configuration.aligned_stack_binning;
-                    binned_stack_suffix = "bin_" + num2str(bin_factor * obj.configuration.aligned_stack_binning);
+                    bin_factor = obj.configuration.binnings(j) / (obj.configuration.aligned_stack_binning / obj.configuration.ft_bin);
+                    binned_stack_suffix = "bin_" + num2str(bin_factor * obj.configuration.aligned_stack_binning * obj.configuration.ft_bin);
                     disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali...");
                     stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + ".ali";
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{j} = stack_output_path;
@@ -114,33 +93,11 @@ classdef BinStacks < Module
                 end
                 
                 xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                
-                %             batchruntomo_folders = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + "*_BatchRunTomo_*");
-                %             extracted_date_strings = string([]);
-                %             extracted_date_strings_indices = (1:length(batchruntomo_folders))';
-                %             for i = 1:length(batchruntomo_folders)
-                %                 extracted_date_strings(i) = batchruntomo_folders(i).date;
-                %             end
-                %             extracted_date_strings = extracted_date_strings';
-                %             extracted_dates = datetime(extracted_date_strings, "Format", "dd-MMM-yyyy HH:mm:ss", "TimeZone", "local");
-                %             extracted_dates_tabularized = table(extracted_dates, extracted_date_strings_indices);
-                %             extracted_dates_tabularized_sorted = sortrows(extracted_dates_tabularized, "extracted_dates");
-                %
-                
-                %             for i = 1:length(tilt_stacks)
+
                 [path, name, extension] = fileparts(tilt_stacks.name);
-                
-                %                 batchruntomo_xf_files = dir(...
-                %                     batchruntomo_folders(...
-                %                     extracted_dates_tabularized_sorted.extracted_date_strings_indices(end)...
-                %                     ).folder + string(filesep)...
-                %                     + batchruntomo_folders(...
-                %                     extracted_dates_tabularized_sorted.extracted_date_strings_indices(end)...
-                %                     ).name + string(filesep) + name + string(filesep) + "*.xf");
-                
+
                 xf_file_source = xf_file_paths{1};
-                %                 destination_path = obj.output_path;
-                %                 [status_mkdir, message, message_id] = mkdir(destination_path);
+
                 xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                 
                 obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
@@ -156,12 +113,12 @@ classdef BinStacks < Module
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{j} = stack_output_path;
                     [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
                     executeCommand("newstack"...
-                        + " -size " + floor(height / obj.configuration.binnings(j)) + "," + floor(width / obj.configuration.binnings(j))...
+                        + " -size " + floor(height / (obj.configuration.binnings(j) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(j) / obj.configuration.ft_bin))...
                         + " -input " + stack_destination...
                         + " -output " + stack_output_path...
                         + " -xform " + xf_file_destination...
                         + " -antialias " + obj.configuration.antialias_filter...
-                        + " -bin " + num2str(obj.configuration.binnings(j)), false, obj.log_file_id);
+                        + " -bin " + num2str(obj.configuration.binnings(j) / obj.configuration.ft_bin), false, obj.log_file_id);
                     
                     if obj.configuration.binnings(j) > 1
                         [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{j}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "binned_aligned_tilt_stacks_folder", obj.log_file_id);
@@ -169,7 +126,7 @@ classdef BinStacks < Module
                         [output_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).stacks_symbolic_links{j}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "aligned_tilt_stacks_folder", obj.log_file_id);    
                     end
                     
-                    if obj.configuration.run_ctf_phaseflip == true %&& obj.configuration.binnings(j) ~= obj.configuration.aligned_stack_binning
+                    if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
                         defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
                         splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
@@ -200,12 +157,8 @@ classdef BinStacks < Module
                         executeCommand(command, false, obj.log_file_id);
                         %TODO: put in ctf corrected stacks folder
                         if obj.configuration.binnings(j) > 1
-%                             ctf_corrected_stack_link_destination = strjoin(splitted_tilt_stack_path_name, ".");
-%                             createSymbolicLink(ctf_corrected_stack_destination, ctf_corrected_stack_link_destination, obj.log_file_id);
                             createSymbolicLinkInStandardFolder(obj.configuration, ctf_corrected_stack_destination, "ctf_corrected_binned_aligned_tilt_stacks_folder", obj.log_file_id, true);
                         else
-%                             ctf_corrected_stack_link_destination = obj.configuration.processing_path + string(filesep) + obj.configuration.ctf_corrected_aligned_tilt_stacks_folder + string(filesep) + splitted_tilt_stack_path_name(1) + string(filesep) + strjoin(splitted_tilt_stack_path_name, ".");
-%                             createSymbolicLink(ctf_corrected_stack_destination, ctf_corrected_stack_link_destination, obj.log_file_id);
                             createSymbolicLinkInStandardFolder(obj.configuration, ctf_corrected_stack_destination, "ctf_corrected_aligned_tilt_stacks_folder", obj.log_file_id, true);
                         end
                     end
@@ -220,7 +173,6 @@ classdef BinStacks < Module
                             + " -OutputFile " + ctf_corrected_tomogram_destination...
                             + " -TILTFILE " + tilt_file_destination...
                             + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning;
-                        
                         
                         if obj.configuration.set_up.gpu > 0
                             command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);

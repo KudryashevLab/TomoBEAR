@@ -86,7 +86,7 @@ time_file_id = fopen(string(pwd) + string(string(filesep)) + "TIME_LEFT", "w+");
 
 for i=1:NAngles
     iteration_begin = tic;
-    if mod(i-1, 10) == 0
+    if mod(i-1, 10) == 0 || i == NAngles
         fseek(iteration_file_id, 0, "bof");
         fprintf(iteration_file_id, "%d/%d", i + (NAngles * (obj.tag - 1)), NAngles * length(obj.partition.tiles));
     end

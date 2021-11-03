@@ -83,7 +83,6 @@ classdef (Abstract) Module
             % disp("INFO:CONFIGURATION...");
             % disp(configuration);
             
-            
             obj.dynamic_configuration = struct();
             
             field_names = fieldnames(obj.configuration);
@@ -94,6 +93,7 @@ classdef (Abstract) Module
             end
             % disp("INFO:INPUT_PATH " + input_path);
             % TODO: needs to be tested
+            % TODO: use own function for that already available
             if obj.configuration.processing_path(end) == "/"
                 obj.output_path = obj.configuration.processing_path + obj.configuration.pipeline_step_output_folder;
             else
@@ -123,19 +123,7 @@ classdef (Abstract) Module
             else
                 obj.field_names = obj.original_field_names;
             end
-            
-%             
-%             
-%             if ~isempty(obj.configuration.tomogram_indices)
-%                 % TODO: because of pipeline runner needs to do step 1, when
-%                 % other cases are handled and the status index is properly chosen then it should be ok again
-%                   obj.field_names = {obj.original_field_names{obj.configuration.tomogram_interval(1):1:obj.configuration.tomogram_interval(3)}};
-% %                 obj.field_names = {obj.original_field_names{obj.configuration.tomogram_interval(1):obj.configuration.tomogram_interval(2):obj.configuration.tomogram_interval(3)}};
-%             elseif 
-%             else
-%                 obj.field_names = obj.original_field_names;
-%             end
-            
+
             obj.i = obj.configuration.set_up.i;
             
             if obj.configuration.execution_method ~= "once"

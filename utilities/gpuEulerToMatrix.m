@@ -1,7 +1,7 @@
 function transformation_matrices = gpuEulerToMatrix(angles, varargin)
 
-defaultMatrixOperation = "crotation"; % "interpolation"
-defaultMatrixType = "homogeneous"; % "normal"
+defaultMatrixOperation = "crotation";
+defaultMatrixType = "homogeneous";
 defaultDataType = "single";
 defaultVolumeSize = 200;
 
@@ -34,9 +34,9 @@ for i = 1:size(angles, 1)
     tdrot = angles(i,1);
     tilt = angles(i,2);
     narot = angles(i,3);
-    tdrot = deg2rad(tdrot);%*pi/180;
-    narot = deg2rad(narot);%*pi/180;
-    tilt = deg2rad(tilt);%*pi/180;
+    tdrot = deg2rad(tdrot);
+    narot = deg2rad(narot);
+    tilt = deg2rad(tilt);
     
     costdrot = cos(tdrot);
     cosnarot = cos(narot);
@@ -55,7 +55,7 @@ for i = 1:size(angles, 1)
         transformation_matrices(((i - 1) * 4) + 3, 1) = sintdrot*sintilt;
         transformation_matrices(((i - 1) * 4) + 3, 2) = costdrot*sintilt;
         transformation_matrices(((i - 1) * 4) + 3, 3) = costilt;
-    elseif matrixOperation == "rotation" % the same as in wikipedia Mzxz^T
+    elseif matrixOperation == "rotation"
         transformation_matrices(((i - 1) * 4) + 1, 1) = costdrot*cosnarot - sintdrot*costilt*sinnarot;
         transformation_matrices(((i - 1) * 4) + 1, 2) = - costdrot*sinnarot - cosnarot*sintdrot*costilt;
         transformation_matrices(((i - 1) * 4) + 1, 3) = sintdrot*sintilt;

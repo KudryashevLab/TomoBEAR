@@ -351,9 +351,9 @@ classdef CreateStacks < Module
             executeCommand("newstack " + strjoin(output_stack_list, " ") + " " + stack_output_path, false, obj.log_file_id);
 
             if isfield(obj.configuration, "apix")
-                apix = obj.configuration.apix;
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
             else
-                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+                apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
             end
 
             executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path, false, obj.log_file_id);

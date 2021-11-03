@@ -3,25 +3,18 @@ if nargin <= 4
     execute = true;
 end
 if isfield(configuration, standard_folder)
-    
     standard_folder_path = configuration.processing_path + string(filesep)...
         + configuration.output_folder + string(filesep)...
         + configuration.(standard_folder);
     [path, name, extension] = fileparts(source);
     path_parts = strsplit(path, string(filesep));
-    
     % TODO: check for errors
     if ~exist(standard_folder_path + string(filesep)...
-            + path_parts(end), "dir") && standard_folder ~= "meta_data_folder" && standard_folder ~= "gain_correction_folder" && execute == true
+            + path_parts(end), "dir") && standard_folder ~= "meta_data_folder"...
+            && standard_folder ~= "gain_correction_folder" && execute == true
         [success, message, message_id] = mkdir(standard_folder_path + string(filesep)...
             + path_parts(end));
     end
-    
-    % TODO: remove if not needed
-    %     if standard_folder == "tilt_stacks_folder"
-    %         destination = standard_folder_path + string(filesep)...
-    %             + path_parts(end) + string(filesep) + path_parts(end) + ".st";
-    %     else
     if standard_folder == "motion_corrected_files_folder"...
             || standard_folder == "aligned_tilt_stacks_folder"...
             || standard_folder == "tilt_stacks_folder"...
@@ -57,7 +50,6 @@ if isfield(configuration, standard_folder)
         if fileExists(destination)
             delete(destination);
         end
-    
         [~, output] = createSymbolicLink(source, destination, log_file_id);
     else
         output = "";

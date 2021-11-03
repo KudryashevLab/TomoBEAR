@@ -1,5 +1,4 @@
 function min_and_max_tilt_angles = getMinAndMaxTiltAnglesFromTiltFile(configuration)
-
 tomograms = getTomograms(configuration, true);
 batchruntomo_folders = dir(configuration.processing_path + string(filesep)...
     + configuration.output_folder + string(filesep) + "*_batchruntomo_*");

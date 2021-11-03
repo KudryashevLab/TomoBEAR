@@ -1,5 +1,4 @@
 function tiltxf_file_paths = getTltxfFilePaths(configuration)
-
 original_mrcs = getOriginalMRCsFromStandardFolder(configuration);
 batchruntomo_folders = dir(configuration.processing_path + string(filesep)...
     + configuration.output_folder + string(filesep) + "*_batchruntomo_*");

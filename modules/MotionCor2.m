@@ -94,6 +94,14 @@ classdef MotionCor2 < Module
                     + " -Tilt " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).angles(1) + " " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).angles(2) - obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).angles(1));
             end
             
+            if obj.configuration.split_sum == true
+                motion_correction_arguments = motion_correction_arguments...
+                    + " -SplitSum 1";
+            else
+                motion_correction_arguments = motion_correction_arguments...
+                    + " -SplitSum 0";
+            end
+            
             
             % TODO: increase group for low dose images
             

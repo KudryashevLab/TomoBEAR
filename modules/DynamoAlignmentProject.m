@@ -364,12 +364,14 @@ classdef DynamoAlignmentProject < Module
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
                                     if previous_binning >= binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
                                     elseif previous_binning < binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
                                     end
                                 end
-                                
+%                                	if obj.configuration.as_boxes == true
+%                                     particles_path = particles_path + ".Boxes";
+%                                 end
                                 %                             if previous_binning == binning
                                 %
                                 %                             else
@@ -387,16 +389,16 @@ classdef DynamoAlignmentProject < Module
                         end
                         %TODO: needs to be tested if that is faster or make
                         %option for decision
-%                         if obj.configuration.as_boxes == 1
-%                             % dBoxes.convertSimpleData(char(particles_path),...
-%                             %     [char(particles_path) '.Boxes'],...
-%                             %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-%                             ownDbox(string(particles_path),string([char(particles_path) '.Boxes']));
-%                             
-%                             [status, message, messageid] = rmdir(char(particles_path), 's');
-%                             %                             new_table(:,1) = 1:length(new_table);
-%                             %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
-%                         end
+                        if obj.configuration.as_boxes == 1
+                            % dBoxes.convertSimpleData(char(particles_path),...
+                            %     [char(particles_path) '.Boxes'],...
+                            %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
+                            ownDbox(string(particles_path),string([char(particles_path) '.Boxes']));
+                            
+                            [status, message, messageid] = rmdir(char(particles_path), 's');
+                            %                             new_table(:,1) = 1:length(new_table);
+                            %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
+                        end
 %                         
                         if obj.configuration.use_noise_classes == true
                             for i = length(obj.configuration.selected_classes)+1:obj.configuration.classes
@@ -501,9 +503,9 @@ classdef DynamoAlignmentProject < Module
                                 end
                             end
                             if isfield(obj.configuration, "apix") && obj.configuration.apix ~= 0
-                                tomos.pix_size(i) = obj.configuration.apix * binning;
+                                tomos.pix_size(i) = obj.configuration.apix * obj.configuration.ft_bin * binning;
                             else
-                                tomos.pix_size(i) = obj.configuration.greatest_apix * binning;
+                                tomos.pix_size(i) = obj.configuration.greatest_apix * obj.configuration.ft_bin * binning;
                             end
                             tomos.tomo_size(i,:) = [width, height, obj.configuration.reconstruction_thickness / binning];
                             
@@ -992,7 +994,7 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     %                 end
                     
-                    while inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor
+                    while (inplane_sampling > atand(1/(size(template,1)/2)) / obj.configuration.atand_factor) || iterations == 0
                         %                     if skipped_iterations < iterations_to_skip
                         %                         %                         if obj.configuration.sampling == 0
                         %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
@@ -1478,7 +1480,7 @@ classdef DynamoAlignmentProject < Module
                     card.gpu_identifier_set = [];
                     card.how_many_processors = 1;
                 else
-                    card.gpu_identifier_set = obj.configuration.gpu;
+                    card.gpu_identifier_set = (obj.configuration.gpu-1)';
                     card.how_many_processors = 1;
                 end
                 
@@ -1523,9 +1525,13 @@ classdef DynamoAlignmentProject < Module
                     card.mra_r8 = 0;
                 end
                 if isfield(obj.configuration, "apix")
-                    apix = obj.configuration.apix;
+                    apix = obj.configuration.apix * obj.configuration.ft_bin;
                 else
-                    apix = obj.configuration.tomograms.tomogram_001.apix;
+                    if isfield(obj.configuration, "greatest_apix")
+                        apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
+                    else
+                        apix = obj.configuration.tomograms.tomogram_001.apix * obj.configuration.ft_bin;
+                    end
                 end
                 
                 card.apix = apix * binning;
@@ -1612,7 +1618,11 @@ classdef DynamoAlignmentProject < Module
             if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
                 dynamo_execute_project(char(project_name));
             else
-                dynamo_execute_project(char(string(project_name) + "_eo"));
+                if ~contains(string(project_name), "_eo")
+                    dynamo_execute_project(char(string(project_name) + "_eo"));
+                else
+                    dynamo_execute_project(char(string(project_name)));
+                end
             end
             %             fid = fopen(obj.output_path + filesep + "SUCCESS_" + binning, "w");
             %             fclose(fid);

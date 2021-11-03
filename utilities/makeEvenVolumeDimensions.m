@@ -1,5 +1,4 @@
 function volume_out = makeEvenVolumeDimensions(volume_in, mean_value)
-
 if mod(length(volume_in), 2) == 1
     % TODO: adjust for non cubic sizes
     volume_out = zeros(size(volume_in) + 1);

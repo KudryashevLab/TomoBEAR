@@ -41,7 +41,8 @@ classdef MetaData < Module
             if obj.configuration.parallel_execution == true
                 field_names = obj.field_names;
                 configuration = obj.configuration;
-                parfor i = 1:length(obj.field_names)
+               
+                for i = 1:length(obj.field_names) %par
                     tomograms{i} = struct();
                     field_name = field_names{i};
                     num_images_2 = [];
@@ -102,8 +103,8 @@ classdef MetaData < Module
                                 tomograms{i}.low_dose_frames = num_images_1;
                             end
                         end
-                        tomograms{i}.apix = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
-                        apix_list(i) = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1))) * configuration.ft_bin;
+                        tomograms{i}.apix = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1)));
+                        apix_list(i) = str2double(getPixelSizeFromHeader(configuration.tomograms.(field_name).file_paths(1)));
                     end
                 end
                 for i = 1:length(field_names)
@@ -170,8 +171,8 @@ classdef MetaData < Module
                         end
                     end
                     
-                    obj.dynamic_configuration.tomograms.(obj.field_names{i}).apix = str2double(getPixelSizeFromHeader(obj.configuration.tomograms.(obj.field_names{i}).file_paths(1))) * obj.configuration.ft_bin;
-                    obj.dynamic_configuration.apix_list(i) = str2double(getPixelSizeFromHeader(obj.configuration.tomograms.(obj.field_names{i}).file_paths(1))) * obj.configuration.ft_bin;
+                    obj.dynamic_configuration.tomograms.(obj.field_names{i}).apix = str2double(getPixelSizeFromHeader(obj.configuration.tomograms.(obj.field_names{i}).file_paths(1)));
+                    obj.dynamic_configuration.apix_list(i) = str2double(getPixelSizeFromHeader(obj.configuration.tomograms.(obj.field_names{i}).file_paths(1)));
                     
                     if isnan(obj.dynamic_configuration.greatest_apix) || obj.dynamic_configuration.greatest_apix < obj.dynamic_configuration.tomograms.(obj.field_names{i}).apix
                         obj.dynamic_configuration.greatest_apix = obj.dynamic_configuration.tomograms.(obj.field_names{i}).apix;
