@@ -1667,8 +1667,24 @@ classdef DynamoAlignmentProject < Module
             %             fid = fopen(obj.output_path + filesep + "SUCCESS_" + binning, "w");
             %             fclose(fid);
             
+            
+            
+            
             if obj.configuration.show_results == true
                 ddb([char(project_name) ':a:ref=*'], 'j', ['c' num2str(length(template)/2)]);
+            else
+                paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
+                alignment_folder = dir(paths{1} + filesep + "alignment_project*");
+                alignment_folder_splitted = strsplit(alignment_folder.name, "_");
+                iteration_path = dir(paths{1} + filesep + "*" + filesep + "*" + filesep + "results" + filesep + "ite_*");
+                tab_all_path = dir(string(iteration_path(end-1).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "*.tbl");
+                tables = {char(string(tab_all_path.folder) + string(filesep) + tab_all_path.name)};
+                dread(tab_all_path)
+                figure; tom = 1; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
+                figure; tom = 2; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
+                figure; tom = 3; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
+                figure; tom = 4; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
+                figure; tom = 5; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
             end
             
             cd(return_path);
