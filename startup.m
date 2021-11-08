@@ -20,7 +20,12 @@ end
 
 
 if ~isdeployed()
-    initializeEnvironment();
+    if fileExists("CONFIGURATION")
+        configuration_path = string(fread(fopen("CONFIGURATION"), "*char")');
+        initializeEnvironment(configuration_path);
+    else
+        initializeEnvironment();
+    end
 end
 
 clear project_path;

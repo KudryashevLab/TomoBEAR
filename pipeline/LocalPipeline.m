@@ -327,7 +327,7 @@ classdef LocalPipeline < Pipeline
                             continue;
                         end
                     elseif fileExists(failure_file_path) && merged_configuration.ignore_success_files == false
-                        disp("INFO: Aborting execution of bechamelsaucethe pipeline step (" + obj.pipeline_definition{i} + ") due to availability of a FAILURE file!");
+                        disp("INFO: Aborting execution of the pipeline step (" + obj.pipeline_definition{i} + ") due to availability of a FAILURE file!");
                         return;
                     else
                         %configuration_history.(pipelineDefinition{i}) = struct;

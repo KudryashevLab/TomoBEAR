@@ -6,6 +6,7 @@ unique_extensions = unique(extension);
 % TODO: extract possible extensions to default configuration
 unique_extensions(contains(unique_extensions, ".mrc")) = [];
 unique_extensions(contains(unique_extensions, ".tif")) = [];
+unique_extensions(contains(unique_extensions, ".eer")) = [];
 multiple_extensions = ~isempty(unique_extensions);
 end
 

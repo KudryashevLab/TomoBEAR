@@ -61,23 +61,28 @@ classdef DynamoAlignmentProject < Module
                         box_size = box_size + 1;
                     end
                     
+                    if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                        mask = dread(obj.configuration.mask_path);
+                        mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
+                    else
+                        % TODO:NOTE: introduce flag for doing iteration before
+                        % or after
+                        if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                            smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                            mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                        else
+                            smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                            mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                            mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                        end
+                    end
+                    
                     if box_size > 1
                         template = dynamo_crop(template, size(particle, 1));
                         mask = dynamo_crop(mask, size(particle, 1));
                     elseif box_size < 1
                         template = dynamo_embed(template,  size(particle, 1));
                         mask = dynamo_embed(mask,  size(particle, 1));
-                    end
-                    
-                    % TODO:NOTE: introduce flag for doing iteration before
-                    % or after
-                    if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                        smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                        mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
-                    else
-                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                        mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
-                        mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
                     end
                     
                     dwrite(template, template_em_files{1});
@@ -121,9 +126,16 @@ classdef DynamoAlignmentProject < Module
                             tables{i} = char(string(tab_all_path(end).folder) + string(filesep) + tab_all_path(end).name);
                         end
                         
-                        mask_em_path = dir(string(paths{1}) + filesep + "*/*_eo/settings/mask.em");
-                        if isempty(mask_em_path)
-                            mask_em_path = dir(string(paths{1}) + filesep + "*/*/settings/mask.em");
+                        if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                            mask = dread(obj.configuration.mask_path);
+                            mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
+                            dwrite(mask, char(alignment_project_folder_path + string(filesep) + "mask.em"))
+                            mask_em_path = dir(char(alignment_project_folder_path + string(filesep) + "mask.em"));
+                        else
+                            mask_em_path = dir(string(paths{1}) + filesep + "*/*_eo/settings/mask.em");
+                            if isempty(mask_em_path)
+                                mask_em_path = dir(string(paths{1}) + filesep + "*/*/settings/mask.em");
+                            end
                         end
                         template_em_path = dir(string(iteration_path(end).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "average_ref_*.em");
                         
@@ -158,9 +170,16 @@ classdef DynamoAlignmentProject < Module
                             tables{i} = char(string(tab_all_path(end).folder) + string(filesep) + tab_all_path(end).name);
                         end
                         
-                        mask_em_path = dir(string(paths{1}) + filesep + "*/*_eo/settings/mask.em");
-                        if isempty(mask_em_path)
-                            mask_em_path = dir(string(paths{1}) + filesep + "*/*/settings/mask.em");
+                        if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                            mask = dread(obj.configuration.mask_path);
+                            mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
+                            dwrite(mask, char(alignment_project_folder_path + string(filesep) + "mask.em"))
+                            mask_em_path = dir(char(alignment_project_folder_path + string(filesep) + "mask.em"));
+                        else
+                            mask_em_path = dir(string(paths{1}) + filesep + "*/*_eo/settings/mask.em");
+                            if isempty(mask_em_path)
+                                mask_em_path = dir(string(paths{1}) + filesep + "*/*/settings/mask.em");
+                            end
                         end
                         template_em_path = dir(string(iteration_path(end).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "average_ref_*.em");
                         
@@ -315,11 +334,11 @@ classdef DynamoAlignmentProject < Module
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
                                     if previous_binning >= binning
-%                                         if binning > 1
-                                            dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-%                                         else
-%                                             dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', 0, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-%                                         end
+                                        %                                         if binning > 1
+                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+                                        %                                         else
+                                        %                                             dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', 0, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+                                        %                                         end
                                     elseif previous_binning < binning
                                         dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
                                     end
@@ -369,9 +388,9 @@ classdef DynamoAlignmentProject < Module
                                         dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
                                     end
                                 end
-%                                	if obj.configuration.as_boxes == true
-%                                     particles_path = particles_path + ".Boxes";
-%                                 end
+                                %                                	if obj.configuration.as_boxes == true
+                                %                                     particles_path = particles_path + ".Boxes";
+                                %                                 end
                                 %                             if previous_binning == binning
                                 %
                                 %                             else
@@ -399,7 +418,7 @@ classdef DynamoAlignmentProject < Module
                             %                             new_table(:,1) = 1:length(new_table);
                             %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
                         end
-%                         
+                        %
                         if obj.configuration.use_noise_classes == true
                             for i = length(obj.configuration.selected_classes)+1:obj.configuration.classes
                                 noise_template{i} = rand(size(template) * (previous_binning / binning)) * obj.configuration.noise_scaling_factor;
@@ -632,13 +651,20 @@ classdef DynamoAlignmentProject < Module
                     tables = {char(alignment_project_folder_path + string(filesep) + "table.tbl")};
                     dwrite(new_table, tables{1});
                     template = avge.average;
-                    if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                        mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                    if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                        mask = dread(obj.configuration.mask_path);
+                        mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
                     else
-                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                        mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
-                        mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                        % TODO:NOTE: introduce flag for doing iteration before
+                        % or after
+                        if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                            smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                            mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                        else
+                            smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                            mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                            mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                        end
                     end
                     mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
                     dwrite(mask, mask_em_files{1});
@@ -733,13 +759,20 @@ classdef DynamoAlignmentProject < Module
                             else
                                 new_table(end+1:end+length(sub_table),:) = sub_table;
                             end
-                            if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                                smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                            if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                                mask = dread(obj.configuration.mask_path);
+                                mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
                             else
-                                smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
-                                mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                                % TODO:NOTE: introduce flag for doing iteration before
+                                % or after
+                                if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                                    smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                    mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                                else
+                                    smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                    mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                    mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                                end
                             end
                             mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
                             dwrite(mask, mask_em_files{1});
@@ -780,13 +813,20 @@ classdef DynamoAlignmentProject < Module
                         dwrite(template_em_files{1}, char(alignment_project_folder_path + string(filesep) + "average.em"));
                         mask_em_files = {mask_em_files{1}};
                     else
-                        if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                            smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                            mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                        if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                            mask = dread(obj.configuration.mask_path);
+                            mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
                         else
-                            smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                            mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
-                            mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                            % TODO:NOTE: introduce flag for doing iteration before
+                            % or after
+                            if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                                smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                            else
+                                smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                            end
                         end
                         mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
                         dwrite(mask, mask_em_files{1});

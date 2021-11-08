@@ -4,6 +4,7 @@
 # delete alls sym links in repository, needs to be run from repository folder
 # find -type l -delete
 DYNAMO_INITIALIZED
+CONFIGURATION
 
 tomoBEAR/
 

@@ -24,9 +24,9 @@ classdef TemplateMatchingPostProcessing < Module
             end
             
             if mod(size(rec_resampled,1),2) ~= 0
-                mask_erase = dynamo_ellipsoid((size(rec_resampled) + 1)/4, size(rec_resampled,1) + 1, (size(rec_resampled,1) + 1)/2, mask_gaussian_fall_off);
+                mask_erase = dynamo_ellipsoid((size(rec_resampled) + 1)*obj.configuration.exclusion_radius_box_size_ratio, size(rec_resampled,1) + 1, (size(rec_resampled,1) + 1)/2, mask_gaussian_fall_off);
             else
-                mask_erase = dynamo_ellipsoid(size(rec_resampled)/4, size(rec_resampled,1), size(rec_resampled,1)/2, mask_gaussian_fall_off);
+                mask_erase = dynamo_ellipsoid(size(rec_resampled)*obj.configuration.exclusion_radius_box_size_ratio, size(rec_resampled,1), size(rec_resampled,1)/2, mask_gaussian_fall_off);
             end
 
             binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);

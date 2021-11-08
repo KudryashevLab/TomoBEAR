@@ -42,7 +42,7 @@ classdef MetaData < Module
                 field_names = obj.field_names;
                 configuration = obj.configuration;
                
-                for i = 1:length(obj.field_names) %par
+                parfor i = 1:length(obj.field_names)
                     tomograms{i} = struct();
                     field_name = field_names{i};
                     num_images_2 = [];
@@ -57,6 +57,7 @@ classdef MetaData < Module
                         tomograms{i}.high_dose_frames = 1;
                     else
                         if configuration.tomograms.(field_name).tif ~= true
+                            [status_header, output_1] = system("header -s " + configuration.tomograms.(field_name).file_paths(1));
                             [status_header, output_1] = system("header -s " + configuration.tomograms.(field_name).file_paths(1));
                             size_output_1 = str2num(output_1);
                         else

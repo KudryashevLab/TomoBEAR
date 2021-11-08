@@ -88,7 +88,7 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
         end
     end
     
-    L = round((size(mask_erase,1)*configuration.exclusion_radius_box_size_ratio));
+    L = round((size(mask_erase,1)/2));
 
     tilt_max = dread(char(cc_folder + string(filesep) + "tilt.mrc"));
     tdrot_max = dread(char(cc_folder + string(filesep) + "tdrot.mrc"));
@@ -124,7 +124,7 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
 
         ar = round([0.5,0.5,0.5]+a);
         cc(ar(1)-L+1:ar(1)+L, ar(2)-L+1:ar(2)+L, ar(3)-L+1:ar(3)+L) =...
-            cc(ar(1)-L+1:ar(1)+L, ar(2)-L+1:ar(2)+L, ar(3)-L+1:ar(3)+L) .* (1-mask_erase);
+            cc(ar(1)-L+1:ar(1)+L, ar(2)-L+1:ar(2)+L, ar(3)-L+1:ar(3)+L) .* (1-mask_erase((size(mask_erase, 1)/2)+1-L:(size(mask_erase, 1)/2)+L, (size(mask_erase, 1)/2)+1-L:(size(mask_erase, 1)/2)+L, (size(mask_erase, 1)/2)+1-L:(size(mask_erase, 1)/2)+L));
 
         % TODO: perhaps interpolate
         tab_tomo(counter,7) = tdrot_max(round(a(1)),round(a(2)), round(a(3)));

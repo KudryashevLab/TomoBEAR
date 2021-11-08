@@ -802,7 +802,9 @@
         "rings_r1": 0,                              
         "rings_random_r1": 0,                       
         "dynamic_mask_r1": 0,
-        "citation": ""
+        "citation": "",
+        "mask_path": "",
+        "mask_apix": 1
     },
     "PolishParticlesAndEstimateResolution": {
         "execution_method": "once",
@@ -818,5 +820,10 @@
         "padding_policy": "noise",
         "normalization": "zm",
         "use_symmetry": true
+    },
+    "SPOC": {
+        "execution_method": "once",
+        "repository_path": "/home/nibalysc/Projects/public/SPOC",
+        "env": "spoc"
     }
 }
