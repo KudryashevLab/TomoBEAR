@@ -7,3 +7,6 @@ TomoBEAR
 
 ## Results
 
+# Contacts
+
+[Nikita Balyschew](mailto:nikita.balyschew@googlemail.com?subject=[GitHub]%20TomoBEAR)
