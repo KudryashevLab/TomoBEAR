@@ -279,6 +279,9 @@ classdef MotionCor2 < Module
                 if obj.configuration.fm_ref ~= ""
                     command = command...                    
                         + " -FmRef " + obj.configuration.fm_ref;
+                elseif extension == ".eer"
+                    command = command...                    
+                        + " -FmRef " + obj.configuration.eer_total_number_of_fractions / obj.configuration.eer_fraction_grouping;
                 else
                     command = command...                    
                         + " -FmRef " + last_frame;
