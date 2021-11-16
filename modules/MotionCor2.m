@@ -239,7 +239,9 @@ classdef MotionCor2 < Module
                 motion_correction_output = output_folder + string(filesep) + name + "_" + obj.configuration.output_postfix + ".stdout";
                 motion_correction_log = output_folder + string(filesep) + name + "_" + obj.configuration.output_postfix + ".log";
                 
-               [width, height, last_frame] = getHeightAndWidthFromHeader(mrc_list(i), obj.log_file_id);
+                if extension == ".tif" || extension == ".mrc" 
+                    [width, height, last_frame] = getHeightAndWidthFromHeader(mrc_list(i), obj.log_file_id);
+                end
 %                 % TODO: Redo in matlab style or use just pixel size flag
 %                 command = "header -s " + mrc_list(i) + " | cut -c17-";
 % %                 output_header{i} = executeCommand(command, false, obj.log_file_id);
@@ -253,9 +255,19 @@ classdef MotionCor2 < Module
                 if extension == ".tif"
                     command = obj.configuration.motion_correction_command...
                         + " -InTiff " + mrc_input;
-                else
+                elseif extension == ".mrc"
                     command = obj.configuration.motion_correction_command...
                         + " -InMrc " + mrc_input;
+                elseif extension == ".eer"
+                    command = obj.configuration.motion_correction_command...
+                        + " -InEer " + mrc_input + " -EerSampling " + obj.configuration.eer_sampling;
+                    if obj.configuration.fm_int_file ~= ""
+                        command = command + " -FmIntFile " + obj.configuration.fm_int_file;
+                    else
+                        fid = fopen(obj.output_path + filesep + "fraction.txt", "w");
+                        fprintf(fid, "%d %d %.6f", obj.configuration.eer_total_number_of_fractions, obj.configuration.eer_fraction_grouping, obj.configuration.eer_exposure_per_fraction);
+                        fclose(fid);
+                    end
                 end
 
                 command = command...

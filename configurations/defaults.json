@@ -248,7 +248,12 @@
         "skip": false,
         "citation": "",
         "citation_link": "",
-        "doi": ""
+        "doi": "",
+        "eer_sampling": 2,
+        "fm_int_file": "",
+        "eer_total_number_of_fractions": 576,
+        "eer_fraction_grouping": 16,
+        "eer_exposure_per_fraction": 0.006945
     },
     "CreateStacks": {
         "execution_method": "in_order",
