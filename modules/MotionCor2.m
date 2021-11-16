@@ -267,6 +267,7 @@ classdef MotionCor2 < Module
                         fid = fopen(obj.output_path + filesep + "fraction.txt", "w");
                         fprintf(fid, "%d %d %.6f", obj.configuration.eer_total_number_of_fractions, obj.configuration.eer_fraction_grouping, obj.configuration.eer_exposure_per_fraction);
                         fclose(fid);
+                        command = command + " -FmIntFile " + obj.output_path + filesep + "fraction.txt";
                     end
                 end
 
