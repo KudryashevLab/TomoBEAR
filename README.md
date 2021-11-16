@@ -1,12 +1,14 @@
-# TomoBEAR
-A full processing pipeline for tomographic cryo electron microscopy data
+In the following directions, replace MR/v98 by the directory on the target machine where MATLAB is installed, or MR by the directory where the MATLAB Runtime is installed.
 
- ![Simple pipeline](https://github.com/KudryashevLab/tomoBEAR/blob/main/images/pipeline.png?raw=true)
- 
-TomoBEAR 
+(1) Set the environment variable XAPPLRESDIR to this value:
 
-## Results
+MR/v98/X11/app-defaults
 
-# Contacts
 
-[Nikita Balyschew](mailto:nikita.balyschew@googlemail.com?subject=[GitHub]%20TomoBEAR)
+(2) If the environment variable LD_LIBRARY_PATH is undefined, set it to the following:
+
+MR/v98/runtime/glnxa64:MR/v98/bin/glnxa64:MR/v98/sys/os/glnxa64:MR/v98/sys/opengl/lib/glnxa64
+
+If it is defined, set it to the following:
+
+${LD_LIBRARY_PATH}:MR/v98/runtime/glnxa64:MR/v98/bin/glnxa64:MR/v98/sys/os/glnxa64:MR/v98/sys/opengl/lib/glnxa64

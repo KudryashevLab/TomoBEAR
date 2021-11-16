@@ -95,7 +95,7 @@
         "binnings": [16],
         "ignore_file_system_time_stamps": true,
         "automatic_filename_parts_recognition": true,
-        "angle_regex": "_([+-]*[\\d]*[.]+\\d+)[_.]",
+        "angle_regex": "_([+-]*\\d+[.]+\\d+)[_.]*",
         "name_regex": "([A-Za-z\\d_]+[A-Za-z]+)",
         "number_regex": "[_]*([\\d]+[_[\\d]*]*)_",
         "name_number_regex": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)",
