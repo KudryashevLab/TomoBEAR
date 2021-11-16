@@ -214,8 +214,6 @@ classdef DynamoAlignmentProject < Module
                                 tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + i + ".tbl");
                                 dwrite(sub_table, tables{i})
                             end
-                            
-                            
                         end
                         
                         mask_em_path = dir(string(paths{1}) + filesep + "*/*_eo/settings/mask.em");
@@ -658,8 +656,8 @@ classdef DynamoAlignmentProject < Module
                         % TODO:NOTE: introduce flag for doing iteration before
                         % or after
                         if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                            smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                            mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                            smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                            mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
                         else
                             smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
                             mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
@@ -717,9 +715,9 @@ classdef DynamoAlignmentProject < Module
                             if i == 1
                                 new_table = [];
                             end
+                            sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
                             if previous_binning/binning > 1
                                 
-                                sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
                                 sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
                                 sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
                                 sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
@@ -766,8 +764,8 @@ classdef DynamoAlignmentProject < Module
                                 % TODO:NOTE: introduce flag for doing iteration before
                                 % or after
                                 if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                                    smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                    mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                                    smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                    mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
                                 else
                                     smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
                                     mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
@@ -820,8 +818,8 @@ classdef DynamoAlignmentProject < Module
                             % TODO:NOTE: introduce flag for doing iteration before
                             % or after
                             if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                                smoothing_pixels = ((size(mask)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                mask = dynamo_ellipsoid(((size(mask) .* obj.configuration.radii_ratio) - smoothing_pixels), length(mask), length(mask)/2, smoothing_pixels);
+                                smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
                             else
                                 smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
                                 mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
@@ -1578,8 +1576,14 @@ classdef DynamoAlignmentProject < Module
                 card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_template_initial.sel'];
                 card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_table_initial.sel'];
                 card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_fmask_initial.sel'];
-                card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
-                card.file_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                if obj.configuration.mask_path ~= ""
+                    card.file_mask = mask_em_files{1};
+                    card.file_mask_classification = mask_em_files{1};
+
+                else
+                    card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                    card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
+                end
                 
                 save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
                 if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
@@ -1657,6 +1661,32 @@ classdef DynamoAlignmentProject < Module
             %             end
             if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
                 dynamo_execute_project(char(project_name));
+                visualizations_path = obj.output_path + filesep + "visualizations";
+                [SUCCESS, MESSAGE, MESSAGEID] = mkdir(obj.output_path + filesep + "visualizations");
+                paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
+                iteration_path = dir(paths{1} + filesep + "*" + filesep + "*" + filesep + "results" + filesep + "ite_*");
+                for h = 1:length(iteration_path)-1
+                    tab_all_path = dir(string(iteration_path(h).folder) + filesep + iteration_path(h).name + filesep + "averages" + filesep + "*.tbl");
+                    tables = {char(string(tab_all_path(1).folder) + string(filesep) + tab_all_path(1).name)};
+                    tbl = dread(tables{1});
+                    tomogram_numbers = unique(tbl(:,20));
+                    for i = 1:length(tomogram_numbers)
+                        f = figure('visible','off');
+                        tom = i;
+                        plot3(tbl(tbl(:, 20) == tom,24), tbl(tbl(:, 20) == tom,25), tbl(tbl(:, 20) == tom,26),'.');
+                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
+                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
+                        close(f);
+                        for j = 1:obj.configuration.classes
+                            cls = j;
+                            f = figure('visible','off');
+                            plot3(tbl(tbl(:, 20) == tom & tbl(:, 34) == cls,24), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls,25), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls,26),'.');
+                            saveas(f,visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
+                            saveas(f,visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                            close(f);
+                        end
+                    end
+                end
             else
                 if ~contains(string(project_name), "_eo")
                     dynamo_execute_project(char(string(project_name) + "_eo"));
@@ -1670,22 +1700,12 @@ classdef DynamoAlignmentProject < Module
             
             
             
-%             if obj.configuration.show_results == true
-%                 ddb([char(project_name) ':a:ref=*'], 'j', ['c' num2str(length(template)/2)]);
-%             else
-%                 paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
-%                 alignment_folder = dir(paths{1} + filesep + "alignment_project*");
-%                 alignment_folder_splitted = strsplit(alignment_folder.name, "_");
-%                 iteration_path = dir(paths{1} + filesep + "*" + filesep + "*" + filesep + "results" + filesep + "ite_*");
-%                 tab_all_path = dir(string(iteration_path(end-1).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "*.tbl");
-%                 tables = {char(string(tab_all_path.folder) + string(filesep) + tab_all_path.name)};
-%                 dread(tab_all_path)
-%                 figure; tom = 1; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
-%                 figure; tom = 2; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
-%                 figure; tom = 3; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
-%                 figure; tom = 4; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
-%                 figure; tom = 5; plot3(tbl1(tbl1(:, 20) == tom,24), tbl1(tbl1(:, 20) == tom,25), tbl1(tbl1(:, 20) == tom,26),'.');
-%             end
+            %             if obj.configuration.show_results == true
+            %                 ddb([char(project_name) ':a:ref=*'], 'j', ['c' num2str(length(template)/2)]);
+            %             else
+            %
+            
+            %             end
             
             cd(return_path);
             %             previous_binning = binning;

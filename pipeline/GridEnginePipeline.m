@@ -1,6 +1,6 @@
-classdef SlurmPipeline < Pipeline
+classdef GridEnginePipeline < Pipeline
     methods
-        function obj = SlurmPipeline(configuration_path, default_configuration_path)
+        function obj = GridEnginePipeline(configuration_path, default_configuration_path)
             if nargin == 0
                 configuration_path = "";
                 default_configuration_path = "";
@@ -16,7 +16,7 @@ classdef SlurmPipeline < Pipeline
         end
         
         function execute(obj, tomogram_begin, tomogram_end, pipeline_ending_step)
-            disp("INFO: Executing pipeline on slurm...");
+            disp("INFO: Executing pipeline on grid engine...");
             
             if ~isempty(obj.default_configuration)
                 configuration = obj.initializeDefaults();
@@ -52,7 +52,7 @@ classdef SlurmPipeline < Pipeline
             
             output_path = processing_path + string(filesep) + configuration.general.output_folder;
             
-            pipeline_log_file_path = output_path + string(filesep) + "slurm_pipeline.log";
+            pipeline_log_file_path = output_path + string(filesep) + "grid_engine_pipeline.log";
             
             if fileExists(pipeline_log_file_path)
                 log_file_id = fopen(pipeline_log_file_path, "a");
@@ -96,8 +96,8 @@ classdef SlurmPipeline < Pipeline
                     end
                     pipeline_steps = length(pipeline_definition);
                 end
-                    
-                    
+                
+                
                 for i = 1:pipeline_steps
                     if (i == 1 && obj.pipeline_definition{i} == "general")
                         continue;
@@ -111,7 +111,7 @@ classdef SlurmPipeline < Pipeline
                     else
                         node = "";
                     end
-
+                    
                     job_ids = [];
                     
                     gpu_counter = 0;
@@ -135,12 +135,12 @@ classdef SlurmPipeline < Pipeline
                         if isfield(merged_configuration, "execution_method")...
                                 && merged_configuration.execution_method == "once"
                             if configuration.general.jobs_per_node == 1 && configuration.general.gpus_per_node > 1
-                            	gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
+                                gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
                                 gpu_counter = gpu_counter + 1;
                             else
-                            	gpu = -1;
+                                gpu = -1;
                             end
-                            [job_ids, first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, obj.pipeline_definition{i}, node, gpu);
+                            [job_ids, first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, node, gpu);
                         elseif isfield(merged_configuration, "execution_method")...
                                 && (merged_configuration.execution_method == "in_order"...
                                 || merged_configuration.execution_method == "sequential"...
@@ -152,7 +152,7 @@ classdef SlurmPipeline < Pipeline
                                 else
                                     gpu = -1;
                                 end
-                                [job_ids(end + 1: end + configuration.general.jobs_per_node), first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, (j * configuration.general.jobs_per_node) + 1, min(dynamic_configuration.tomograms_count,(j * configuration.general.jobs_per_node) + configuration.general.jobs_per_node), i - 1, obj.pipeline_definition{i}, node, gpu);
+                                [job_ids(end + 1: end + configuration.general.jobs_per_node), first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, (j * configuration.general.jobs_per_node) + 1, min(dynamic_configuration.tomograms_count,(j * configuration.general.jobs_per_node) + configuration.general.jobs_per_node), i - 1, node, gpu);
                                 current_node = current_node + 1;
                                 if ~isempty(obj.configuration.general.nodes)
                                     node = obj.configuration.general.nodes(mod(current_node, nodes_length)+1);
@@ -161,21 +161,21 @@ classdef SlurmPipeline < Pipeline
                                 end
                             end
                             if configuration.general.jobs_per_node == 1 && configuration.general.gpus_per_node > 1
-                            	gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
+                                gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
                                 gpu_counter = gpu_counter + 1;
                             else
                                 gpu = -1;
                             end
-                            [job_ids(end + 1), first_step_to_execute] = obj.queueJobs(configuration, job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, obj.pipeline_definition{i}, node, gpu);
+                            [job_ids(end + 1), first_step_to_execute] = obj.queueJobs(configuration, job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, node, gpu);
                         elseif isfield(merged_configuration, "execution_method") && merged_configuration.execution_method == "control"
                             if configuration.general.jobs_per_node == 1 && configuration.general.gpus_per_node > 1
-                            	gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
+                                gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
                                 gpu_counter = gpu_counter + 1;
                             else
                                 gpu = -1;
                             end
                             
-                            [job_ids, first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, obj.pipeline_definition{i}, node, gpu);
+                            [job_ids, first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, node, gpu);
                             disp("INFO: Stopping execution of further pipeline steps due to reaching control point.");
                             return;
                         else
@@ -203,7 +203,7 @@ classdef SlurmPipeline < Pipeline
             disp("INFO: Queing finished!");
         end
         
-        function [job_ids, first_step_to_execute] = queueJobs(obj, configuration, previous_job_ids, first_step_to_execute, starting_tomogram, ending_tomogram, ending_step, step_name, node, gpu)
+        function [job_ids, first_step_to_execute] = queueJobs(obj, configuration, previous_job_ids, first_step_to_execute, starting_tomogram, ending_tomogram, ending_step, node, gpu)
             execute = configuration.general.slurm_execute;
             job_ids = [];
             if nargin == 2
@@ -211,112 +211,62 @@ classdef SlurmPipeline < Pipeline
             end
             
             if configuration.general.pipeline_location ~= ""
-                sbatch_wrapper = configuration.general.pipeline_location + string(filesep) + configuration.general.sbatch_wrapper;
+                qsub_wrapper = configuration.general.pipeline_location + string(filesep) + configuration.general.qsub_wrapper;
                 pipeline_executable = configuration.general.pipeline_location + string(filesep) + configuration.general.pipeline_executable;
             else
                 current_dir = string(pwd) + string(filesep);
-                sbatch_wrapper = current_dir + configuration.general.sbatch_wrapper;
+                qsub_wrapper = current_dir + configuration.general.qsub_wrapper;
                 pipeline_executable = current_dir + configuration.general.pipeline_executable;
             end
             
-            command = sbatch_wrapper;
+            command = qsub_wrapper;
             
-            command = command + " --job-name=" + step_name + " ";
+            command = command + " -P " + configuration.general.project_name + " ";
             
-            if configuration.general.slurm_partition ~= ""
-                command = command + " --partition=" + configuration.general.slurm_partition + " ";
+            command = command + " -N " + step_name + " ";
+            
+            if configuration.general.email ~= ""
+                command = command + " -m ea -M " + configuration.general.email + " ";
+            end
+            
+            if configuration.general.ge_queue ~= ""
+                command = command + " -q " + configuration.general.ge_queue + " ";
             else
                 command = command + " ";
             end
             
-            if configuration.general.slurm_constraint ~= ""
-                command = command + " --constraint=" + configuration.general.slurm_constraint + " ";
+            if configuration.general.ge_processing_environment ~= "" || configuration.general.ge_processing_elements > 0
+                command = command + " -pe " + configuration.general.ge_processing_environment + " " + configuration.general.ge_processing_elements + " ";
             else
                 command = command + " ";
             end
 
-            if configuration.general.slurm_qos ~= ""
-                command = command + " --qos=" + configuration.general.slurm_qos + " ";
+            if configuration.general.ge_time ~= ""
+                command = command + " -l h_rt=" + configuration.general.ge_time + " ";
+                command = command + " -l s_rt=" + configuration.general.ge_time + " ";
             else
                 command = command + " ";
             end
 
-            if configuration.general.slurm_gres ~= ""
-                command = command + " --gres=" + configuration.general.slurm_gres + " ";
+            if configuration.general.ge_memory_per_processing_element_in_gb ~= ""
+                command = command + " -l h_vmem=" + configuration.general.ge_memory_per_processing_element_in_gb + "GB ";
             else
                 command = command + " ";
             end
-            
-            if configuration.general.slurm_gpus > 0
-                command = command + " --gpus=" + configuration.general.slurm_gpus + " ";
+
+            if configuration.general.ge_flags ~= ""
+                command = command + " " + configuration.general.ge_flags + " ";
             else
                 command = command + " ";
-            end
-            
-            % TODO: rename slurm_time
-            if configuration.general.slurm_time ~= ""
-                command = command + " --time=" + configuration.general.time + " ";
-            else
-                command = command + " ";
-            end
-            
-            if configuration.general.slurm_nodes > 0
-                command = command + " --nodes=" + configuration.general.slurm_nodes + " ";
-            else
-                command = command + " ";
-            end
-            
-            if configuration.general.slurm_node_list ~= ""
-                command = command + " --nodelist=" + configuration.general.slurm_node_list + " ";
-            else
-                command = command + " ";
-            end
-            
-            if node ~= ""
-                command = command + " --nodelist=" + node + " ";
-            else
-                command = command + " ";
-            end
-            
-            if configuration.general.slurm_exclusive == true
-            	command = command + " --exclusive ";
-            else
-            	command = command + " ";
-            end
-            
-            if configuration.general.slurm_nice > 0
-            	command = command + " --nice=" + configuration.general.slurm_nice + " ";
-            else
-            	command = command + " ";
-            end
-            
-            if configuration.general.slurm_mem_per_gpu_in_gb > 0
-            	command = command + " --mem-per-gpu=" + configuration.general.slurm_mem_per_gpu_in_gb + "GB ";
-            else
-            	command = command + " ";
-            end
-            if configuration.general.slurm_gpus_per_task > 0
-            	command = command + " --gpus-per-task=" + configuration.general.slurm_gpus_per_task + " ";
-            else
-            	command = command + " ";
-            end
-            
-            if configuration.general.slurm_flags ~= ""
-            	command = command + " " + configuration.general.slurm_flags + " ";
-            else
-            	command = command + " ";
             end
             pipeline_executable_string = pipeline_executable + " local " + obj.configuration_path + " " + obj.default_configuration_path + " " + starting_tomogram + " " + ending_tomogram + " " + ending_step;
             
-%           if gpu ~= -1
-                pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location;
-%           end
+            pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location;
             
             if first_step_to_execute == true
                 command = command + pipeline_executable_string;
                 if execute == true
                     [status, output] = system(command);
-                    %                     job_ids(end + 1) = str2num(strtrim(output));
                 else
                     disp(command);
                     output = "-1";
@@ -324,7 +274,7 @@ classdef SlurmPipeline < Pipeline
                 first_step_to_execute = false;
             else
                 if length(previous_job_ids) > 1
-                    command = command + " --dependency=afterok:" + strjoin(strsplit(num2str(previous_job_ids)), ":") + " ";
+                    command = command + " -V -b n -cwd -w e -W depend=afterok:" + strjoin(strsplit(num2str(previous_job_ids)), ":") + " ";
                     command = command + pipeline_executable_string;
                     if execute == true
                         [status, output] = system(command);
@@ -333,7 +283,7 @@ classdef SlurmPipeline < Pipeline
                         output = "-1";
                     end
                 elseif length(previous_job_ids) == 1
-                    command = command + " --dependency=afterok:" + num2str(previous_job_ids) + " ";
+                    command = command + " -V -b n -cwd -w e -W depend=afterok:" + num2str(previous_job_ids) + " ";
                     command = command + pipeline_executable_string;
                     if execute == true
                         [status, output] = system(command);
@@ -342,23 +292,21 @@ classdef SlurmPipeline < Pipeline
                         output = "-1";
                     end
                 elseif length(previous_job_ids) == 0
-                    command = command + pipeline_executable_string;
+                    command = command + " -V -b n -cwd -w e "  + pipeline_executable_string;
                     if execute == true
                         [status, output] = system(command);
                     else
                         disp(command);
                         output = "-1";
                     end
-                end 
-            end
-%             if execute == true
-                try
-                    job_ids(end + 1) = str2num(output);
-                catch exception
-                    disp(output);
-                    error(exception.message);
                 end
-%             end
+            end
+            try
+                job_ids(end + 1) = str2num(output);
+            catch exception
+                disp(output);
+                error(exception.message);
+            end
         end
         
         function configuration = loadJSON(obj, file_path)

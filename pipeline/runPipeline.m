@@ -148,6 +148,40 @@ elseif string(compute_environment) == "slurm"
     else
         pipeline.execute(starting_tomogram, ending_tomogram, step);
     end
+elseif string(compute_environment) == "grid"
+    if nargin == 3
+        strating_tomogram = -1;
+        ending_tomogram = -1;
+        step = -1;
+    end
+    %if isdeployed()
+    % TODO: think of passing project_path to initializeEnvironment
+    %global environmentProperties;
+    %environmentProperties = initializeEnvironment(default_configuration_path);
+    %end
+    %% PIPELINE GENERATION
+    if nargin == 1
+        pipeline = GridEnginePipeline();
+    elseif nargin == 2
+        pipeline = GridEnginePipeline(configuration_path);
+    elseif nargin >= 3
+        if nargin > 3
+            disp("WARNING: Too many input arguments.");
+        end
+        pipeline = GridEnginePipeline(configuration_path, default_configuration_path);
+    end
+    
+    %% PRINT GENERATED PIPELINE
+    pipeline.print();
+    %% PIPELINE EXECUTION
+    % TODO: make a compatibility layer for different shells like ksh, zsh, csh,
+    % tcsh, bash... perhaps better to write most of the stuff in matlab
+    % language
+    if nargin <= 3
+        pipeline.execute()
+    else
+        pipeline.execute(starting_tomogram, ending_tomogram, step);
+    end
 else
     error("ERROR: unknown compute environment!");
 end

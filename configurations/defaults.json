@@ -30,7 +30,7 @@
         "data_path": "",
         "processing_path": "",
         "debug": false,
-        "project_name": "pipeline",
+        "project_name": "tomoBEAR",
         "project_description": "new_project description",
         "wipe_cache": false,
         "motion_correction_command": "", 
@@ -129,7 +129,18 @@
         "dose_order": [],
         "dt_crop_max_mb": 250000,
         "dt_crop_in_memory": 1,
-        "regenerate_load_modules_file": false
+        "regenerate_load_modules_file": false,
+        "ge_flags": "",
+        "qsub_wrapper": "qsub.sh",
+        "email": "",
+        "ge_queue": "",
+        "ge_processing_environment": "smp",
+        "ge_time": "",
+        "ge_memory_per_processing_element_in_gb": "",
+        "ge_gpus": 4,
+        "ge_processing_elements": 4,
+        "python_envs": "",
+        "use_conda": true
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -823,7 +834,9 @@
     },
     "SPOC": {
         "execution_method": "once",
-        "repository_path": "/home/nibalysc/Projects/public/SPOC",
-        "env": "spoc"
+        "repository_path": "",
+        "spoc_env": "spoc",
+        "numAsymUnits": 1,
+        "mask_path": ""
     }
 }

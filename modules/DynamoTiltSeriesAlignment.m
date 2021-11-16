@@ -69,6 +69,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     else
                         apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                     end
+                    
                     if obj.configuration.use_newstack_for_binning == true
                         u.enter.settingAcquisition.apix(apix * obj.configuration.pre_aligned_stack_binning);
                     else

@@ -397,6 +397,8 @@ if dynamic_configuration.tilt_stacks == false
         dynamic_configuration.tomograms.(tomogram_name).double_numbering = dynamic_configuration.original_files(tomogram_file_indices(1)).double_numbering;
         [folder, name, extension] = fileparts(dynamic_configuration.tomograms.(tomogram_name).name{1});
         dynamic_configuration.tomograms.(tomogram_name).tif = string(extension) == ".tif";
+        dynamic_configuration.tomograms.(tomogram_name).mrc = string(extension) == ".mrc";
+        dynamic_configuration.tomograms.(tomogram_name).eer = string(extension) == ".eer";
         current_tomogram = current_tomogram + 1;
     end
 else
