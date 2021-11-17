@@ -154,8 +154,8 @@ classdef SlurmPipeline < Pipeline
                                 end
                                 [job_ids(end + 1: end + configuration.general.jobs_per_node), first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, (j * configuration.general.jobs_per_node) + 1, min(dynamic_configuration.tomograms_count,(j * configuration.general.jobs_per_node) + configuration.general.jobs_per_node), i - 1, obj.pipeline_definition{i}, node, gpu);
                                 current_node = current_node + 1;
-                                if ~isempty(obj.configuration.general.nodes)
-                                    node = obj.configuration.general.nodes(mod(current_node, nodes_length)+1);
+                                if ~isempty(configuration.general.nodes)
+                                    node = configuration.general.nodes(mod(current_node, nodes_length)+1);
                                 else
                                     node = "";
                                 end

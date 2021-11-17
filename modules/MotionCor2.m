@@ -48,7 +48,8 @@ classdef MotionCor2 < Module
         function [motion_corrected_files, symbolic_link_standard_folder] = correctWithMotionCor2(obj, mrc_list)
             % TODO: support for frame integration files
             field_names = fieldnames(obj.configuration.tomograms);
-
+            % TODO: Handle unused variables
+            [path, name, extension] = fileparts(mrc_list{1});
             % TODO: Look up default gain value for motioncorr2
             disp("INFO: Getting ready to process...");
             disp("INFO: Processing micrographs in " + obj.configuration.output_folder);
@@ -80,8 +81,14 @@ classdef MotionCor2 < Module
                     + " " + obj.configuration.magnification_anisotropy_major_axis_angle;
             end
             motion_correction_arguments = motion_correction_arguments...
-                    + " -kV " + obj.configuration.keV...
+                    + " -kV " + obj.configuration.keV;
+            if extension == ".eer"
+                motion_correction_arguments = motion_correction_arguments + " "...
+                    + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
+            else
+                motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
+            end
             if obj.configuration.apply_dose_weighting
                 % TODO:NOTE: shouldn't the dose be a sum of frames
                 motion_correction_arguments = motion_correction_arguments...
@@ -265,7 +272,7 @@ classdef MotionCor2 < Module
                         command = command + " -FmIntFile " + obj.configuration.fm_int_file;
                     else
                         fid = fopen(obj.output_path + filesep + "fraction.txt", "w");
-                        fprintf(fid, "%d %d %.6f", obj.configuration.eer_total_number_of_fractions, obj.configuration.eer_fraction_grouping, obj.configuration.eer_exposure_per_fraction);
+                        fprintf(fid, "%d %d %.10f", obj.configuration.eer_total_number_of_fractions, obj.configuration.eer_fraction_grouping, obj.configuration.eer_exposure_per_fraction);
                         fclose(fid);
                         command = command + " -FmIntFile " + obj.output_path + filesep + "fraction.txt";
                     end
