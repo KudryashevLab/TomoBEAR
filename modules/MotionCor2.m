@@ -67,7 +67,6 @@ classdef MotionCor2 < Module
             motion_correction_arguments = motion_correction_arguments...
                 ...%+ " -Patch " + obj.configuration.patch...
                 + " -InFmMotion " + obj.configuration.in_fm_motion...
-                + " -SumRange " + obj.configuration.sum_range(1) + " " + obj.configuration.sum_range(2)...
                 + " -Outstack " + obj.configuration.outstack...
                 + " -Bft " + obj.configuration.b_factor(1) + " " + obj.configuration.b_factor(2);
             
@@ -80,8 +79,10 @@ classdef MotionCor2 < Module
                     + " " + obj.configuration.magnification_anisotropy_minor_scale...
                     + " " + obj.configuration.magnification_anisotropy_major_axis_angle;
             end
+            
             motion_correction_arguments = motion_correction_arguments...
                     + " -kV " + obj.configuration.keV;
+                
             if extension == ".eer"
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
@@ -89,10 +90,20 @@ classdef MotionCor2 < Module
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
             end
-            if obj.configuration.apply_dose_weighting
-                % TODO:NOTE: shouldn't the dose be a sum of frames
-                motion_correction_arguments = motion_correction_arguments...
-                    + " -FmDose " + obj.configuration.fm_dose;
+            
+            if obj.configuration.apply_dose_weighting == true
+                
+                if obj.configuration.fm_dose ~= 0
+                    % TODO:NOTE: shouldn't the dose be a sum of frames
+                    motion_correction_arguments = motion_correction_arguments...
+                        + " -FmDose " + obj.configuration.fm_dose;
+                end
+                
+                if ~isempty(obj.configuration.sum_range)
+                    motion_correction_arguments = motion_correction_arguments...
+                        + " -SumRange " + obj.configuration.sum_range(1) + " " + obj.configuration.sum_range(2);
+                end
+
             end
             
             % TODO: check if configuration.tilt even exists
