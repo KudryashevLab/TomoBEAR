@@ -107,7 +107,11 @@ classdef MotionCor2 < Module
                     motion_correction_arguments = motion_correction_arguments...
                         + " -SumRange " + obj.configuration.sum_range(1) + " " + obj.configuration.sum_range(2);
                 end
-
+            else
+                
+                motion_correction_arguments = motion_correction_arguments...
+                    + " -SumRange " + 0 + " " + 0;
+                
             end
             
             % TODO: check if configuration.tilt even exists
