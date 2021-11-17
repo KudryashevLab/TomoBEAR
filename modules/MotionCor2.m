@@ -84,7 +84,7 @@ classdef MotionCor2 < Module
                     + " -kV " + obj.configuration.keV;
             if extension == ".eer"
                 motion_correction_arguments = motion_correction_arguments + " "...
-                    + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
+                    + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
             else
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
