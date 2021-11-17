@@ -84,9 +84,6 @@ classdef MotionCor2 < Module
                     + " " + obj.configuration.magnification_anisotropy_major_axis_angle;
             end
             
-            motion_correction_arguments = motion_correction_arguments...
-                    + " -kV " + obj.configuration.keV;
-                
             if extension == ".eer"
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
@@ -96,6 +93,8 @@ classdef MotionCor2 < Module
             end
             
             if obj.configuration.apply_dose_weighting == true
+                motion_correction_arguments = motion_correction_arguments...
+                    + " -kV " + obj.configuration.keV;
                 
                 if obj.configuration.fm_dose ~= 0
                     % TODO:NOTE: shouldn't the dose be a sum of frames
