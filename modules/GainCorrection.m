@@ -125,7 +125,7 @@ classdef GainCorrection < Module
             gain_correction_image = summed_image / mean_value;
             % TODO: clean script if the method works
             summed_image_normalized = summed_image / frames;
-            method = "median";
+            method = obj.configuration.method;
             siz = size(gain_correction_image);
             pad_gain_correction_image = false;
             cut_on_frequency = siz(1) / 4;
@@ -134,7 +134,7 @@ classdef GainCorrection < Module
             sigma = 2;
             filter_size = 2 * ceil( 2 * sigma)+1;
             filter_domain = "spatial";
-            median_filter = [3 3];
+            median_filter = obj.configuration.median_filter;
             if pad_gain_correction_image
                 gain_correction_image = padarray(gain_correction_image,[round(size(gain_correction_image, 1) / padding_factor) round(size(gain_correction_image, 2) / padding_factor)],'both');
             end

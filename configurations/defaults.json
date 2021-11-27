@@ -140,7 +140,9 @@
         "ge_gpus": 4,
         "ge_processing_elements": 4,
         "python_envs": "",
-        "use_conda": true
+        "use_conda": true,
+        "mcr_location": "",
+        "defocus_limit_factor": 2.5
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -271,7 +273,6 @@
     },
     "GCTFCtfphaseflipCTFCorrection": {
         "execution_method": "parallel",
-        "defocus_limit_factor": 2.5,
         "slice_suffix": "view",
         "slice_folder": "slices",
         "gctf_correction_log_file": "gctf.log",
@@ -532,6 +533,8 @@
     "GainCorrection": {
         "execution_method": "once",
         "parallel_execution": true,
+        "method": "median",
+        "median_filter": [3, 3],
         "skip": false,
         "citation": ""
     },
@@ -710,7 +713,6 @@
         "split_by_y": true,
         "atand_factor": 2,
         "use_SUSAN": false,
-        "SUSAN_use_imod_style_ctf_correction": false,
         "cone_flip": 0,
         "checkpoint_module": true,
         "noise": 1,
@@ -820,7 +822,13 @@
         "dynamic_mask_r1": 0,
         "citation": "",
         "mask_path": "",
-        "mask_apix": 1
+        "mask_apix": 1,
+        "SUSAN_defocus_min": 10000,
+        "SUSAN_defocus_max": 50000,
+        "SUSAN_ctf_box_size":400,
+        "SUSAN_binning": 0,
+        "ctf_correction_method": "defocus_file",
+        "bandpass_method": "angles"
     },
     "PolishParticlesAndEstimateResolution": {
         "execution_method": "once",

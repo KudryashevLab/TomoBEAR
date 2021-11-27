@@ -309,7 +309,7 @@ classdef SlurmPipeline < Pipeline
             pipeline_executable_string = pipeline_executable + " local " + obj.configuration_path + " " + obj.default_configuration_path + " " + starting_tomogram + " " + ending_tomogram + " " + ending_step;
             
 %           if gpu ~= -1
-                pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location;
+                pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location + " " + configuration.general.mcr_location;
 %           end
             
             if first_step_to_execute == true

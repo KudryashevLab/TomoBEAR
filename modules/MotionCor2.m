@@ -27,21 +27,35 @@ classdef MotionCor2 < Module
                 [motion_corrected_files, symbolic_link_standard_folder] =  obj.correctWithAlignFrames(mrc_list);
             end
             
-            motion_corrected_dose_weighted_files = dir(obj.output_path + filesep + "*_DWS.mrc");
-            if ~isempty(motion_corrected_dose_weighted_files)
+            if ~isempty(dir(obj.output_path + filesep + "*_DW.mrc"))
+                motion_corrected_dose_weighted_files = dir(obj.output_path + filesep + "*_DW.mrc");
                 for i = 1:length(motion_corrected_dose_weighted_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i} = "" + motion_corrected_dose_weighted_files(i).folder + filesep + motion_corrected_dose_weighted_files(i).name;
                 end
                 obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
-            else
-                obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
             end
+            
+            if ~isempty(dir(obj.output_path + filesep + "*_DWS.mrc"))
+                motion_corrected_dose_weighted_sum_files = dir(obj.output_path + filesep + "*_DWS.mrc");
+                for i = 1:length(motion_corrected_dose_weighted_sum_files)
+                    obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{i} = "" + motion_corrected_dose_weighted_sum_files(i).folder + filesep + motion_corrected_dose_weighted_sum_files(i).name;
+                end
+            end
+            
+            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
             % TODO: check if next line is needed
             obj.dynamic_configuration.motioncor_output_postfix = obj.configuration.output_postfix;
             
-%             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
-%             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
+            if obj.configuration.split_sum == true
+                motion_corrected_even_files = dir(obj.output_path + filesep + "*_EVN.mrc");
+                motion_corrected_odd_files = dir(obj.output_path + filesep + "*_ODD.mrc");
+                for i = 1:length(motion_corrected_even_files)
+                    obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{i} = "" + motion_corrected_even_files(i).folder + filesep + motion_corrected_even_files(i).name;
+                    obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{i} = "" + motion_corrected_odd_files(i).folder + filesep + motion_corrected_odd_files(i).name;
+                end
+            end
             disp("INFO: Motion correction done!");
         end
         

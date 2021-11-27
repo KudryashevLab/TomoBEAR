@@ -182,6 +182,8 @@ elseif string(compute_environment) == "grid"
     else
         pipeline.execute(starting_tomogram, ending_tomogram, step);
     end
+elseif string(compute_environment) == "clone"
+    [status, output] = system("cp -as " + configuration_path + " " + default_configuration_path);
 else
     error("ERROR: unknown compute environment!");
 end

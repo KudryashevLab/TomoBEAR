@@ -5,6 +5,16 @@ classdef DynamoAlignmentProject < Module
         end
         
         function obj = process(obj)
+            if isfield(obj.configuration, "apix")
+                apix = obj.configuration.apix * obj.configuration.ft_bin;
+            else
+                if isfield(obj.configuration, "greatest_apix")
+                    apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
+                else
+                    apix = obj.configuration.tomograms.tomogram_001.apix * obj.configuration.ft_bin;
+                end
+            end
+            
             if isfield(obj.configuration, "binning")
                 binning = obj.configuration.binning;
             else
@@ -147,7 +157,7 @@ classdef DynamoAlignmentProject < Module
                             template_em_files{i} = char(string(template_em_path(i).folder) + string(filesep) + template_em_path(i).name);
                         end
                         template = dread(template_em_files{1});
-                    elseif length(tab_all_path) == length(obj.configuration.selected_classes)
+                    elseif length(tab_all_path) == length(obj.configuration.selected_classes) && isscalar(obj.configuration.selected_classes(1))
                         %                     new_table = [];
                         counter = 0;
                         for i = 1:length(tab_all_path)
@@ -192,27 +202,57 @@ classdef DynamoAlignmentProject < Module
                         end
                         template = dread(template_em_files{1});
                     else
-                        if any(length(tab_all_path) < obj.configuration.selected_classes)
-                            error("ERROR: some or all of the selected class(es) are not available in previous run!")
+                        if ~iscell(obj.configuration.selected_classes)
+                            if  any(length(tab_all_path) < obj.configuration.selected_classes)
+                                error("ERROR: some or all of the selected class(es) are not available in previous run!")
+                            end
+                        else
+                            table = dread(string(tab_all_path(1).folder) + filesep + tab_all_path(1).name);
+                            tomogram_indices = unique(table(:,20));
+                            for i = 1:length(obj.configuration.selected_classes)
+                                if  any(length(tab_all_path) < obj.configuration.selected_classes{i})
+                                    error("ERROR: some or all of the selected class(es) are not available in previous run for tomogram class entry " + i + " with tomogram index " + tomogram_indices(i) + "!")
+                                end
+                            end
                         end
-                        
                         tab_all_path = dir(string(iteration_path(end).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "*.tbl");
                         %                     new_table = [];
                         counter = 0;
-                        for i = 1:length(tab_all_path)
-                            if any(i == obj.configuration.selected_classes)
-                                table = dread(string(tab_all_path(i).folder) + filesep + tab_all_path(i).name);
-                                sub_table = table(table(:,34) == i,:);
-                                sub_tables{counter + 1} = sub_table;
-                                counter = counter + 1;
-                                particle_counter = particle_counter + length(sub_table);
-                                %                             if isempty(new_table)
-                                %                                 new_table = sub_table;
-                                %                             else
-                                %                                 new_table(end+1:length(sub_table),:) = sub_table;
-                                %                             end
-                                tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + i + ".tbl");
-                                dwrite(sub_table, tables{i})
+                        if ~iscell(obj.configuration.selected_classes)
+                            for i = 1:length(tab_all_path)
+                                if any(i == obj.configuration.selected_classes)
+                                    table = dread(string(tab_all_path(i).folder) + filesep + tab_all_path(i).name);
+                                    sub_table = table(table(:,34) == i,:);
+                                    sub_tables{counter + 1} = sub_table;
+                                    counter = counter + 1;
+                                    particle_counter = particle_counter + length(sub_table);
+                                    %                             if isempty(new_table)
+                                    %                                 new_table = sub_table;
+                                    %                             else
+                                    %                                 new_table(end+1:length(sub_table),:) = sub_table;
+                                    %                             end
+                                    tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + i + ".tbl");
+                                    dwrite(sub_table, tables{i})
+                                end
+                            end
+                        else
+                            for i = 1:length(unique(tomogram_indices))
+                                for j = 1:length(tab_all_path)
+                                    if any(j == obj.configuration.selected_classes{i})
+                                        table = dread(string(tab_all_path(j).folder) + filesep + tab_all_path(j).name);
+                                        sub_table = table(table(:,34) == j & table(:,20) == tomogram_indices(i),:);
+                                        sub_tables{counter + 1} = sub_table;
+                                        counter = counter + 1;
+                                        particle_counter = particle_counter + length(sub_table);
+                                        %                             if isempty(new_table)
+                                        %                                 new_table = sub_table;
+                                        %                             else
+                                        %                                 new_table(end+1:length(sub_table),:) = sub_table;
+                                        %                             end
+                                        tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + i + ".tbl");
+                                        dwrite(sub_table, tables{i})
+                                    end
+                                end
                             end
                         end
                         
@@ -223,9 +263,19 @@ classdef DynamoAlignmentProject < Module
                         
                         template_em_path = dir(string(iteration_path(end-1).folder) + filesep + iteration_path(end-1).name + filesep + "averages" + filesep + "average_ref_*.em");
                         
+                        
+                        if iscell(obj.configuration.selected_classes)
+                            selected_classes = [];
+                            for i = 1:length(obj.configuration.selected_classes)
+                                selected_classes = unique([selected_classes obj.configuration.selected_classes{i}']);
+                            end
+                        else
+                            selected_classes = obj.configuration.selected_classes;
+                        end
+                        
                         counter = 0;
                         for i = 1:length(template_em_path)
-                            if any(i == obj.configuration.selected_classes)
+                            if any(i == selected_classes)
                                 mask_em_files{counter + 1} = char(string(mask_em_path(1).folder) + string(filesep) + mask_em_path(1).name);
                                 counter = counter + 1;
                             end
@@ -233,11 +283,12 @@ classdef DynamoAlignmentProject < Module
                         
                         counter = 0;
                         for i = 1:length(template_em_path)
-                            if any(i == obj.configuration.selected_classes)
+                            if any(i == selected_classes)
                                 template_em_files{counter + 1} = char(template_em_path(i).folder + string(filesep) + template_em_path(i).name);
                                 counter = counter + 1;
                             end
                         end
+                        
                         template = dread(template_em_files{1});
                         
                     end
@@ -513,6 +564,8 @@ classdef DynamoAlignmentProject < Module
                             stack_path = string(aligned_tilt_stacks(i).folder) + filesep + string(aligned_tilt_stacks(i).name);
                             tomos.set_stack  (i, stack_path);
                             tomos.set_angles (i, char(string(tlt_files{tomos_id(i)}(1).folder) + filesep + tlt_files{tomos_id(i)}(1).name));
+                            % TODO: exclude line if ctf_correction_method
+                            % is not "defocus_file"
                             tomos.set_defocus(i, char(string(defocus_files{tomos_id(i)}(1).folder) + filesep + string(defocus_files{tomos_id(i)}(1).name)));
                             if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
                                 for j = 1:size(tomos.defocus, 1)
@@ -538,11 +591,46 @@ classdef DynamoAlignmentProject < Module
                         %                         dwrite(new_table,table_name);
                         particles_raw = char("particles_bin_" + binning + ".ptclsraw");
                         ptcls = SUSAN.Data.ParticlesInfo(new_table, tomos);
-                        if obj.configuration.SUSAN_use_imod_style_ctf_correction == true
+                        if obj.configuration.ctf_correction_method == "IMOD"
                             tmp_positions = ptcls.position(:,3);
                             ptcls.position(:,3) = 0;
                             ptcls.update_defocus(tomos);
                             ptcls.position(:,3) = tmp_positions;
+                        elseif obj.configuration.ctf_correction_method == "defocus_file"
+                        elseif obj.configuration.ctf_correction_method == "SUSAN"
+                            sampling = size(template, 1); % spacing between particles, in pixels
+                            grid_ctf = SUSAN.Data.ParticlesInfo.grid2D(sampling,tomos);
+                            grid_ctf.save( 'grid_ctf.ptclsraw');
+                            %% Create CtfEstimator
+                            ctf_est = SUSAN.Modules.CtfEstimator(obj.configuration.SUSAN_ctf_box_size);
+                            ctf_est.binning = obj.configuration.SUSAN_binning; % No binning (2^0).
+                            if obj.configuration.gpu == -1
+                                ctf_est.gpu_list = 0:gpuDeviceCount - 1;
+                            else
+                                ctf_est.gpu_list = obj.configuration.gpu - 1;
+                            end
+                            
+                            %ctf_est.gpu_list = [0 1 2 3]; % 4 GPUs available.
+                            
+                            ctf_est.resolution.min = obj.configuration.template_matching_binning * apix; % angstroms
+                            ctf_est.resolution.max = binning * apix;
+                            
+                            if isfield(obj.configuration, "global_lower_defocus_average_in_angstrom")
+                                ctf_est.defocus.min = configuration.global_lower_defocus_average_in_angstrom;
+                                ctf_est.defocus.max = configuration.global_upper_defocus_average_in_angstrom;
+                            elseif isfield(obj.configuration, "nominal_defocus_in_nm") && obj.configuration.nominal_defocus_in_nm ~= 0
+                                % TODO: could be also 2 numbers for lower and upper
+                                % limit or factors in different variable names
+                                ctf_est.defocus.min = round(obj.configuration.nominal_defocus_in_nm / obj.configuration.defocus_limit_factor) * 10^4;
+                                ctf_est.defocus.max = round(obj.configuration.nominal_defocus_in_nm * obj.configuration.defocus_limit_factor) * 10^4;
+                            else
+                                ctf_est.defocus.min = obj.configuration.SUSAN_defocus_min; % angstroms
+                                ctf_est.defocus.max = obj.configuration.SUSAN_defocus_max; % angstroms
+                            end
+                            
+                            tomos_ctf = ctf_est.estimate('ctf_grid', 'grid_ctf.ptclsraw',...
+                                tomos_name);
+                            tomos_ctf.save(tomos_name);
                         end
                         ptcls.save(particles_raw);
                         
@@ -1087,7 +1175,10 @@ classdef DynamoAlignmentProject < Module
                         obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
                         obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
                         obj.configuration.("cone_flip_r" + (iterations + 1)) = obj.configuration.cone_flip;
-                        
+                        if obj.configuration.bandpass_method == "angles"
+                            obj.configuration.("high_r" + (iterations + 1)) = 2;
+                            obj.configuration.("low_r" + (iterations + 1)) = 1/tand(obj.configuration.("is_r" + (iterations + 1)));
+                        end
                         inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
                         iterations = iterations + 1;
                     end
@@ -1097,11 +1188,12 @@ classdef DynamoAlignmentProject < Module
                     obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
                     obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
                     
-                    bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
-                    
-                    for i = 1:iterations
-                        obj.configuration.("high_r" + i) = 2;
-                        obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                    if obj.configuration.bandpass_method == "iterations"
+                        bandpass_step = (((size(template,1) / 2) / 2) - 3) / iterations;
+                        for i = 1:iterations
+                            obj.configuration.("high_r" + i) = 2;
+                            obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                        end
                     end
                     
                     %     dvput project d -sym c1
@@ -1562,15 +1654,7 @@ classdef DynamoAlignmentProject < Module
                     card.mra_r7 = 0;
                     card.mra_r8 = 0;
                 end
-                if isfield(obj.configuration, "apix")
-                    apix = obj.configuration.apix * obj.configuration.ft_bin;
-                else
-                    if isfield(obj.configuration, "greatest_apix")
-                        apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
-                    else
-                        apix = obj.configuration.tomograms.tomogram_001.apix * obj.configuration.ft_bin;
-                    end
-                end
+                
                 
                 card.apix = apix * binning;
                 card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_template_initial.sel'];
@@ -1579,7 +1663,7 @@ classdef DynamoAlignmentProject < Module
                 if obj.configuration.mask_path ~= ""
                     card.file_mask = mask_em_files{1};
                     card.file_mask_classification = mask_em_files{1};
-
+                    
                 else
                     card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
                     card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
@@ -1599,8 +1683,16 @@ classdef DynamoAlignmentProject < Module
                     card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/template_initial_ref_001.em'];
                     card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/table_initial_ref_001.tbl'];
                     %                 card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask.em'];
-                    card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
-                    card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
+                    
+                    if obj.configuration.mask_path ~= ""
+                        card.file_mask = mask_em_files{1};
+                        card.file_mask_classification = mask_em_files{1};
+                        
+                    else
+                        card.file_mask = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
+                        card.file_mask_classification = [char(alignment_project_folder_path) '/' char(project_name) '/settings/mask_ref_001.em'];
+                    end
+                    
                     save([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat'], 'card');
                     %                 end
                     dvcheck(char(project_name));

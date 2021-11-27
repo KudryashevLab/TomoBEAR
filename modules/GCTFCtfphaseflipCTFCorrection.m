@@ -138,6 +138,13 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     % optimization
                     lower_l = global_defocus_average_in_angstrom / 2;
                     upper_l = global_defocus_average_in_angstrom * 1.5;
+                    if ~isfield(dynamic_configuration, "global_lower_defocus_average_in_angstrom")
+                        dynamic_configuration.global_lower_defocus_average_in_angstrom = lower_l;
+                        dynamic_configuration.global_upper_defocus_average_in_angstrom = upper_l;
+                    else
+                        dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l;
+                        dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom + upper_l;
+                    end
                 end
                 disp("INFO: CALCULATED LIMITS: Lower Limit: " + lower_l + " Upper Limit: " + upper_l);
                 command = "CUDA_VISIBLE_DEVICES=" + (obj.configuration.set_up.gpu - 1) + " " + string(obj.configuration.ctf_correction_command)...
@@ -286,6 +293,8 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     end
                 end
             end
+            dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
+            dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
         end
         
         function obj = cleanUp(obj)
