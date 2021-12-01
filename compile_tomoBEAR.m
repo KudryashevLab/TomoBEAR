@@ -84,7 +84,8 @@ if build == true
         error("ERROR: not supported in this version of MATLAB, R2020b needed, please run the application compiler app!")
     end
 end
-system("./change_permissions_for_build.sh");
+system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh");
+system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/" + default_configuration.general.project_name);
 fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + "run_" + default_configuration.general.project_name + ".sh", "r+");
 counter = 1;
 while ~feof(fid)
