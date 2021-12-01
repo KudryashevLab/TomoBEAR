@@ -165,6 +165,10 @@ classdef BinStacks < Module
                                 createSymbolicLinkInStandardFolder(obj.configuration, ctf_corrected_stack_destination, "ctf_corrected_aligned_tilt_stacks_folder", obj.log_file_id, true);
                             end
                         end
+                        
+                        % TODO: add ccderaser to delete fiducials from
+                        % stacks or some other method
+                        
                         if isfield(obj.configuration, "reconstruct_tomograms") && obj.configuration.reconstruct_tomograms == true
                             disp("INFO: tomograms will be generated.");
                             ctf_corrected_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...

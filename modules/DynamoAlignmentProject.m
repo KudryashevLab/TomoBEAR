@@ -236,9 +236,11 @@ classdef DynamoAlignmentProject < Module
                                 end
                             end
                         else
+                            table_counter = 0;
                             for i = 1:length(unique(tomogram_indices))
                                 for j = 1:length(tab_all_path)
                                     if any(j == obj.configuration.selected_classes{i})
+                                        table_counter = table_counter + 1;
                                         table = dread(string(tab_all_path(j).folder) + filesep + tab_all_path(j).name);
                                         sub_table = table(table(:,34) == j & table(:,20) == tomogram_indices(i),:);
                                         sub_tables{counter + 1} = sub_table;
@@ -249,7 +251,7 @@ classdef DynamoAlignmentProject < Module
                                         %                             else
                                         %                                 new_table(end+1:length(sub_table),:) = sub_table;
                                         %                             end
-                                        tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + i + ".tbl");
+                                        tables{i} = char(alignment_project_folder_path + string(filesep) + "table_" + table_counter + "_tomogram_" + tomogram_indices(i) + "_class_" + j + ".tbl");
                                         dwrite(sub_table, tables{i})
                                     end
                                 end
@@ -282,14 +284,20 @@ classdef DynamoAlignmentProject < Module
                         end
                         
                         counter = 0;
+                        template = [];
+
                         for i = 1:length(template_em_path)
                             if any(i == selected_classes)
                                 template_em_files{counter + 1} = char(template_em_path(i).folder + string(filesep) + template_em_path(i).name);
                                 counter = counter + 1;
+                                if isempty(template)
+                                    template = dread(template_em_files{1});
+                                else
+                                    template = (template + dread(template_em_files{1})) / 2;
+                                end
                             end
                         end
                         
-                        template = dread(template_em_files{1});
                         
                     end
                 end
@@ -799,70 +807,144 @@ classdef DynamoAlignmentProject < Module
                             end
                         end
                     else
-                        for i = 1:length(obj.configuration.selected_classes)
-                            if i == 1
-                                new_table = [];
-                            end
-                            sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
-                            if previous_binning/binning > 1
-                                
-                                sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
-                                sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
-                                sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
-                                sub_table(:,4) = 0;
-                                sub_table(:,5) = 0;
-                                sub_table(:,6) = 0;
-                                if previous_binning >= binning
-                                    sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
-                                    sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
-                                    sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
-                                else
-                                    sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
-                                    sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
-                                    sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
+                        if ~iscell(obj.configuration.selected_classes)
+                            for i = 1:length(obj.configuration.selected_classes)
+                                if i == 1
+                                    new_table = [];
                                 end
-                            end
-                            %                         if previous_binning == binning
-                            %
-                            %                         else
-                            if previous_binning == binning
-                                template = dread(template_em_files{i});
-                            else
-                                if ~fileExists(char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em"))
-                                    avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_logical));
-                                    template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
-                                    dwrite(avge.average, template_em_files{i});
-                                    template = avge.average;
-                                else
-                                    template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                                sub_table = sub_tables{i}(sub_tables{i}(:,34) == obj.configuration.selected_classes(i),:);
+                                if previous_binning/binning > 1
+                                    
+                                    sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
+                                    sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
+                                    sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
+                                    sub_table(:,4) = 0;
+                                    sub_table(:,5) = 0;
+                                    sub_table(:,6) = 0;
+                                    if previous_binning >= binning
+                                        sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
+                                    else
+                                        sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
+                                    end
+                                end
+                                %                         if previous_binning == binning
+                                %
+                                %                         else
+                                if previous_binning == binning
                                     template = dread(template_em_files{i});
-                                end
-                            end
-                            %                         end
-                            
-                            if isempty(new_table)
-                                new_table = sub_table;
-                            else
-                                new_table(end+1:end+length(sub_table),:) = sub_table;
-                            end
-                            if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
-                                mask = dread(obj.configuration.mask_path);
-                                mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
-                            else
-                                % TODO:NOTE: introduce flag for doing iteration before
-                                % or after
-                                if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
-                                    smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                    mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
                                 else
-                                    smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
-                                    mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
-                                    mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                                    if ~fileExists(char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em"))
+                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_logical));
+                                        template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                                        dwrite(avge.average, template_em_files{i});
+                                        template = avge.average;
+                                    else
+                                        template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                                        template = dread(template_em_files{i});
+                                    end
                                 end
+                                %                         end
+                                
+                                if isempty(new_table)
+                                    new_table = sub_table;
+                                else
+                                    new_table(end+1:end+length(sub_table),:) = sub_table;
+                                end
+                                if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                                    mask = dread(obj.configuration.mask_path);
+                                    mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
+                                else
+                                    % TODO:NOTE: introduce flag for doing iteration before
+                                    % or after
+                                    if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                        mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                    else
+                                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                        mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                        mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                                    end
+                                end
+                                mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
+                                dwrite(mask, mask_em_files{1});
+                                
                             end
-                            mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
-                            dwrite(mask, mask_em_files{1});
-                            
+                        else
+                            for i = 1:length(selected_classes)
+                                if i == 1
+                                    new_table = [];
+                                end
+                                sub_table = [];
+                                for j = 1:length(sub_tables)
+                                    if isempty(sub_table)
+                                        sub_table = sub_tables{j}(sub_tables{j}(:,34) == selected_classes(i),:);
+                                    else
+                                        sub_table(end+1:end+length(sub_tables{j}(sub_tables{j}(:,34) == selected_classes(i),:)),:) = sub_tables{j}(sub_tables{j}(:,34) == selected_classes(i),:);
+                                    end
+                                end
+                                if previous_binning/binning > 1
+                                    
+                                    sub_table(:,24) = sub_table(:,24) + sub_table(:,4);
+                                    sub_table(:,25) = sub_table(:,25) + sub_table(:,5);
+                                    sub_table(:,26) = sub_table(:,26) + sub_table(:,6);
+                                    sub_table(:,4) = 0;
+                                    sub_table(:,5) = 0;
+                                    sub_table(:,6) = 0;
+                                    if previous_binning >= binning
+                                        sub_table(:,24) = (sub_table(:,24)*previous_binning/binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*previous_binning/binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*previous_binning/binning)+1;
+                                    else
+                                        sub_table(:,24) = (sub_table(:,24)*binning/previous_binning)+1;
+                                        sub_table(:,25) = (sub_table(:,25)*binning/previous_binning)+1;
+                                        sub_table(:,26) = (sub_table(:,26)*binning/previous_binning)+1;
+                                    end
+                                end
+                                %                         if previous_binning == binning
+                                %
+                                %                         else
+                                if previous_binning == binning
+                                    template = dread(template_em_files{i});
+                                else
+                                    if ~fileExists(char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em"))
+                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_logical));
+                                        template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                                        dwrite(avge.average, template_em_files{i});
+                                        template = avge.average;
+                                    else
+                                        template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                                        template = dread(template_em_files{i});
+                                    end
+                                end
+                                %                         end
+                                
+                                if isempty(new_table)
+                                    new_table = sub_table;
+                                else
+                                    new_table(end+1:end+length(sub_table),:) = sub_table;
+                                end
+                                if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""
+                                    mask = dread(obj.configuration.mask_path);
+                                    mask = dynamo_rescale(mask, obj.configuration.mask_apix, obj.configuration.greatest_apix * binning);
+                                else
+                                    % TODO:NOTE: introduce flag for doing iteration before
+                                    % or after
+                                    if obj.configuration.use_elliptic_mask == true && obj.configuration.classes > 1
+                                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                        mask = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                    else
+                                        smoothing_pixels = ((size(template)' .* obj.configuration.radii_ratio) .* obj.configuration.ellipsoid_smoothing_ratio)';
+                                        mask_sphere = dynamo_ellipsoid(((size(template) .* obj.configuration.radii_ratio) - smoothing_pixels), length(template), length(template)/2, smoothing_pixels);
+                                        mask = generateMaskFromTemplate(obj.configuration, template) .* mask_sphere;
+                                    end
+                                end
+                                mask_em_files = {char(alignment_project_folder_path + string(filesep) + "mask.em")};
+                                dwrite(mask, mask_em_files{1});
+                            end
                         end
                         
                         if obj.configuration.use_noise_classes == true

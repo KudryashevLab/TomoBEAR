@@ -142,7 +142,8 @@
         "python_envs": "",
         "use_conda": true,
         "mcr_location": "",
-        "defocus_limit_factor": 2.5
+        "defocus_limit_factor": 2.5,
+        "skip_data_check": false
     },
     "StopPipeline": {
         "execution_method": "control"
