@@ -221,7 +221,7 @@ classdef GridEnginePipeline < Pipeline
            
             command = qsub_wrapper;
            
-            command = command + " -P " + configuration.general.project_name + " ";
+%             command = command + " -P " + configuration.general.project_name + " ";
            
             command = command + " -N " + step_name + " ";
            

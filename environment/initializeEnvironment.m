@@ -147,5 +147,6 @@ if ~fileExists(default_configuration.general.pipeline_executable)
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable)
 end
+system("chmod ug+x " + default_configuration.general.qsub_wrapper)
 end
 
