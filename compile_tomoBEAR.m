@@ -85,7 +85,7 @@ if build == true
     end
 end
 system("./change_permissions_for_build.sh");
-fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + default_configuration.general.pipeline_executable, "r+");
+fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + "run_" + default_configuration.general.pipeline_executable, "r+");
 counter = 1;
 while ~feof(fid)
     text_line{counter} = string(fgets(fid));
