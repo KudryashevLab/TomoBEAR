@@ -1,9 +1,14 @@
-function results = compile_tomoBEAR(build_destination)
+function results = compile_tomoBEAR(build_destination, default_configuration_path)
 build = false;
 if nargin == 0
     build_destination = "cryo_et_pipeline";
+    default_configuration_path = "configurations/defaults.json";
     results = [];
 end
+
+configuration_parser = ConfigurationParser();
+[default_configuration, ~] = configuration_parser.parse(default_configuration_path);
+
 if build == true
     if ~verLessThan("matlab", "9.9") % R2020b
         opts = compiler.build.StandaloneApplicationOptions("pipeline/runPipeline.m");
@@ -80,7 +85,7 @@ if build == true
     end
 end
 system("./change_permissions_for_build.sh");
-fid = fopen("tomoBEAR/for_redistribution_files_only/run_tomoBEAR.sh", "r+");
+fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + default_configuration.general.pipeline_executable, "r+");
 counter = 1;
 while ~feof(fid)
     text_line{counter} = string(fgets(fid));
