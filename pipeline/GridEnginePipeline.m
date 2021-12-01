@@ -259,6 +259,13 @@ classdef GridEnginePipeline < Pipeline
             else
                 command = command + " ";
             end
+            
+            if node ~= ""
+                command = command + " -l h=" + node + " ";
+            else
+                command = command + " ";
+            end
+            
             pipeline_executable_string = pipeline_executable + " local " + obj.configuration_path + " " + obj.default_configuration_path + " " + starting_tomogram + " " + ending_tomogram + " " + ending_step;
            
             pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location + " " + configuration.general.mcr_location;
