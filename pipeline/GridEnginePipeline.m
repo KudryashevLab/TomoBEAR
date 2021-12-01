@@ -268,7 +268,7 @@ classdef GridEnginePipeline < Pipeline
             
             pipeline_executable_string = pipeline_executable + " local " + obj.configuration_path + " " + obj.default_configuration_path + " " + starting_tomogram + " " + ending_tomogram + " " + ending_step;
            
-            pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location + " " + configuration.general.mcr_location;
+            pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location + " " + configuration.general.mcr_location + " " + configuration.general.ld_library_path;
            
             if first_step_to_execute == true
                 command = command + " -V -b n -cwd -w e " + pipeline_executable_string;
