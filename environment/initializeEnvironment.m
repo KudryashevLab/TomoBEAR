@@ -119,7 +119,7 @@ if ~isdeployed
         end
         dip_initialise;
     end
-
+    
     project_sub_paths = {"dynamo", {"matlab", {"mbtools", {"src"}, "src", {"shorthands"}}, "mex", {"bin"}}, "utilities", "configuration", "json", "modules", "pipeline", "helper", {"gpu"}}; %, "extern", {"semaphore"}, "imod", "offxca", "database", "nn", "playground", {"matlab", {"astra"}}, "extern", {"av3", {"utils"}, "bol_scripts", "tom", {"Filtrans", "Geom"}, "irt", "flatten", "window2"}
     concatAndAddPathsRecursive(project_path, project_sub_paths, string(filesep));
     
@@ -128,8 +128,24 @@ if ~isdeployed
         fid = fopen("DYNAMO_INITIALIZED", "w+");
         fclose(fid);
     end
-    
     addpath(default_configuration.general.SUSAN_path);
+end
+if ~fileExists(default_configuration.general.pipeline_executable)
+    fid = fopen(default_configuration.general.pipeline_executable, "w+");
+    fprintf(fid, "%s\n", "#!/bin/bash");
+    fprintf(fid, "%s\n", "#https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself");
+    fprintf(fid, "%s\n", "if [ ""$#"" -ne 9 ]; then");
+    fprintf(fid, "\t%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )");
+    fprintf(fid, "%s\n", "else");
+    fprintf(fid, "\t%s\n", "SCRIPTPATH=""$8""");
+    fprintf(fid, "%s\n", "fi");
+    fprintf(fid, "%s\n", "export PATH=$SCRIPTPATH/dynamo/cuda/bin:$PATH");
+    fprintf(fid, "%s\n", "export PATH=" + default_configuration.general.SUSAN_path + "/+SUSAN/bin:$PATH");
+    fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
+    fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh $9 $1 $2 $3 $4 $5 $6 $7");
+    fclose(fid);
+    % TODO: add parameter to decide for whom to allow execution
+    system("chmod ug+x " + default_configuration.general.pipeline_executable)
 end
 end
 
