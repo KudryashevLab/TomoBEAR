@@ -281,7 +281,7 @@ classdef GridEnginePipeline < Pipeline
                 first_step_to_execute = false;
             else
                 if length(previous_job_ids) > 1
-                    command = command + " -V -b n -cwd -w e -W depend=afterok:" + strjoin(strsplit(num2str(previous_job_ids)), ":") + " ";
+                    command = command + " -V -b n -cwd -w e -hold_jid " + strjoin(strsplit(num2str(previous_job_ids)), ",") + " ";
                     command = command + pipeline_executable_string;
                     if execute == true
                         [status, output] = system(command);
@@ -290,7 +290,7 @@ classdef GridEnginePipeline < Pipeline
                         output = "-1";
                     end
                 elseif length(previous_job_ids) == 1
-                    command = command + " -V -b n -cwd -w e -W depend=afterok:" + num2str(previous_job_ids) + " ";
+                    command = command + " -V -b n -cwd -w e -hold_jid " + num2str(previous_job_ids) + " ";
                     command = command + pipeline_executable_string;
                     if execute == true
                         [status, output] = system(command);
