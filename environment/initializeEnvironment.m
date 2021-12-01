@@ -135,8 +135,7 @@ if ~fileExists(default_configuration.general.pipeline_executable)
     fprintf(fid, "%s\n", "#!/bin/bash");
     fprintf(fid, "%s\n", "#https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself");
     fprintf(fid, "%s\n", "if [ ""$#"" -ne 9 ]; then");
-    fprintf(fid, "\t%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )"""
-    );
+    fprintf(fid, "\t%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )""");
     fprintf(fid, "%s\n", "else");
     fprintf(fid, "\t%s\n", "SCRIPTPATH=""$8""");
     fprintf(fid, "%s\n", "fi");
