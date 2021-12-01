@@ -234,6 +234,12 @@ classdef GridEnginePipeline < Pipeline
             else
                 command = command + " ";
             end
+            
+            if configuration.general.ge_gpus > 0
+                command = command + " -l gpus=" + configuration.general.ge_gpus + " ";
+            else
+                command = command + " ";
+            end
            
             if configuration.general.ge_processing_environment ~= "" || configuration.general.ge_processing_elements > 0
                 command = command + " -pe " + configuration.general.ge_processing_environment + " " + configuration.general.ge_processing_elements + " ";
