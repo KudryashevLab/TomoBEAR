@@ -223,7 +223,7 @@ classdef GridEnginePipeline < Pipeline
            
 %             command = command + " -P " + configuration.general.project_name + " ";
            
-            command = command + " -N " + step_name + " ";
+            command = command + " -N " + configuration.general.project_name + " " + step_name + " ";
            
             if configuration.general.email ~= ""
                 command = command + " -m ea -M " + configuration.general.email + " ";
