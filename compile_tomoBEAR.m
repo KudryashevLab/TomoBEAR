@@ -91,7 +91,7 @@ counter = 1;
 while ~feof(fid)
     text_line{counter} = string(fgets(fid));
     if contains(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;")
-        if default_configuration.general.ld_library_path ~= ""
+        if default_configuration.general.ld_library_path == ""
             text_line{counter} = strrep(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;",...
                 "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.:${MCRROOT}/runtime/glnxa64 ;");
         else
