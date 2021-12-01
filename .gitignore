@@ -50,6 +50,8 @@ codegen
 *.jpg
 *.gif
 *.coverage
+*.e*
+*.o*
 
 tomoBEAR
 playgorund/

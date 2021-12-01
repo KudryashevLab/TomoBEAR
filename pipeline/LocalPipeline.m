@@ -356,6 +356,7 @@ classdef LocalPipeline < Pipeline
                                 % if merged_configuration.execution_method == "parallel"
                                 %     generatePool(merged_configuration.cpu_fraction, false, pool_folder);
                                 % elseif merged_configuration.execution_method == "in_order"
+                                disp("INFO:VARIABLE:merged_configuration.environment_properties.gpu_count: " + merged_configuration.environment_properties.gpu_count);
                                 generatePool(merged_configuration.environment_properties.gpu_count, false, pool_folder);
                                 % end
                             end
