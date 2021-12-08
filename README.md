@@ -1,7 +1,7 @@
 # TomoBEAR
 A full processing pipeline for tomographic cryo electron microscopy data
 
- ![Simple pipeline](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline.svg?raw=true)
+ ![Simple pipeline](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline.svg?raw=true#gh-light-mode-only)
  
 TomoBEAR 
 
