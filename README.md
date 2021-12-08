@@ -33,13 +33,15 @@ On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom as can be seen below
 
 Many thanks to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR) for giving the opportunity to work in such an interesting field.
 
-Many thanks to [Vaisli Mikirtumov](mailto:mikivasia@gmail.com?subject=[GitHub]%20TomoBEAR) for untired testing, reporting of bug and improvement suggestions.
+Many thanks to [Vaisli Mikirtumov](mailto:mikivasia@gmail.com?subject=[GitHub]%20TomoBEAR) for untired testing, reporting of bugs and improvement suggestions.
 
-Many thanks to the Buchmann family for supporting this project with their stipendia for PhD starters.
+Many thanks to the Buchmann family and [BMLS (Buchmann Institute for Molecular Life Sciences)](https://www.bmls.de) for supporting this project with their starters stipendia for PhD students.
 
-Many thanks to the DFG (Deutsche Forschungsgesellschaft) for funding the project.
+Many thanks to the [DFG (Deutsche Forschungsgesellschaft)](https://www.dfg.de) for funding the project.
 
-Many thanks to the Max Planck Institute of Biophysics in Hesse in Frankfurt for support.
+Many thanks to the [Max Planck Institute of Biophysics](https://www.biophys.mpg.de) in Hesse in Frankfurt for support.
+
+Many thanks to the Kudryashev scientific research group established in 2021 at the [MDC (Max-Delbrück-Center for Molecular Medicine)](https://www.biophys.mpg.de) in Berlin for testing and reporting of bugs.
 
 # Contacts
 [Misha Kudryashev (Principal Investigator)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)
