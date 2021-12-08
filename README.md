@@ -3,12 +3,14 @@ TomoBEAR is an configured automated full processing pipeline for tomographic cry
 
 In the following picture you can see a flow chart which visualizes which steps TomoBEAR will and can do for you in an automated and parallel manner. TomoBEAR supports single nodes with GPUs and also copmuter clusters through a queue manager like Slurm or SGE (Sun Grid Engine) at the moment.
 
-Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
+Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information. More information can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
 
 ![Schematic Pipeline Image Light Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_light_mode.svg#gh-light-mode-only)
 ![Schematic Pipeline Image Dark Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
  
 Orange processing steps in the flow chart are mandatory and must be executed by TomoBEAR. Yellow boxes are optional and can be activated if desired.
+
+In case of errors do not hesitate one of the provided persons in the mentioned in the contacts section below.
 
 # Results (preliminray)
 
