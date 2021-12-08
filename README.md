@@ -1,7 +1,7 @@
 # TomoBEAR
 TomoBEAR is an configured automated full processing pipeline for tomographic cryo electron microscopy data in the field of CryoEM based on best practices in the scientific research group of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR).
 
-In the following picture you can see a flow chart which visualizes which steps TomoBEAR will and can do for you in an automated and parallel manner. TomoBEAR supports single nodes with GPUs as also copmuter clusters through a queue manager like SLURM or SGE (Sun Grid Engine) at the moment.
+In the following picture you can see a flow chart which visualizes which steps TomoBEAR will and can do for you in an automated and parallel manner. TomoBEAR supports single nodes with GPUs and also copmuter clusters through a queue manager like Slurm or SGE (Sun Grid Engine) at the moment.
 
 Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
 
@@ -36,6 +36,8 @@ Many thanks to [Vaisli Mikirtumov](mailto:mikivasia@gmail.com?subject=[GitHub]%2
 Many thanks to the Buchmann family for supporting this project with their stipendia for PhD starters.
 
 Many thanks to the DFG (Deutsche Forschungsgesellschaft) for funding the project.
+
+Many thanks to the Max Planck Institute of Biophysics in Hesse in Frankfurt for support.
 
 # Contacts
 [Misha Kudryashev (Principal Investigator)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)
