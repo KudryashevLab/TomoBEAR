@@ -12,6 +12,8 @@ Orange processing steps in the flow chart are mandatory and must be executed by 
 
 # Results (preliminray)
 
+All results shown here have been achieved in an automated manner. The only manual task which needed to be done is chosing the classes for further processing in between the transition of different binning levels.
+
 ## EMPIAR-10064
 
 On the EMPIAR-10064 dataset TomoBEAR achieved 11.52 Angstrom as can be seen below.
@@ -41,5 +43,7 @@ Many thanks to the Max Planck Institute of Biophysics in Hesse in Frankfurt for 
 
 # Contacts
 [Misha Kudryashev (Principal Investigator)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)
+
 [Nikita Balyschew (Developer)](mailto:nikita.balyschew@gmail.com?subject=[GitHub]%20TomoBEAR)
+
 [Vaisli Mikirtumov (Application Engineer)](mailto:mikivasia@gmail.com?subject=[GitHub]%20TomoBEAR)
