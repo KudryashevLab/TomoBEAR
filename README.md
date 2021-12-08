@@ -12,6 +12,16 @@ Orange processing steps in the flow chart are mandatory and must be executed by 
 
 ## Results
 
-# Contacts
 
+
+# Acknowledgement
+
+Especially many thanks to [Vaisli Mikirtumov](mikivasia@gmail.com) for untired testing, reporting of bug and improvement suggestions.
+
+Many thanks to the Buchmann family for supporting this project with their stipendia for PhD starters.
+
+Also many thanks go to DFG (Deutsche Forschungsgesellschaft) for funding the project.
+
+# Contacts
+[Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)
 [Nikita Balyschew](mailto:nikita.balyschew@gmail.com?subject=[GitHub]%20TomoBEAR)
