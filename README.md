@@ -1,9 +1,12 @@
 # TomoBEAR
-A full processing pipeline for tomographic cryo electron microscopy data
+TomoBEAR is an automated full processing pipeline for tomographic cryo electron microscopy data in the field of CryoEM.
 
- ![Schematic Pipeline Image Light Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_light_mode.svg#gh-light-mode-only)![Schematic Pipeline Image Dark Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
+In the following picture you can see a flow chart which visualizes which steps TomoBEAR will and can do for you in an automated and parallel manner. TomoBEAR supports single nodes with GPUs as also copmuter clusters through a queue manager like SLURM or SGE (Sun Grid Engine) at the moment.
+
+![Schematic Pipeline Image Light Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_light_mode.svg#gh-light-mode-only)
+![Schematic Pipeline Image Dark Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
  
-TomoBEAR 
+The Orange boxes in the flow chart are the ones which are 
 
 ## Results
 
