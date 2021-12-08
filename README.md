@@ -39,9 +39,9 @@ Many thanks to the Buchmann family and [BMLS (Buchmann Institute for Molecular L
 
 Many thanks to the [DFG (Deutsche Forschungsgesellschaft)](https://www.dfg.de) for funding the project.
 
-Many thanks to the [Max Planck Institute of Biophysics](https://www.biophys.mpg.de) in Hesse in Frankfurt for support.
+Many thanks to the [structural biology scientific research group of Werner Kühlbrandt](https://www.biophys.mpg.de/2207989/werner_kuehlbrandt) at the [Max Planck Institute of Biophysics (MPIBP)](https://www.biophys.mpg.de) and the [MPIBP](https://www.biophys.mpg.de) in Hesse in Frankfurt for support.
 
-Many thanks to the Kudryashev scientific research group established in 2021 at the [MDC (Max-Delbrück-Center for Molecular Medicine)](https://www.biophys.mpg.de) in Berlin for testing and reporting of bugs.
+Many thanks to the [Kudryashev scientific research group](https://www.mdc-berlin.de/kudryashev) established in 2021 at the [MDCMM (Max-Delbrück-Center for Molecular Medicine)](https://www.mdc-berlin.de) in Berlin for testing and reporting of bugs.
 
 # Contacts
 [Misha Kudryashev (Principal Investigator)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)
