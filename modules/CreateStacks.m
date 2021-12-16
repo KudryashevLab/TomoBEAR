@@ -7,6 +7,10 @@ classdef CreateStacks < Module
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             createStandardFolder(obj.configuration, "tilt_stacks_folder", false);
+            createStandardFolder(obj.configuration, "even_tilt_stacks_folder", false);
+            createStandardFolder(obj.configuration, "odd_tilt_stacks_folder", false);
+            createStandardFolder(obj.configuration, "dose_weighted_tilt_stacks_folder", false);
+            createStandardFolder(obj.configuration, "dose_weighted_sum_tilt_stacks_folder", false);
         end
         
         function obj = process(obj)
@@ -22,6 +26,18 @@ classdef CreateStacks < Module
             % high dose and low dose movies
             if ~isfield(obj.configuration, "tilt_stacks") || obj.configuration.tilt_stacks ~= true
                 motion_corrected_files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files;
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                    motion_corrected_dose_weighted_files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+                end
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+                    motion_corrected_dose_weighted_sum_files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files;
+                end
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                    motion_corrected_even_files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files;
+                end
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                    motion_corrected_odd_files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files;
+                end
             else
                 source = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).file_paths;
                 tilt_stack_name = field_names{obj.configuration.set_up.j};
@@ -242,11 +258,30 @@ classdef CreateStacks < Module
                     %                         medfilt_border_image = conv2(double(border_image), kernel, 'same');
                     %                         medfilt_border_image(medfilt_border_image < 0.0000000001) = 0;
                 end
+                path_parts = strsplit(obj.output_path, string(filesep));
+                % TODO: refactor to outside of loop
+                stack_output_path = obj.output_path + string(filesep) + path_parts(end) + ".st";
+                
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                    stack_output_path_even = obj.output_path + string(filesep) + path_parts(end) + "_even.st";
+                end
+                
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                    stack_output_path_odd = obj.output_path + string(filesep) + path_parts(end) + "_odd.st";
+                end
+                
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                    stack_output_path_dose_weighted = obj.output_path + string(filesep) + path_parts(end) + "_dose_weighted.st";
+                end
+                
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+                    stack_output_path_dose_weighted_sum = obj.output_path + string(filesep) + path_parts(end) + "_dose_weighted_sum.st";
+                end
+                
                 for i = 1:length(motion_corrected_files)
                     [path, name, extension] = fileparts(motion_corrected_files{i});
-                    path_parts = strsplit(obj.output_path, string(filesep));
-                    % TODO: refactor to outside of loop
-                    stack_output_path = obj.output_path + string(filesep) + path_parts(end) + ".st";
+                    
+                    
                     % TODO: check if needed here
                     [status_mkdir, message] = mkdir(obj.output_path);
                     if status_mkdir ~= 1
@@ -339,12 +374,33 @@ classdef CreateStacks < Module
                     end
                     dwrite(gather(normalized_micrograph), char(projection_output_path));
                     output_stack_list(i) = projection_output_path;
+                    
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                        output_stack_list_even(i) = string(motion_corrected_even_files{i});
+                    end
+                    
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                        output_stack_list_odd(i) = string(motion_corrected_odd_files{i});
+                    end
+                    
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                        output_stack_list_dose_weighted(i) = string(motion_corrected_dose_weighted_files{i});
+                    end
+                    
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")    
+                        output_stack_list_dose_weighted_sum(i) = string(motion_corrected_dose_weighted_sum_files{i});
+                    end
                 end
             else
                 error("ERROR: unknown normalization method!");
             end
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized = output_stack_list;
             obj.temporary_files = output_stack_list;
+            if length(output_stack_list) < obj.configuration.minimum_files
+                disp("INFO: Not enough MRC files to create stack!");
+                obj.status = 0;
+                return;
+            end
             
             disp("INFO: Creating Stack!");
             % TODO: add "-tilt" parameter to include angles in meta data
@@ -357,17 +413,41 @@ classdef CreateStacks < Module
             end
 
             executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path, false, obj.log_file_id);
+            
             [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "tilt_stacks_folder", obj.log_file_id);
-
+            
+            if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                executeCommand("newstack " + strjoin(output_stack_list_even, " ") + " " + stack_output_path_even, false, obj.log_file_id);
+                executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_even, false, obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "even_tilt_stacks_folder", obj.log_file_id);
+            end
+            
+            if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                executeCommand("newstack " + strjoin(output_stack_list_odd, " ") + " " + stack_output_path_odd, false, obj.log_file_id);
+                executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_odd, false, obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "odd_tilt_stacks_folder", obj.log_file_id);
+            end
+            
+            if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                executeCommand("newstack " + strjoin(output_stack_list_dose_weighted, " ") + " " + stack_output_path_dose_weighted, false, obj.log_file_id);
+                executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_dose_weighted, false, obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "dose_weighted_tilt_stacks_folder", obj.log_file_id);
+            end
+            
+            if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+                executeCommand("newstack " + strjoin(output_stack_list_dose_weighted_sum, " ") + " " + stack_output_path_dose_weighted_sum, false, obj.log_file_id);
+                executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_dose_weighted_sum, false, obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "dose_weighted_sum_tilt_stacks_folder", obj.log_file_id);
+            end
+            
+            
+            
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping = tilt_index_angle_mapping;
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping(2,:) = sort(obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping(2,:));
             
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path = stack_output_path;
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_symbolic_link = tilt_stack_symbolic_link;
-            if length(output_stack_list) < obj.configuration.minimum_files
-                disp("INFO: Not enough MRC files to create stack!");
-                obj.status = 0;
-            end
+
             %     if isfield(configuration, "tilt_stacks_folder")
             %         % TODO: check for errors
             %         mkdir(tilt_stacks_folder + string(filesep)...

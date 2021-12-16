@@ -3,12 +3,12 @@ classdef DynamoCleanStacks < Module
         function obj = DynamoCleanStacks(configuration)
             obj = obj@Module(configuration);
         end
-
+        
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             createStandardFolder(obj.configuration, "tilt_stacks_folder", false);
         end
-
+        
         function obj = process(obj)
             create_stacks_input_path = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep)...
                 + "*_CreateStacks_*");
@@ -22,7 +22,6 @@ classdef DynamoCleanStacks < Module
             real_source = string(regexprep(real_source,'[\n\r]+',''));
             disp("INFO: Cleaning tiltstack" + source + "!");
             stack_file_name_splitted = strsplit(stack_file(1).name, ".");
-            tilt_stack_destination = obj.output_path + string(filesep) + name + ".st";
             dynamo_success_file = dir(obj.configuration.processing_path...
                 + string(filesep) + obj.configuration.output_folder + string(filesep)...
                 + "*DynamoTiltSeriesAlignment*" + string(filesep) + name + string(filesep)...
@@ -61,8 +60,36 @@ classdef DynamoCleanStacks < Module
                     tilts_to_be_removed = setdiff(1:length(motion_corrected_files), tilt_indices);
                     tilts_to_keep = intersect(1:length(motion_corrected_files), tilt_indices);
                     motion_corrected_file_paths = strcat(string({motion_corrected_files(tilts_to_keep).folder}), string(filesep), string({motion_corrected_files(tilts_to_keep).name}));
+                    tilt_stack_destination = obj.output_path + string(filesep) + name + ".st"; 
                     if length(motion_corrected_files) > length(tilts_to_keep)
                         executeCommand("newstack " + strjoin(motion_corrected_file_paths, " ") + " " + tilt_stack_destination, false, obj.log_file_id);
+                        if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                            motion_corrected_dose_weighted_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files);
+                            dose_weighted_tilt_stack_destination = obj.output_path + string(filesep) + name + "_dw.st"; 
+                            executeCommand("newstack " + strjoin(motion_corrected_dose_weighted_files, " ") + " " + dose_weighted_tilt_stack_destination, false, obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                        end
+                        if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+                            motion_corrected_dose_weighted_sum_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files);
+                            dose_weighted_sum_tilt_stack_destination = obj.output_path + string(filesep) + name + "_dws.st";                         
+                            executeCommand("newstack " + strjoin(motion_corrected_dose_weighted_sum_files, " ") + " " + dose_weighted_sum_tilt_stack_destination, false, obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                        end
+                        if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                            even_tilt_stack_destination = obj.output_path + string(filesep) + name + "_even.st"; 
+                            motion_corrected_even_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files);
+                            executeCommand("newstack " + strjoin(motion_corrected_even_files, " ") + " " + even_tilt_stack_destination, false, obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+
+                        end
+                        if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                            odd_tilt_stack_destination = obj.output_path + string(filesep) + name + "_odd.st"; 
+                            motion_corrected_odd_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files);
+                            executeCommand("newstack " + strjoin(motion_corrected_odd_files, " ") + " " + odd_tilt_stack_destination, false, obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                        end
+                        
+                        
                         %TODO: tilt_index_angle_mapping should come under tomogram and then the
                         %name in the structure
                         obj.dynamic_configuration.tilt_index_angle_mapping = struct;
@@ -115,7 +142,7 @@ classdef DynamoCleanStacks < Module
                 end
             end
         end
-
+        
         function obj = cleanUp(obj)
             if obj.configuration.keep_intermediates == false
                 field_names = fieldnames(obj.configuration.tomograms);
@@ -131,5 +158,5 @@ classdef DynamoCleanStacks < Module
             obj = cleanUp@Module(obj);
         end
     end
-
+    
 end

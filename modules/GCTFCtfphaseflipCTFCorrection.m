@@ -138,12 +138,12 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     % optimization
                     lower_l = global_defocus_average_in_angstrom / 2;
                     upper_l = global_defocus_average_in_angstrom * 1.5;
-                    if ~isfield(dynamic_configuration, "global_lower_defocus_average_in_angstrom")
-                        dynamic_configuration.global_lower_defocus_average_in_angstrom = lower_l;
-                        dynamic_configuration.global_upper_defocus_average_in_angstrom = upper_l;
+                    if ~isfield(obj.dynamic_configuration, "global_lower_defocus_average_in_angstrom")
+                        obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = lower_l;
+                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = upper_l;
                     else
-                        dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l;
-                        dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom + upper_l;
+                        obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = obj.dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l / 2;
+                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = obj.dynamic_configuration.global_uppper_defocus_average_in_angstrom + upper_l / 2;
                     end
                 end
                 disp("INFO: CALCULATED LIMITS: Lower Limit: " + lower_l + " Upper Limit: " + upper_l);
@@ -293,8 +293,8 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     end
                 end
             end
-            dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
-            dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
+%             dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
+%             dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_upper_defocus_average_in_angstrom / length(tilt_stacks);
         end
         
         function obj = cleanUp(obj)

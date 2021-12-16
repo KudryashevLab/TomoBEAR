@@ -2,30 +2,71 @@
 %userpath("clear");
 %userpath(project_path);
 
-if ~verLessThan("matlab", "9.4")
-    project_path = string(pwd());
-    if ~isdeployed()
-        setenv("MATLAB_SHELL", project_path + string(filesep) + "matlab_shell.sh");
-        addpath(project_path + string(filesep) + "environment");
-        addpath(project_path + string(filesep) + "utilities");
-    end
-else
-    project_path = pwd();
-    if ~isdeployed()
-        setenv('MATLAB_SHELL', char(project_path + string(filesep) + 'matlab_shell.sh'));
-        addpath(char(project_path + string(filesep) + "environment"));
-        addpath(char(project_path + string(filesep) + "utilities"));
-    end
-end
-
+project_path = string(pwd());
 
 if ~isdeployed()
-    if fileExists("CONFIGURATION")
-        configuration_path = string(fread(fopen("CONFIGURATION"), "*char")');
-        initializeEnvironment(configuration_path);
-    else
-        initializeEnvironment();
+    addpath("configuration");
+    addpath("json");
+    addpath(project_path + string(filesep) + "environment");
+    addpath(project_path + string(filesep) + "utilities");
+end
+
+if fileExists("CONFIGURATION")
+    default_configuration_path = string(fread(fopen("CONFIGURATION"), "*char")');
+else
+    default_configuration_path = "./configurations/defaults.json";
+end
+
+configuration_parser = ConfigurationParser();
+[default_configuration, ~] = configuration_parser.parse(default_configuration_path);
+
+if isunix()
+    if ~fileExists("./load_modules.sh") || default_configuration.general.regenerate_load_modules_file == true
+        if ~isempty(default_configuration.general.modules)
+            fid = fopen("./load_modules.sh", "w+");
+            for i = 1:length(default_configuration.general.modules)
+                fprintf(fid, "module load %s\n", string(default_configuration.general.modules(i)));
+            end
+            fclose(fid);
+        end
+    end
+    
+    if ~fileExists(default_configuration.general.pipeline_executable)
+        fid = fopen(default_configuration.general.pipeline_executable, "w+");
+        fprintf(fid, "%s\n", "#!/bin/bash");
+        fprintf(fid, "%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )""");
+        
+        if fileExists("./load_modules.sh") 
+            fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
+        end
+        
+        if default_configuration.general.additional_shell_initialization_script ~= ""
+            fprintf(fid, "%s\n", "source " + default_configuration.general.additional_shell_initialization_script);
+        end
+        
+        fprintf(fid, "%s\n", "# >>> conda initialize >>>");
+        fprintf(fid, "%s\n", "# !! Contents within this block are managed by 'conda init' !!");
+        fprintf(fid, "%s\n", "__conda_setup=""$('/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/bin/conda' 'shell.bash' 'hook' 2> /dev/null)""");
+        fprintf(fid, "%s\n", "if [ $? -eq 0 ]; then");
+        fprintf(fid, "%s\n", "eval ""$__conda_setup""");
+        fprintf(fid, "%s\n", "else");
+        fprintf(fid, "%s\n", "if [ -f ""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/etc/profile.d/conda.sh"" ]; then");
+        fprintf(fid, "%s\n", ". ""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/etc/profile.d/conda.sh""");
+        fprintf(fid, "%s\n", "else");
+        fprintf(fid, "%s\n", "export PATH=""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/bin:$PATH""");
+        fprintf(fid, "%s\n", "fi");
+        fprintf(fid, "%s\n", "fi");
+        fprintf(fid, "%s\n", "unset __conda_setup");
+        fprintf(fid, "%s\n", "# <<< conda initialize <<<");
+        fprintf(fid, "%s\n", "eval $2");
+        fclose(fid);
     end
 end
+
+setenv("MATLAB_SHELL", project_path + string(filesep) + "matlab_shell.sh");
+addpath(project_path + string(filesep) + "environment");
+addpath(project_path + string(filesep) + "utilities");
+
+initializeEnvironment(default_configuration_path);
 
 clear project_path;

@@ -29,9 +29,9 @@ classdef TemplateMatchingPostProcessing < Module
                 mask_erase = dynamo_ellipsoid(size(rec_resampled)*obj.configuration.exclusion_radius_box_size_ratio, size(rec_resampled,1), size(rec_resampled,1)/2, mask_gaussian_fall_off);
             end
 
-            binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+            binned_tomograms_paths = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
             if isempty(binned_tomograms_paths) == true
-                binned_tomograms_paths = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
             end
             binned_tomograms_paths_filtered = binned_tomograms_paths(contains({binned_tomograms_paths.name}, "bin_" + obj.configuration.template_matching_binning));
             temporary_files = string([]);

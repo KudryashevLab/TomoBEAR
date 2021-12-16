@@ -31,15 +31,6 @@ if isunix()
     environment.system = "unix";
     [status, host_name] = unix("hostname | tail -1");
     host_name = string(host_name(1:end-1));
-    if ~fileExists("./load_modules.sh") || default_configuration.general.regenerate_load_modules_file == true
-        fid = fopen("./load_modules.sh", "w+");
-        if ~isempty(default_configuration.general.modules)
-            for i = 1:length(default_configuration.general.modules)
-                fprintf(fid, "module load %s\n", string(default_configuration.general.modules(i)));
-            end
-        end
-        fclose(fid);
-    end
 elseif ismac()
     environment.system = "mac";
     [status, host_name] = unix("hostname");
@@ -147,6 +138,9 @@ if ~fileExists(default_configuration.general.pipeline_executable)
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable)
 end
+% TODO: add parameter to decide for whom to allow execution
 system("chmod ug+x " + default_configuration.general.qsub_wrapper)
+system("chmod ug+x " + default_configuration.general.sbatch_wrapper)
+
 end
 

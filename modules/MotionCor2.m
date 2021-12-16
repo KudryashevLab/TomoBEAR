@@ -7,6 +7,10 @@ classdef MotionCor2 < Module
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             createStandardFolder(obj.configuration, "motion_corrected_files_folder", false);
+            createStandardFolder(obj.configuration, "even_motion_corrected_files_folder", false);
+            createStandardFolder(obj.configuration, "odd_motion_corrected_files_folder", false);
+            createStandardFolder(obj.configuration, "dose_weighted_sum_motion_corrected_files_folder", false);
+            createStandardFolder(obj.configuration, "dose_weighted_motion_corrected_files_folder", false);
         end
         
         function obj = process(obj)
@@ -31,18 +35,21 @@ classdef MotionCor2 < Module
                 motion_corrected_dose_weighted_files = dir(obj.output_path + filesep + "*_DW.mrc");
                 for i = 1:length(motion_corrected_dose_weighted_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i} = "" + motion_corrected_dose_weighted_files(i).folder + filesep + motion_corrected_dose_weighted_files(i).name;
+                    [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i}, "dose_weighted_motion_corrected_files_folder", log_file_id_tmp);
                 end
-                obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+%                 obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
             end
             
             if ~isempty(dir(obj.output_path + filesep + "*_DWS.mrc"))
                 motion_corrected_dose_weighted_sum_files = dir(obj.output_path + filesep + "*_DWS.mrc");
                 for i = 1:length(motion_corrected_dose_weighted_sum_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{i} = "" + motion_corrected_dose_weighted_sum_files(i).folder + filesep + motion_corrected_dose_weighted_sum_files(i).name;
+                    [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{i}, "dose_weighted_sum_motion_corrected_files_folder", log_file_id_tmp);
                 end
+%                 obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files;
             end
             
-            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+            %obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files = motion_corrected_files;
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links = symbolic_link_standard_folder;
             % TODO: check if next line is needed
@@ -54,12 +61,18 @@ classdef MotionCor2 < Module
                 for i = 1:length(motion_corrected_even_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{i} = "" + motion_corrected_even_files(i).folder + filesep + motion_corrected_even_files(i).name;
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{i} = "" + motion_corrected_odd_files(i).folder + filesep + motion_corrected_odd_files(i).name;
+                    [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{i}, "even_motion_corrected_files_folder", log_file_id_tmp);
+                    [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{i}, "odd_motion_corrected_files_folder", log_file_id_tmp);
                 end
             end
             disp("INFO: Motion correction done!");
         end
         
         function [motion_corrected_files, symbolic_link_standard_folder] = correctWithMotionCor2(obj, mrc_list)
+            dose_order = obj.configuration.dose_order;
+            if any(dose_order == 0) == true
+                dose_order = dose_order + 1;
+            end
             % TODO: support for frame integration files
             field_names = fieldnames(obj.configuration.tomograms);
             % TODO: Handle unused variables
@@ -120,10 +133,10 @@ classdef MotionCor2 < Module
                     motion_correction_arguments = motion_correction_arguments...
                         + " -SumRange " + obj.configuration.sum_range(1) + " " + obj.configuration.sum_range(2);
                 end
-            else
-                
-                motion_correction_arguments = motion_correction_arguments...
-                    + " -SumRange " + 0 + " " + 0;
+%             else
+%                 
+%                 motion_correction_arguments = motion_correction_arguments...
+%                     + " -SumRange " + 0 + " " + 0;
                 
             end
             
@@ -236,14 +249,14 @@ classdef MotionCor2 < Module
             for i = 1:length(mrc_list)
                 disp("INFO: Processing " + mrc_list(i) + "...");
                 
-                mrc_input = mrc_list{i};
+                input_projection = mrc_list{i};
                 
                 %     if regexp(mrc_input, "_[-+]0.0_")
                 %         executeCommand("newstack -exclude 5-79 " + mrc_input + " test.mrc")
                 %         mrc_input = mrc_list(i).folder + string(filesep) +
                 %     end
                 % TODO: Handle unused variables
-                [path, name, extension] = fileparts(mrc_input);
+                [path, name, extension] = fileparts(input_projection);
                 path_parts = strsplit(path, string(filesep));
                 
                 % TODO: decide if the condition "isfield(configuration,
@@ -290,16 +303,16 @@ classdef MotionCor2 < Module
 %                 string_char = str2double(output_header{i});
 %                 
 %                 last_frame = string_char(end - 1);
-                [~, ~, extension] = fileparts(mrc_input);
+                [~, ~, extension] = fileparts(input_projection);
                 if extension == ".tif"
                     command = obj.configuration.motion_correction_command...
-                        + " -InTiff " + mrc_input;
+                        + " -InTiff " + input_projection;
                 elseif extension == ".mrc"
                     command = obj.configuration.motion_correction_command...
-                        + " -InMrc " + mrc_input;
+                        + " -InMrc " + input_projection;
                 elseif extension == ".eer"
                     command = obj.configuration.motion_correction_command...
-                        + " -InEer " + mrc_input + " -EerSampling " + obj.configuration.eer_sampling;
+                        + " -InEer " + input_projection + " -EerSampling " + obj.configuration.eer_sampling;
                     if obj.configuration.fm_int_file ~= ""
                         command = command + " -FmIntFile " + obj.configuration.fm_int_file;
                     else
@@ -326,7 +339,7 @@ classdef MotionCor2 < Module
                         + " -FmRef " + last_frame;
                 end
 
-                if ~isempty(regexp(mrc_input, "_[-+]*0+\.0", "match")) && isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "high_dose") && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
+                if ~isempty(regexp(input_projection, "_[-+]*0+\.0", "match")) && isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "high_dose") && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
                     command = command...
                         + " -Patch " + obj.configuration.patch;
                 else
@@ -338,6 +351,20 @@ classdef MotionCor2 < Module
                             + " -Group " + string(num2str(obj.configuration.group));
                     end
                 end
+                
+                if obj.configuration.apply_dose_weighting == true
+                    if obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
+                        if isempty(regexp(input_projection, "_[+-]*0{2}\.0", "match"))
+                            command = command + " -InitDose " + ((dose_order(i) - 1 * obj.configuration.fm_dose * obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).low_dose_frames)...
+                                + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose_frames * obj.configuration.fm_dose));
+                        else
+                            command = command + " -InitDose " + 0;
+                        end
+                    else
+                        command = command + " -InitDose " + ((dose_order(i) - 1) * obj.configuration.fm_dose * obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).low_dose_frames);
+                    end
+                end
+                
                 
                 command = command...
                     + " | tee " + motion_correction_output...
@@ -509,7 +536,7 @@ classdef MotionCor2 < Module
                     + " " + motion_correction_arguments + " "...
                     + " -FmRef " + last_frame...
                     + " -LogFile " + motion_correction_log;
-                if ~isempty(regexp(mrc_input, "_[-+]*0+\.0", "match")) && isfield(obj.configuration, "high_dose") && obj.configuration.high_dose == true
+                if (~isempty(regexp(mrc_input, "_[-+]*0+\.0", "match")) && isfield(obj.configuration, "high_dose") && obj.configuration.high_dose == true) || obj.configuration.apply_patch_based_correction_to_all_projections == true
                     command = command...
                         + " -Patch " + obj.configuration.patch;
                 else

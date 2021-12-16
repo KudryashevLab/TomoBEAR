@@ -144,7 +144,21 @@
         "mcr_location": "",
         "defocus_limit_factor": 2.5,
         "skip_data_check": false,
-        "ld_library_path":""
+        "ld_library_path":"",
+        "additional_shell_initialization_script": "",
+        "mask_path": "",
+        "exclude_projections": 0,
+        "dose_weight_first_image": true,
+        "even_tilt_stacks_folder": "even_tilt_stacks",
+        "odd_tilt_stacks_folder": "odd_tilt_stacks",
+        "dose_weighted_tilt_stacks_folder": "dose_weighted_tilt_stacks",
+        "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
+        "even_motion_corrected_files_folder": "even_motion_corrected_files",
+        "odd_motion_corrected_files_folder": "odd_motion_corrected_files",
+        "dose_weighted_motion_corrected_files_folder": "dose_weighted_motion_corrected_files",
+        "dose_weighted_sum_motion_corrected_files_folder": "dose_weighted_sum_motion_corrected_files",
+        "apply_patch_based_correction_to_all_projections": true
+
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -830,7 +844,10 @@
         "SUSAN_ctf_box_size":400,
         "SUSAN_binning": 0,
         "ctf_correction_method": "defocus_file",
-        "bandpass_method": "angles"
+        "bandpass_method": "angles",
+        "exclude_projections": 0,
+        "even_tilt_stacks_folder": "even_tilt_stacks",
+        "odd_tilt_stacks_folder": "odd_tilt_stacks"
     },
     "PolishParticlesAndEstimateResolution": {
         "execution_method": "once",
@@ -853,5 +870,25 @@
         "spoc_env": "spoc",
         "numAsymUnits": 1,
         "mask_path": ""
+    },
+    "GenerateParticles": {
+        "execution_method": "once",
+        "use_SUSAN": true,
+        "ctf_correction_method": "SUSAN",
+        "SUSAN_ctf_box_size": 400,
+        "SUSAN_binning": 0,
+        "SUSAN_defocus_min": 10000,
+        "SUSAN_defocus_max": 50000,
+        "binning": 0,
+        "susan_lowpass": 65,
+        "susan_padding": 200,
+        "per_particle_ctf_correction": "phase_flip",
+        "padding_policy": "noise",
+        "normalization": "zm",
+        "use_symmetry": true,
+        "average_particles": false,
+        "table": "",
+        "table": "",
+        "all_in_one_folder": true
     }
 }
