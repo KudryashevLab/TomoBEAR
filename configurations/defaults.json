@@ -151,14 +151,35 @@
         "dose_weight_first_image": true,
         "even_tilt_stacks_folder": "even_tilt_stacks",
         "odd_tilt_stacks_folder": "odd_tilt_stacks",
-        "dose_weighted_tilt_stacks_folder": "dose_weighted_tilt_stacks",
-        "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
+        "aligned_even_tilt_stacks_folder": "aligned_even_tilt_stacks",
+        "aligned_odd_tilt_stacks_folder": "aligned_odd_tilt_stacks",
+        "aligned_dose_weighted_tilt_stacks_folder": "aligned_dose_weighted_tilt_stacks",
+        "aligned_dose_weighted_sum_tilt_stacks_folder": "aligned_dose_weighted_sum_tilt_stacks",
         "even_motion_corrected_files_folder": "even_motion_corrected_files",
         "odd_motion_corrected_files_folder": "odd_motion_corrected_files",
         "dose_weighted_motion_corrected_files_folder": "dose_weighted_motion_corrected_files",
         "dose_weighted_sum_motion_corrected_files_folder": "dose_weighted_sum_motion_corrected_files",
-        "apply_patch_based_correction_to_all_projections": true
-
+        "apply_patch_based_correction_to_all_projections": true,
+        "binned_even_tilt_stacks_folder": "binned_even_tilt_stacks",
+        "binned_odd_tilt_stacks_folder": "binned_odd_tilt_stacks",
+        "binned_aligned_even_tilt_stacks_folder": "binned_aligned_even_tilt_stacks",
+        "binned_aligned_odd_tilt_stacks_folder": "binned_aligned_odd_tilt_stacks",
+        "binned_aligned_dose_weighted_tilt_stacks_folder": "binned_aligned_dose_weighted_tilt_stacks",
+        "binned_aligned_dose_weighted_sum_tilt_stacks_folder": "binned_aligned_dose_weighted_sum_tilt_stacks",
+        "even_tomograms_folder": "even_tomograms",
+        "odd_tomograms_folder": "odd_tomograms",
+        "dose_weighted_tomograms_folder": "dose_weighted_tomograms",
+        "dose_weighted_sum_tomograms_folder": "dose_weighted_sum_tomograms",
+        "binned_even_tomograms_folder": "binned_even_tomograms",
+        "binned_odd_tomograms_folder": "binned_odd_tomograms",
+        "ctf_corrected_binned_even_tomograms_folder": "ctf_corrected_binned_even_tomograms",
+        "ctf_corrected_binned_odd_tomograms_folder": "ctf_corrected_binned_odd_tomograms",
+        "binned_dose_weighted_tomograms_folder": "binned_dose_weighted_tomograms",
+        "binned_dose_weighted_sum_tomograms_folder": "binned_dose_weighted_sum_tomograms",
+        "ctf_corrected_binned_aligned_even_tilt_stacks_folder": "ctf_corrected_binned_aligned_even_tilt_stacks",
+        "ctf_corrected_binned_aligned_odd_tilt_stacks_folder": "ctf_corrected_binned_aligned_odd_tilt_stacks",
+        "ctf_corrected_binned_aligned_dose_weighted_tilt_stacks_folder": "ctf_corrected_binned_aligned_dose_weighted_tilt_stacks",
+        "ctf_corrected_binned_aligned_dose_weighted_sum_tilt_stacks_folder": "ctf_corrected_binned_aligned_dose_weighted_sum_tilt_stacks"
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -890,5 +911,11 @@
         "table": "",
         "table": "",
         "all_in_one_folder": true
+    },
+    "CryoCARE": {
+        "execution_method": "once",
+        "repository_path": "",
+        "spoc_env": "",
+        "binning": 0
     }
 }

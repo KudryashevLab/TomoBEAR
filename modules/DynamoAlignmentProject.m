@@ -55,7 +55,7 @@ classdef DynamoAlignmentProject < Module
                     tab_all_path = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder + string(filesep) + "*.tbl");
                     tables = {char(string(tab_all_path.folder) + string(filesep) + tab_all_path.name)};
                     new_table = dread(tables{1});
-                    
+                    dwrite(new_table, 'tables.tbl');
                     if obj.configuration.as_boxes == 1
                         
                         if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
@@ -209,7 +209,7 @@ classdef DynamoAlignmentProject < Module
                                         projections_in_high_dose_image = configuration.tomograms.(field_names{tomos_id(i)}).high_dose_frames / configuration.tomograms.(field_names{tomos_id(i)}).low_dose_frames;
                                     else
                                         projections_in_high_dose_image = 0;
-                                    end                                    
+                                    end
                                     for j = 1:size(tomos.defocus, 1)
                                         
                                         if obj.configuration.dose_weight_first_image == true
@@ -890,8 +890,9 @@ classdef DynamoAlignmentProject < Module
                             end
                             
                         end
-                        
-                        template = avge.average;
+                        if exist("avge", "var")
+                            template = avge.average;
+                        end
                     else
                         new_table = [];
                         
@@ -1813,10 +1814,18 @@ classdef DynamoAlignmentProject < Module
                     %                 iterations = iterations + 1;
                     %                 if obj.configuration.sampling == 0
                     %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
-                    inplane_range = obj.configuration.template_matching_in_plane_sampling + obj.configuration.discretization_bias;
-                    inplane_sampling = inplane_range / obj.configuration.refine_factor;
-                    cone_range = obj.configuration.template_matching_cone_sampling + obj.configuration.discretization_bias;
-                    cone_sampling = cone_range / obj.configuration.refine_factor;
+                    if obj.configuration.sampling == 0
+                        %                 if obj.configuration.in_plane_sampling / 2 < atand(1/(size(template,1)/2))
+                        inplane_range = obj.configuration.template_matching_in_plane_sampling;
+                        inplane_sampling = inplane_range / obj.configuration.refine_factor;
+                        cone_range = obj.configuration.template_matching_cone_sampling;
+                        cone_sampling = cone_range / obj.configuration.refine_factor;
+                    else
+                        inplane_range = obj.configuration.sampling;
+                        inplane_sampling = inplane_range / obj.configuration.refine_factor;
+                        cone_range = obj.configuration.sampling;
+                        cone_sampling = cone_range / obj.configuration.refine_factor;
+                    end
                     %                     skipped_iterations = 0;
                     %                     iterations_to_skip = (obj.configuration.template_matching_binning / binning) - 1;
                     %                 else
@@ -2123,8 +2132,15 @@ classdef DynamoAlignmentProject < Module
                         obj.configuration.("threshold_modus_r" + (iterations + 1)) = obj.configuration.threshold_mode;
                         obj.configuration.("area_search_modus_r" + (iterations + 1)) = obj.configuration.area_search_mode;
                         obj.configuration.("cone_flip_r" + (iterations + 1)) = obj.configuration.cone_flip;
+                        
+                        if obj.configuration.bandpass_method == "angles"
+                            obj.configuration.("high_r" + (iterations + 1)) = 2;
+                            obj.configuration.("low_r" + (iterations + 1)) = 1 / tand(obj.configuration.("is_r" + (iterations + 1)));
+                        end
+                        
                         inplane_sampling = obj.configuration.("is_r" + (iterations + 1));
                         iterations = iterations + 1;
+                        
                     end
                     
                     obj.dynamic_configuration.in_plane_range = obj.configuration.("ir_r" + (iterations));
@@ -2132,11 +2148,14 @@ classdef DynamoAlignmentProject < Module
                     obj.dynamic_configuration.cone_range = obj.configuration.("cr_r" + (iterations));
                     obj.dynamic_configuration.cone_sampling = obj.configuration.("cs_r" + (iterations));
                     
-                    bandpass_step = (((size(template, 1) / 2) / 2) - 3) / iterations;
-                    
-                    for i = 1:iterations
-                        obj.configuration.("high_r" + i) = 2;
-                        obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                    if obj.configuration.bandpass_method == "iterations"
+                        bandpass_step = (((size(template, 1) / 2) / 2) - 3) / iterations;
+                        
+                        for i = 1:iterations
+                            obj.configuration.("high_r" + i) = 2;
+                            obj.configuration.("low_r" + i) = 3 + floor(bandpass_step * i);
+                        end
+                        
                     end
                     
                     %

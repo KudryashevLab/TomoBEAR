@@ -1,3 +1,5 @@
+% NOTE:TODO: relion_estimate_gain
+
 classdef GainCorrection < Module
     methods
         function obj = GainCorrection(configuration)

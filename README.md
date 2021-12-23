@@ -29,8 +29,8 @@ On the EMPIAR-10064 dataset TomoBEAR achieved 11.52 Angstrom as can be seen belo
 
 On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom as can be seen below.
 
-Coming soon!
-
+![HIV EMPIAR-10064 Map 1](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_1.png)
+![HIV EMPIAR-10064 Map 2](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_2.png)
 ![HIV EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_fsc.png)
 
 # Acknowledgements

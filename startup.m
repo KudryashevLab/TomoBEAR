@@ -31,8 +31,8 @@ if isunix()
         end
     end
     
-    if ~fileExists(default_configuration.general.pipeline_executable)
-        fid = fopen(default_configuration.general.pipeline_executable, "w+");
+    if ~fileExists(default_configuration.general.matlab_shell)
+        fid = fopen(default_configuration.general.matlab_shell, "w+");
         fprintf(fid, "%s\n", "#!/bin/bash");
         fprintf(fid, "%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )""");
         
@@ -46,14 +46,14 @@ if isunix()
         
         fprintf(fid, "%s\n", "# >>> conda initialize >>>");
         fprintf(fid, "%s\n", "# !! Contents within this block are managed by 'conda init' !!");
-        fprintf(fid, "%s\n", "__conda_setup=""$('/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/bin/conda' 'shell.bash' 'hook' 2> /dev/null)""");
+        fprintf(fid, "%s\n", "__conda_setup=""$('" + default_configuration.general.conda_path + "/2020.02/bin/conda' 'shell.bash' 'hook' 2> /dev/null)""");
         fprintf(fid, "%s\n", "if [ $? -eq 0 ]; then");
         fprintf(fid, "%s\n", "eval ""$__conda_setup""");
         fprintf(fid, "%s\n", "else");
-        fprintf(fid, "%s\n", "if [ -f ""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/etc/profile.d/conda.sh"" ]; then");
-        fprintf(fid, "%s\n", ". ""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/etc/profile.d/conda.sh""");
+        fprintf(fid, "%s\n", "if [ -f """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh"" ]; then");
+        fprintf(fid, "%s\n", ". """ + default_configuration.general.conda_path +  "/etc/profile.d/conda.sh""");
         fprintf(fid, "%s\n", "else");
-        fprintf(fid, "%s\n", "export PATH=""/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/bin:$PATH""");
+        fprintf(fid, "%s\n", "export PATH=""" + default_configuration.general.conda_path + "/2020.02/bin:$PATH""");
         fprintf(fid, "%s\n", "fi");
         fprintf(fid, "%s\n", "fi");
         fprintf(fid, "%s\n", "unset __conda_setup");
@@ -63,7 +63,7 @@ if isunix()
     end
 end
 
-setenv("MATLAB_SHELL", project_path + string(filesep) + "matlab_shell.sh");
+setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
 addpath(project_path + string(filesep) + "environment");
 addpath(project_path + string(filesep) + "utilities");
 

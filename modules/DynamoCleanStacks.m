@@ -64,29 +64,29 @@ classdef DynamoCleanStacks < Module
                     if length(motion_corrected_files) > length(tilts_to_keep)
                         executeCommand("newstack " + strjoin(motion_corrected_file_paths, " ") + " " + tilt_stack_destination, false, obj.log_file_id);
                         if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
-                            motion_corrected_dose_weighted_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files);
+                            motion_corrected_dose_weighted_files = string({obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{tilts_to_keep}});
                             dose_weighted_tilt_stack_destination = obj.output_path + string(filesep) + name + "_dw.st"; 
                             executeCommand("newstack " + strjoin(motion_corrected_dose_weighted_files, " ") + " " + dose_weighted_tilt_stack_destination, false, obj.log_file_id);
-                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, dose_weighted_tilt_stack_destination, "dose_weighted_tilt_stacks_folder", obj.log_file_id);
                         end
                         if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
-                            motion_corrected_dose_weighted_sum_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files);
+                            motion_corrected_dose_weighted_sum_files = string({obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{tilts_to_keep}});
                             dose_weighted_sum_tilt_stack_destination = obj.output_path + string(filesep) + name + "_dws.st";                         
                             executeCommand("newstack " + strjoin(motion_corrected_dose_weighted_sum_files, " ") + " " + dose_weighted_sum_tilt_stack_destination, false, obj.log_file_id);
-                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, dose_weighted_sum_tilt_stack_destination, "dose_weighted_sum_tilt_stacks_folder", obj.log_file_id);
                         end
                         if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
                             even_tilt_stack_destination = obj.output_path + string(filesep) + name + "_even.st"; 
-                            motion_corrected_even_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files);
+                            motion_corrected_even_files = string({obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{tilts_to_keep}});
                             executeCommand("newstack " + strjoin(motion_corrected_even_files, " ") + " " + even_tilt_stack_destination, false, obj.log_file_id);
-                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, even_tilt_stack_destination, "even_tilt_stacks_folder", obj.log_file_id);
 
                         end
                         if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
                             odd_tilt_stack_destination = obj.output_path + string(filesep) + name + "_odd.st"; 
-                            motion_corrected_odd_files = string(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files);
+                            motion_corrected_odd_files = string({obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{tilts_to_keep}});
                             executeCommand("newstack " + strjoin(motion_corrected_odd_files, " ") + " " + odd_tilt_stack_destination, false, obj.log_file_id);
-                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
+                            obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_odd_tilt_stack_destination_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, odd_tilt_stack_destination, "odd_tilt_stacks_folder", obj.log_file_id);
                         end
                         
                         
