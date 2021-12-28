@@ -70,7 +70,7 @@ classdef Reconstruct < Module
                     end
                     
                     if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
-                        binned_dose_weighted_sum_tilt_stacks = getCtfCorrectedBinnedDoseWeightedSumTiltStacksFromStandardFolder(obj.configuration, true);
+                        binned_dose_weighted_sum_tilt_stacks = getCtfCorrectedBinnedDoseWeightedSumTiltStacksFromStandardFolde(obj.configuration, true);
                         if ~any(obj.configuration.binnings == obj.configuration.aligned_stack_binning)
                             binned_dose_weighted_sum_tilt_stacks = binned_dose_weighted_sum_tilt_stacks(~contains({binned_dose_weighted_sum_tilt_stacks.name}, "bin_" + obj.configuration.aligned_stack_binning));
                         end
