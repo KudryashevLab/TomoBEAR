@@ -20,16 +20,32 @@ classdef DynamoTemplateMatching < Module
             %dynamo_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.dynamo_folder;
             
             if obj.configuration.use_ctf_corrected_tomograms == true
-                if obj.configuration.template_matching_binning > 1
-                    tomograms = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                if obj.configuration.use_denoised_tomograms == true
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getDenoisedCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getDenoisedCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
+                    end
                 else
-                    tomograms = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
+                    end
                 end
             else
-                if obj.configuration.template_matching_binning > 1
-                    tomograms = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                if obj.configuration.use_denoised_tomograms == true
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getDenoisedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getDenoisedTomogramsFromStandardFolder(obj.configuration, true);
+                    end
                 else
-                    tomograms = getTomogramsFromStandardFolder(obj.configuration, true);
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getTomogramsFromStandardFolder(obj.configuration, true);
+                    end
                 end
             end
             

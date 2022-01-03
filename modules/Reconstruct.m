@@ -537,7 +537,7 @@ classdef Reconstruct < Module
                         %                         if contains(name, obj.configuration.ctf_corrected_stack_suffix) || obj.configuration.use_ctf_corrected_stack == true
                         %                             createSymbolicLinkInStandardFolder(obj.configuration, even_rotated_tomogram_destination, "ctf_corrected_binned_even_tomograms_folder", obj.log_file_id);
                         %                         else
-                        createSymbolicLinkInStandardFolder(obj.configuration, even_rotated_tomogram_destination, "binned_even_tomograms_folder", obj.log_file_id);
+                        createSymbolicLinkInStandardFolder(obj.configuration, even_rotated_tomogram_destination, "ctf_corrected_binned_even_tomograms_folder", obj.log_file_id);
                         %                         end
                     end
                     
@@ -588,7 +588,7 @@ classdef Reconstruct < Module
                         %                         if contains(name, obj.configuration.ctf_corrected_stack_suffix) || obj.configuration.use_ctf_corrected_stack == true
                         %                             createSymbolicLinkInStandardFolder(obj.configuration, odd_rotated_tomogram_destination, "ctf_corrected_binned_odd_tomograms_folder", obj.log_file_id);
                         %                         else
-                        createSymbolicLinkInStandardFolder(obj.configuration, odd_rotated_tomogram_destination, "binned_odd_tomograms_folder", obj.log_file_id);
+                        createSymbolicLinkInStandardFolder(obj.configuration, odd_rotated_tomogram_destination, "ctf_corrected_binned_odd_tomograms_folder", obj.log_file_id);
                         %                         end
                     end
                     

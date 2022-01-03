@@ -5,7 +5,7 @@ classdef BatchRunTomo < Module
         function obj = BatchRunTomo(configuration)
             obj = obj@Module(configuration);
         end
-       
+        
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             output_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.pipeline_step_output_folder;
@@ -32,13 +32,13 @@ classdef BatchRunTomo < Module
                         copyOrLinkFilesBasedOnSizeThreshold(dir_list(k).folder + string(filesep) + dir_list(k).name,...
                             output_folder, threshold, obj.log_file_id);
                         %[status, message, message_id] = copyfile(dir_list(j).folder + string(filesep) + dir_list(j).name, output_folder);
-%                         executeCommand("rm -f " + output_folder + string(filesep) + "SUCCESS");
+                        %                         executeCommand("rm -f " + output_folder + string(filesep) + "SUCCESS");
                         executeCommand("rm -f " + output_folder + string(filesep) + obj.configuration.directive_file_name + ".adoc");
                         break;
                     end
                 end
             end
-           
+            
             if obj.configuration.aligned_stack_binning > 1
                 createStandardFolder(obj.configuration, "binned_aligned_tilt_stacks_folder", false);
                 createStandardFolder(obj.configuration, "ctf_corrected_binned_aligned_tilt_stacks_folder", false);
@@ -46,7 +46,7 @@ classdef BatchRunTomo < Module
                 createStandardFolder(obj.configuration, "ctf_corrected_aligned_tilt_stacks_folder", false);
                 createStandardFolder(obj.configuration, "binned_tilt_stacks_folder", false);
             end
-           
+            
             if isfield(obj.configuration, "reconstruct_binned_stacks") && obj.configuration.reconstruct_binned_stacks == false
                 createStandardFolder(obj.configuration, "tomograms_folder", false);
                 createStandardFolder(obj.configuration, "ctf_corrected_tomograms_folder", false);
@@ -54,8 +54,13 @@ classdef BatchRunTomo < Module
                 createStandardFolder(obj.configuration, "binned_tomograms_folder", false);
                 createStandardFolder(obj.configuration, "ctf_corrected_binned_tomograms_folder", false);
             end
+            
+            if isfield(obj.configuration.tomograms.tomogram_001, "motion_corrected_even_files")
+                createStandardFolder(obj.configuration, "aligned_even_tilt_stacks_folder", false);
+                createStandardFolder(obj.configuration, "aligned_odd_tilt_stacks_folder", false);
+            end
         end
-       
+        
         function obj = process(obj)
             if isfield(obj.configuration, "reconstruct_binned_stacks") && obj.configuration.reconstruct_binned_stacks == false
                 % TODO: restructure next statement, extract
@@ -89,7 +94,7 @@ classdef BatchRunTomo < Module
                 end
                 tomogram_counter = length(dir_list);
             end
-           
+            
             % TODO: all the other previous input paths could have also been
             % batchruntomo not only the last one, introduce flag if batchruntomo
             % already ran
@@ -101,15 +106,15 @@ classdef BatchRunTomo < Module
                     filtered_dir_list(tomogram_counter).folder = dir_list(i).folder;
                     tilt_stack_file_path = string(dir_list(i).folder) + string(filesep) + string(dir_list(i).name);
                     tilt_stack_file = dir(tilt_stack_file_path);
-                   
+                    
                     % NOTE: 3 for third entry because of "." and ".."
                     source = tilt_stack_file.folder + string(filesep) + tilt_stack_file.name;
                     source_path_split = strsplit(tilt_stack_file.folder, string(filesep));
-                   
+                    
                     destination_path = obj.output_path;
                     destination = destination_path + string(filesep) + tilt_stack_file.name;
                     [status_mkdir, message, message_id] = mkdir(destination_path);
-                   
+                    
                     disp("INFO: Linking from " + source + newline + " to "...
                         + destination + "!");
                     % TODO: Check status and / or output
@@ -120,33 +125,33 @@ classdef BatchRunTomo < Module
                 % NOTE: correct the counter, because of matlabs plus one indexing
                 tomogram_counter = tomogram_counter - 1;
             end
-           
+            
             % NOTE: contains(obj.input_path, "view_stacks") should be changed to better
             % condition because view_stacks may change
             if obj.configuration.starting_step == 10 && ~contains(obj.input_path, "view_stacks") % isfield(obj.configuration, "reconstruct_binned_stacks") && obj.configuration.reconstruct_binned_stacks ~= true &&
                 ctf_correction_folder = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + "*CTFCorrection*");
                 if isempty(ctf_correction_folder)
-                  error("ERROR: forgot to run ctf correction module?");
+                    error("ERROR: forgot to run ctf correction module?");
                 end
                 defocus_file_path = string(ctf_correction_folder(1).folder) + string(filesep) + ctf_correction_folder(1).name;
                 defocus_file = dir(defocus_file_path + string(filesep) + field_names(obj.configuration.set_up.j) + string(filesep) + field_names(obj.configuration.set_up.j) + ".defocus");
                 if isempty(ctf_correction_folder)
-                  disp("WARNING: no defocus file found!");
-               
+                    disp("WARNING: no defocus file found!");
+                    
                 elseif obj.configuration.starting_step == 10 && ~isempty(ctf_correction_folder)
                     %defocus_dirs = unique({dir_list(:).folder});
                     %                     for i = 1:length(defocus_file)
                     %[folder, name, extension] = fileparts(defocus_file(obj.configuration.set_up.adjusted_j).folder);
-                   
-                   
+                    
+                    
                     % NOTE: 3 for third entry because of "." and ".."
                     source = defocus_file(1).folder + string(filesep) + defocus_file(1).name;
                     %                         source_path_split = strsplit(defocus_file(obj.configuration.set_up.adjusted_j).folder, "/");
-                   
+                    
                     destination_path = obj.output_path;
                     destination = destination_path + string(filesep) + defocus_file(1).name;
                     %[status, message, message_id] = mkdir(destination_path);
-                   
+                    
                     % TODO: Check status and / or output
                     if ~fileExists(destination)
                         disp("INFO: Linking from " + source + newline + " to "...
@@ -158,9 +163,9 @@ classdef BatchRunTomo < Module
                     %                     end
                 end
             end
-           
+            
             current_location = obj.output_path;
-           
+            
             % TODO: write out template file if the contents are given instead of the
             % file path itself
             if (isfield(obj.configuration, "skip_steps") && ~isempty(obj.configuration.skip_steps)) || obj.configuration.reconstruct_binned_stacks == true
@@ -226,7 +231,7 @@ classdef BatchRunTomo < Module
                     obj.dynamic_configuration.directive_file_struct = obj.generateDirectiveFile(directive_file_path, directives);
                     [folder, name, extension] = fileparts(dir_list(i).name);
                     tilt_stack_file_path = string(dir_list(i).folder) + string(filesep) + string(dir_list(i).name);
-                   
+                    
                     for j = 1:length(end_steps)
                         splitted_name = strsplit(dir_list(1).name, ".");
                         if j == 1 && begin_steps(j) == 0
@@ -241,23 +246,23 @@ classdef BatchRunTomo < Module
                                 angles = sort(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(2,:));
                                 angles = angles(find(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(3,:)));
                             end
-%                             angles = sort(angles);
+                            %                             angles = sort(angles);
                             for k = 1:length(angles)
-%                                 if obj.configuration.tomograms.(splitted_name{1}).tilt_index_angle_mapping(5,k) == 0
-                                    fprintf(fid, "%0.2f\n", angles(k));
-%                                 else
-%                                     fprintf(fid, "%0.2f\n", 0);
-%                                 end
+                                %                                 if obj.configuration.tomograms.(splitted_name{1}).tilt_index_angle_mapping(5,k) == 0
+                                fprintf(fid, "%0.2f\n", angles(k));
+                                %                                 else
+                                %                                     fprintf(fid, "%0.2f\n", 0);
+                                %                                 end
                             end
                             fclose(fid);
                         end
-                       
+                        
                         if end_steps(j) == 3 && ~fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point") && ~obj.configuration.reconstruct_binned_stacks
                             end_steps(j) = 5;
                             %obj.dynamic_configuration.ending_step = obj.configuration.ending_step;
                             %disp("INFO: updated ending step to step " + obj.dynamic_configuration.ending_step + " due to incorrect DynamoTiltSeriesAlignment!");
                         end
-                       
+                        
                         command = "batchruntomo"...
                             + " -DirectiveFile "  + directive_file_path;
                         if obj.configuration.reconstruct_binned_stacks == false
@@ -269,7 +274,7 @@ classdef BatchRunTomo < Module
                             command = command + " -CurrentLocation " + obj.output_path...
                                 + " -RootName " + strjoin(splitted_splitted_name(1:obj.configuration.angle_position - 1), "_");
                         end
-                       
+                        
                         %command = command + " -StartingStep " + starting_step;
                         command = command + " -StartingStep " + begin_steps(j);
                         command = command + " -EndingStep " + end_steps(j);
@@ -278,23 +283,23 @@ classdef BatchRunTomo < Module
                         %                         else
                         %                             command = command + " -EndingStep " + (steps_to_be_skipped(j) - 1);
                         %                         end
-                       
+                        
                         % TODO: check if the second flag in execute command is needed
                         if obj.configuration.exit_on_error == true
                             command = command + " -ExitOnError";
                         end
-                       
+                        
                         if obj.configuration.cpu_machine_list ~= ""
                             command = command + " -CPUMachineList " + obj.configuration.cpu_machine_list;
                         end
-                       
-                       
+                        
+                        
                         % TODO: remove misha flag
                         if (end_steps(j) == 6 || end_steps(j) == 8)...
                                 && (~fileExists(current_location + string(filesep) + splitted_name{1} + ".seed") || ~fileExists(current_location + string(filesep) + splitted_name{1} + ".fid"))...
                                 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point")...
                                 && obj.configuration.take_fiducials_from_dynamo && ~obj.configuration.reconstruct_binned_stacks
-                           
+                            
                             if begin_steps(j) == 5 || begin_steps(j) == 6
                                 point_file = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point");
                                 % TODO: parse output from executeCommand and
@@ -302,7 +307,7 @@ classdef BatchRunTomo < Module
                                 % copy file
                                 [status_system, realpath_output] = system("realpath " + point_file(1).folder + string(filesep) + point_file(1).name);
                                 [status_copyfile, message, message_id] = copyfile(realpath_output(1:end-1), current_location + string(filesep) + point_file(1).name);
-                               
+                                
                                 fid = fopen(realpath_output(1:end-1), 'rt');
                                 point_file_content = textscan(fid, '%d %f %f %d');
                                 fclose(fid);
@@ -311,12 +316,12 @@ classdef BatchRunTomo < Module
                                 prexg_file_content = textscan(fid, '%f %f %f %f %f %f');
                                 fclose(fid);
                             end
-                           
+                            
                             %                                                     prexg_file = dir(current_location + string(filesep) + splitted_name{1} + ".prexg");
                             %                             fid = fopen(prexg_file(1).folder + string(filesep) + prexg_file(1).name, 'rt');
                             %                             prexg_file_content = textscan(fid, '%f %f %f %f %f %f');
                             %                             fclose(fid);
-                           
+                            
                             % x_shifts = (point_file_content{1,2} + prexg_file_content{1,5}(point_file_content{1,4} + 1)) / obj.configuration.pre_aligned_stack_binning;
                             % y_shifts = (point_file_content{1,3} + prexg_file_content{1,6}(point_file_content{1,4} + 1)) / obj.configuration.pre_aligned_stack_binning;
                             x_shifts = (point_file_content{1,2} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
@@ -349,18 +354,18 @@ classdef BatchRunTomo < Module
                                 end
                             end
                             fclose(fid);
-                           
+                            
                             fid = fopen(current_location + string(filesep) + "track.com", "w");
                             for k = 1:length(tline)
                                 fprintf(fid, "%s\n", tline{k});
                             end
                             fclose(fid);
-                           
+                            
                         end
                         %% ERROR: batchruntomo - A value was expected but not found for the last option on the command line
-                       
+                        
                         output = executeCommand(command, true, obj.log_file_id);
-                       
+                        
                         if contains(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING")
                             disp("WARNING:COMMAND_OUTPUT: " + output);
                             new_output = erase(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING");
@@ -382,14 +387,14 @@ classdef BatchRunTomo < Module
                             %                                 + string(filesep) + splitted_name{1}, "s");
                             %                             obj.status = 0;
                             %                             return;
-%                         elseif contains(output, "ERROR: align.com has given processing error 1 times") && contains(output, "ERROR: TILTALIGN - Search failed even after varying step factor")
-%                             new_output = erase(output, "ERROR: align.com has given processing error 1 times");
-%                             new_output = erase(new_output, "ERROR: TILTALIGN - Search failed even after varying step factor");
-%                             if contains(new_output, "ERROR:")
-%                                 disp("WARNING:NEW_COMMAND_OUTPUT: " + new_output);
-%                                 obj.status = 0;
-%                                 return;
-%                             end
+                            %                         elseif contains(output, "ERROR: align.com has given processing error 1 times") && contains(output, "ERROR: TILTALIGN - Search failed even after varying step factor")
+                            %                             new_output = erase(output, "ERROR: align.com has given processing error 1 times");
+                            %                             new_output = erase(new_output, "ERROR: TILTALIGN - Search failed even after varying step factor");
+                            %                             if contains(new_output, "ERROR:")
+                            %                                 disp("WARNING:NEW_COMMAND_OUTPUT: " + new_output);
+                            %                                 obj.status = 0;
+                            %                                 return;
+                            %                             end
                         elseif contains(output, "ERROR:")
                             disp("WARNING:COMMAND_OUTPUT: " + output);
                             obj.status = 0;
@@ -399,7 +404,7 @@ classdef BatchRunTomo < Module
                             obj.status = 0;
                             return;
                         end
-                       
+                        
                         % TODO: remove misha flag
                         if end_steps(j) == 3 ...
                                 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".point")...
@@ -410,7 +415,7 @@ classdef BatchRunTomo < Module
                             % copy file
                             [status_system, realpath_output] = system("realpath " + point_file(1).folder + string(filesep) + point_file(1).name);
                             [status_copyfile, message, message_id] = copyfile(realpath_output(1:end-1), current_location + string(filesep) + point_file(1).name);
-                           
+                            
                             fid = fopen(realpath_output(1:end-1), 'rt');
                             point_file_content = textscan(fid, '%d %f %f %d');
                             fclose(fid);
@@ -432,7 +437,7 @@ classdef BatchRunTomo < Module
                             %
                             % TODO: needs to be adapted for other angular
                             % increments
-                           
+                            
                             fid = fopen(current_location + string(filesep) + splitted_name{1} + ".seed_model", "wt+");
                             if obj.configuration.generate_seed_model_with_all_fiducials_from_dynamo == true
                                 seed_points_x = (point_file_content{1,2} / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
@@ -467,7 +472,7 @@ classdef BatchRunTomo < Module
                                     [status_system, poin2model_output] = system("point2model " + current_location + string(filesep) + splitted_name{1} + ".seed_model" + " " + current_location + string(filesep) + splitted_name{1} + ".fid -image " + current_location + string(filesep) + splitted_name{1} + "_preali.mrc"); % -circle
                                 end
                             end
-                           
+                            
                             % % % % % %                             %[success, message, message_id] = copyfile(current_location + string(filesep) + splitted_name{1} + ".fid", current_location + string(filesep) + splitted_name{1} + ".seed");
                             % % % % % %                             %                         field_names = fieldnames(obj.configuration.tomograms);
                             % % % % % %                             %                         angles = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping(2,:);
@@ -511,6 +516,32 @@ classdef BatchRunTomo < Module
                                     else
                                         createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                                     end
+                                    
+                                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                                        even_tilt_stacks = getEvenTiltStacksFromStandardFolder(obj.configuration, false);
+                                        status = system("newstack -InputFile " + even_tilt_stacks{obj.configuration.set_up.j}...
+                                            + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali -TransformFile "...
+                                            + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                            + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                                        if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                            createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                        else
+                                            createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                        end
+                                        
+                                        odd_tilt_stacks = getOddTiltStacksFromStandardFolder(obj.configuration, false);
+                                        status = system("newstack -InputFile " + odd_tilt_stacks{obj.configuration.set_up.j}...
+                                            + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali -TransformFile "...
+                                            + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                            + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                                        if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                            createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                        else
+                                            createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                        end
+                                    end
                                 end
                             else
                                 if fileExists(obj.configuration, current_location + string(filesep) + name + ".ali")
@@ -520,20 +551,20 @@ classdef BatchRunTomo < Module
                                 end
                             end
                         end
-                       
+                        
                         %                         if j < length(steps_to_be_skipped) + 1
                         %                             starting_step = steps_to_be_skipped(j) + 1;
                         %                         end
                     end
                     if obj.configuration.reconstruct_binned_stacks == true
                         [status_movefile, message, message_id] = movefile(destination, source);
-                       
+                        
                         destination_splitted = strsplit(destination, ".");
                         destination_splitted(end) = "rec";
-                       
+                        
                         source_splitted = strsplit(source, ".");
                         source_splitted(end) = "rec";
-                       
+                        
                         tomogram_destination = strjoin(destination_splitted, ".");
                         tomogram_source = strjoin(source_splitted, ".");
                         [status_movefile, message, message_id] = movefile(tomogram_destination, tomogram_source);
@@ -542,7 +573,7 @@ classdef BatchRunTomo < Module
                         if ~exist(link_destination_path, "dir")
                             [status_mkdir, message, message_id] = mkdir(link_destination_path);
                         end
-                       
+                        
                         link_destination = link_destination_path + string(filesep) + strjoin([splitted_splitted_name(1:end-1), binning_and_extension_splitted(1)],"_") + ".rec";
                         if fileExists(link_destination)
                             createSymbolicLink(tomogram_source, link_destination, obj.log_file_id);
@@ -556,10 +587,10 @@ classdef BatchRunTomo < Module
                 for i = 1:tomogram_counter
                     directive_file_path = obj.configuration.processing_path + string(filesep) + obj.configuration.pipeline_step_output_folder + string(filesep) + obj.configuration.directive_file_name + ".adoc";
                     obj.dynamic_configuration.directive_file_struct = obj.generateDirectiveFile(directive_file_path);
-                   
+                    
                     splitted_name = strsplit(dir_list(i).name, ".");
-                   
-                   
+                    
+                    
                     if (obj.configuration.starting_step == 10 && obj.configuration.ending_step == 13)
                         [status, output] = system("cp " + current_location + string(filesep) + splitted_name{1} + ".rawtlt " + current_location + string(filesep) + splitted_name{1} + ".tlt");
                         fid = fopen(current_location + string(filesep) + "ctfcorrection.com", "r+");
@@ -575,13 +606,13 @@ classdef BatchRunTomo < Module
                         fprintf(fid,"%s\n",file_content{length(file_content)});
                         fclose(fid);
                     end
-                       
+                    
                     % NOTE: DIRTY HACK FOR MISHA
                     if obj.configuration.starting_step == 0 % (obj.configuration.starting_step == 8 && obj.configuration.ending_step == 8) ||
                         if fileExists(current_location + string(filesep) + splitted_name{1} + ".rawtlt")
                             delete(current_location + string(filesep) + splitted_name{1} + ".rawtlt");
                         end
-                       
+                        
                         fid = fopen(current_location + string(filesep) + splitted_name{1} + ".rawtlt", "wt+");
                         %TODO: tilt_index_angle_mapping should come under tomogram and then the
                         %name in the structure
@@ -593,9 +624,9 @@ classdef BatchRunTomo < Module
                             angles = sort(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(2,:));
                             angles = angles(find(obj.configuration.tilt_index_angle_mapping.(splitted_name{1})(3,:)));
                         end
-                       
-%                         angles = sort(angles);
-                       
+                        
+                        %                         angles = sort(angles);
+                        
                         for k = 1:length(angles)
                             if obj.configuration.tomograms.(splitted_name{1}).tilt_index_angle_mapping(5,k) == 0
                                 fprintf(fid, "%0.2f\n", angles(k));
@@ -605,9 +636,9 @@ classdef BatchRunTomo < Module
                         end
                         fclose(fid);
                     end
-                   
-                   
-                   
+                    
+                    
+                    
                     if obj.configuration.starting_step == 0 && obj.configuration.ending_step == 3 && fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid")
                         point_file_content = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid");
                         % TODO: parse output from executeCommand and
@@ -615,7 +646,7 @@ classdef BatchRunTomo < Module
                         % copy file
                         [status_system, realpath_output] = system("realpath " + point_file_content(1).folder + string(filesep) + point_file_content(1).name);
                         [status_copyfile, message, message_id] = copyfile(realpath_output(1:end-1), current_location + string(filesep) + point_file_content(1).name);
-                       
+                        
                         %                         field_names = fieldnames(obj.configuration.tomograms);
                         %                         angles = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_index_angle_mapping(2,:);
                         %                         % TODO: save falgs as boolean in CreateStacks
@@ -632,26 +663,26 @@ classdef BatchRunTomo < Module
                         %obj.dynamic_configuration.ending_step = obj.configuration.ending_step;
                         %disp("INFO: updated ending step to step " + obj.dynamic_configuration.ending_step + " due to incorrect DynamoTiltSeriesAlignment!");
                     end
-                   
+                    
                     command = "batchruntomo"...
                         + " -DirectiveFile "  + directive_file_path...
                         + " -CurrentLocation " + current_location...
                         + " -RootName " + splitted_name{1}...
                         + " -StartingStep " + obj.configuration.starting_step...
                         + " -EndingStep " + obj.configuration.ending_step;
-                   
+                    
                     % TODO: check if the second flag in execute command is needed
                     if obj.configuration.exit_on_error == true
                         command = command + " -ExitOnError";
                     end
-                   
+                    
                     if obj.configuration.cpu_machine_list ~= ""
                         command = command + " -CPUMachineList " + obj.configuration.cpu_machine_list;
                     end
-                   
-                   
+                    
+                    
                     output = executeCommand(command, true, obj.log_file_id);
-                   
+                    
                     if contains(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING")
                         disp("WARNING:COMMAND_OUTPUT: " + output);
                         new_output = erase(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING");
@@ -687,7 +718,7 @@ classdef BatchRunTomo < Module
                     %INFO:VARIABLE:command_output: ERROR: batchruntomo - A value was expected but not found for the last option on the command line"
                     [folder, name, extension] = fileparts(dir_list(i).name);
                     tilt_stack_file_path = string(dir_list(i).folder) + string(filesep) + string(dir_list(i).name);
-                   
+                    
                     if obj.configuration.ending_step >= 8
                         if obj.configuration.aligned_stack_binning > 1
                             [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name);
@@ -710,6 +741,32 @@ classdef BatchRunTomo < Module
                                 else
                                     createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                                 end
+                                
+                                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                                    even_tilt_stacks = getEvenTiltStacksFromStandardFolder(obj.configuration, true);
+                                    status = system("newstack -InputFile " + even_tilt_stacks(obj.configuration.set_up.j).folder + filesep + even_tilt_stacks(obj.configuration.set_up.j).name...
+                                        + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali -TransformFile "...
+                                        + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                        + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                    [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name);
+                                    if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                    else
+                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                    end
+                                    
+                                    odd_tilt_stacks = getOddTiltStacksFromStandardFolder(obj.configuration, true);
+                                    status = system("newstack -InputFile " + odd_tilt_stacks(obj.configuration.set_up.j).folder + filesep + odd_tilt_stacks(obj.configuration.set_up.j).name...
+                                        + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali -TransformFile "...
+                                        + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                        + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                    [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name);
+                                    if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                    else
+                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                    end
+                                end
                             end
                         else
                             [folder, name, extension] = fileparts(dir_list(i).name);
@@ -730,7 +787,7 @@ classdef BatchRunTomo < Module
                     end
                 end
             end
-           
+            
             % TODO: decide if dynamic_configuration is needed at all because it makes sometimes hard to change parameters during runs
             %obj.dynamic_configuration.pre_aligned_stack_binning = obj.configuration.pre_aligned_stack_binning;
             %obj.dynamic_configuration.aligned_stack_binning = obj.configuration.aligned_stack_binning;
@@ -738,7 +795,7 @@ classdef BatchRunTomo < Module
             % commadn to set the flag properly
             disp("INFO: Batchruntomo from step " + obj.configuration.starting_step + " to step " + obj.configuration.ending_step + " done!");
         end
-       
+        
         function directive_file_struct = generateDirectiveFile(obj, directive_file_path, directives)
             if nargin == 2
                 directives = obj.configuration.directives;
@@ -749,16 +806,16 @@ classdef BatchRunTomo < Module
             [path, name, extension] = fileparts(directive_file_path);
             splitted_path = strsplit(path, string(filesep));
             tilt_index_angle_mapping = obj.configuration.tomograms.(splitted_path{end}).tilt_index_angle_mapping;
-           
-           
+            
+            
             starting_angle_index = find(tilt_index_angle_mapping(3,:) == 1, 1, "first");
             ending_angle_index = find(tilt_index_angle_mapping(3,:) == 1, 1, "last");
             starting_angle = tilt_index_angle_mapping(2, starting_angle_index);
-           
+            
             % TODO: make a more robust condition for angle_increment or provide a
             % configuration parameter
             angle_increment = abs(starting_angle - tilt_index_angle_mapping(2, starting_angle_index + 1));
-           
+            
             directive_file_id = fopen(directive_file_path, 'w');
             % NOTE: merge values from configuration file (json) into template file, if
             % not applicable let them as are and replace some importnat variables
@@ -827,13 +884,13 @@ classdef BatchRunTomo < Module
                     else
                         value_trimmed = num2str(value_trimmed);
                     end
-                   
+                    
                     % TODO:NOTE: special case to keep gold beads, perhaps exclude in
                     % own parameter name
                     if key_trimmed == "runtime.AlignedStack.any.eraseGold" && obj.configuration.reconstruct_binned_stacks == true
                         value_trimmed = "1";
                     end
-                   
+                    
                     directives_new = rmfield(directives, key_cleaned);
                     directives = directives_new;
                     directive_file_struct.(key_cleaned) = value_trimmed;
@@ -898,17 +955,17 @@ classdef BatchRunTomo < Module
                 if key_cleaned == "runtime.AlignedStack.any.eraseGold" && obj.configuration.reconstruct_binned_stacks == true
                     value = "1";
                 end
-               
+                
                 directive_file_struct.(key) = value;
                 % TODO: add argument type checks
                 if contains(key_cleaned, "xcorr.pt")
-                key_cleaned = strrep(key_cleaned, "xcorr.pt", "xcorr_pt");
+                    key_cleaned = strrep(key_cleaned, "xcorr.pt", "xcorr_pt");
                 end
                 fprintf(directive_file_id,"%s = %s\n", key_cleaned, value);
             end
             fclose(directive_file_id);
         end
-       
+        
         function merged_configurations = mergeConfigurations(obj,...
                 first_configuration, second_configuration)
             printVariable(first_configuration);
@@ -921,7 +978,7 @@ classdef BatchRunTomo < Module
             end
             printVariable(merged_configurations);
         end
-       
+        
         function obj = cleanUp(obj)
             if obj.configuration.keep_intermediates == false
                 if obj.configuration.ending_step >=13
@@ -940,7 +997,7 @@ classdef BatchRunTomo < Module
                     json_output = endsWith({files(:).name}, "output.json");
                     files = files(~(file_ali + file_tlt + file_xf + file_defocus + file_rawtlt + file_success + file_failure + file_time + json_output));
                     obj.deleteFilesOrFolders(files);
-                   
+                    
                     files = dir(obj.configuration.processing_path + string(filesep)...
                         + obj.configuration.output_folder + string(filesep)...
                         + "*_BatchRunTomo_*" + string(filesep) + field_names{obj.configuration.set_up.j});
@@ -958,7 +1015,7 @@ classdef BatchRunTomo < Module
                     json_output = endsWith({files(:).name}, "output.json");
                     files = files(~(file_ali + file_tlt + file_xf + file_rawtlt + file_defocus + file_success + file_time + file_failure + json_output));
                     obj.deleteFilesOrFolders(files);
-                   
+                    
                     %                     for i = 1:length(files)
                     %                         if files(i).isdir == true
                     %                             [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
