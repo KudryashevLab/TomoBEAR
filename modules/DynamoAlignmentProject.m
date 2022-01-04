@@ -1874,10 +1874,11 @@ classdef DynamoAlignmentProject < Module
                             %                                 obj.configuration.("cr_r" + (iterations + 1)) = obj.configuration.cone_sampling + obj.configuration.discretization_bias;
                             %                                 obj.configuration.("cs_r" + (iterations + 1)) = obj.configuration.cone_sampling / obj.configuration.refine_factor;
                             %                             else
-                            obj.configuration.("ir_r" + (iterations + 1)) = inplane_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                            obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling / obj.configuration.refine_factor;
-                            obj.configuration.("cr_r" + (iterations + 1)) = cone_sampling + (obj.configuration.discretization_bias / (iterations + 1));
-                            obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling / obj.configuration.refine_factor;
+                            
+                            obj.configuration.("ir_r" + (iterations + 1)) = inplane_range + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("is_r" + (iterations + 1)) = inplane_sampling;% / obj.configuration.refine_factor;
+                            obj.configuration.("cr_r" + (iterations + 1)) = cone_range + (obj.configuration.discretization_bias / (iterations + 1));
+                            obj.configuration.("cs_r" + (iterations + 1)) = cone_sampling;% / obj.configuration.refine_factor;
                             %                             end
                             %                         else
                             %                             obj.configuration.("ir_r" + (iterations + 1)) = obj.configuration.("is_r" + iterations) + obj.configuration.discretization_bias;
@@ -2083,7 +2084,7 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     %                 end
                     
-                    while inplane_sampling > atand(1 / (size(template, 1) / 2)) / obj.configuration.atand_factor
+                    while inplane_sampling > atand(1 / (size(template, 1) / 2)) / obj.configuration.atand_factor || iterations == 0
                         %                     if skipped_iterations < iterations_to_skip
                         %                         %                         if obj.configuration.sampling == 0
                         %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))

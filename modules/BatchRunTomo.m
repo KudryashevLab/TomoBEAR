@@ -498,9 +498,9 @@ classdef BatchRunTomo < Module
                             if obj.configuration.aligned_stack_binning > 1
                                 [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name);
                                 if fileExists(current_location + string(filesep) + name + ".ali")
-                                    createSymbolicLink(current_location + string(filesep) + name + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
+                                    createSymbolicLink(current_location + string(filesep) + name + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
                                 else
-                                    createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
+                                    createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
                                 end
                                 if end_steps(j) == 8
                                     xf_file = dir(current_location + string(filesep) + name + ".xf");

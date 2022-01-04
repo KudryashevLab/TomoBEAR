@@ -60,6 +60,8 @@ if isunix()
         fprintf(fid, "%s\n", "# <<< conda initialize <<<");
         fprintf(fid, "%s\n", "eval $2");
         fclose(fid);
+        system("chmod ug+x " + default_configuration.general.matlab_shell);
+
     end
 end
 

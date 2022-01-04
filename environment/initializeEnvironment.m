@@ -136,11 +136,11 @@ if ~fileExists(default_configuration.general.pipeline_executable)
     fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh $9 $1 $2 $3 $4 $5 $6 $7");
     fclose(fid);
     % TODO: add parameter to decide for whom to allow execution
-    system("chmod ug+x " + default_configuration.general.pipeline_executable)
+    system("chmod ug+x " + default_configuration.general.pipeline_executable);
 end
 % TODO: add parameter to decide for whom to allow execution
-system("chmod ug+x " + default_configuration.general.qsub_wrapper)
-system("chmod ug+x " + default_configuration.general.sbatch_wrapper)
+system("chmod ug+x " + default_configuration.general.qsub_wrapper);
+system("chmod ug+x " + default_configuration.general.sbatch_wrapper);
 
 end
 

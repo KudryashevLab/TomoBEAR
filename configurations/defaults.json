@@ -939,7 +939,10 @@
         "padding_policy": "noise",
         "normalization": "zm",
         "save_figures": true,
-        "show_figures": false
+        "show_figures": false,
+        "box_size": 150,
+        "overlap": 0.5,
+        "offset": 150
 
     }
 }
