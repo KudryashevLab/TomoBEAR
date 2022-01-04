@@ -82,7 +82,7 @@ classdef BinStacks < Module
                    
                     binned_stack_suffix = "bin_" + num2str(obj.configuration.binnings(i));
                     disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali");
-                    stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + ".ali";
+                    stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + "_" + obj.configuration.ctf_corrected_stack_suffix + ".ali";
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{i} = stack_output_path;
                     executeCommand("newstack"...
                         + " -input " + stack_source...
