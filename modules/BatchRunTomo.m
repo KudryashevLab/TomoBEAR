@@ -877,7 +877,7 @@ classdef BatchRunTomo < Module
                                 %value_trimmed = num2str(starting_angle_index) + "-" + num2str(ending_angle_index);%"";
                                 value_trimmed = "";
                             case "runtime.GoldErasing.any.extraDiameter"
-                                value_trimmed = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning / obj.configuration.ft_bin));
+                                value_trimmed = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning));
                             otherwise
                                 error("ERROR: Key to be replaced not found!");
                         end
@@ -943,7 +943,7 @@ classdef BatchRunTomo < Module
                             %value = num2str(starting_angle_index) + "-" + num2str(ending_angle_index);
                             value = "";
                         case "runtime.GoldErasing.any.extraDiameter"
-                            value = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning / obj.configuration.ft_bin));
+                            value = num2str(floor(obj.configuration.gold_erasing_extra_diameter / obj.configuration.aligned_stack_binning));
                         otherwise
                             error("ERROR: Key to be replaced not found!");
                     end

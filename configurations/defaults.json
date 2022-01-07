@@ -176,10 +176,13 @@
         "ctf_corrected_binned_odd_tomograms_folder": "ctf_corrected_binned_odd_tomograms",
         "binned_dose_weighted_tomograms_folder": "binned_dose_weighted_tomograms",
         "binned_dose_weighted_sum_tomograms_folder": "binned_dose_weighted_sum_tomograms",
+        "ctf_corrected_binned_dose_weighted_tomograms_folder": "ctf_corrected_binned_dose_weighted_tomograms",
+        "ctf_corrected_binned_dose_weighted_sum_tomograms_folder": "ctf_corrected_binned_dose_weighted_sum_tomograms",
         "ctf_corrected_binned_aligned_even_tilt_stacks_folder": "ctf_corrected_binned_aligned_even_tilt_stacks",
         "ctf_corrected_binned_aligned_odd_tilt_stacks_folder": "ctf_corrected_binned_aligned_odd_tilt_stacks",
         "ctf_corrected_binned_aligned_dose_weighted_tilt_stacks_folder": "ctf_corrected_binned_aligned_dose_weighted_tilt_stacks",
         "ctf_corrected_binned_aligned_dose_weighted_sum_tilt_stacks_folder": "ctf_corrected_binned_aligned_dose_weighted_sum_tilt_stacks",
+        "conda_path": "",
         "matlab_shell": "matlab_shell.sh",
         "denoised_ctf_corrected_tomograms_folder": "denoised_ctf_corrected_tomograms",
         "denoised_ctf_corrected_binned_tomograms_folder": "denoised_ctf_corrected_binned_tomograms",
@@ -943,6 +946,30 @@
         "box_size": 150,
         "overlap": 0.5,
         "offset": 150
-
+    },
+    "GumNet": {
+        "execution_method": "once",
+        "repository_path": "",
+        "gum_net_env": "",
+        "binning": 0,
+        "use_SUSAN": true,
+        "ctf_correction_method": "SUSAN",
+        "SUSAN_ctf_box_size": 400,
+        "SUSAN_binning": 0,
+        "SUSAN_defocus_min": 10000,
+        "SUSAN_defocus_max": 50000,
+        "susan_padding": 0,
+        "per_particle_ctf_correction": "phase_flip",
+        "padding_policy": "noise",
+        "normalization": "zm"
+    },
+    "DeepFinder": {
+        "execution_method": "once",
+        "deep_finder_env": "",
+        "repository_path": "",
+        "binning": 0,
+        "use_ctf_corrected_tomograms": true,
+        "use_denoised_tomograms": true,
+        "strategy": "spheres"
     }
 }

@@ -137,7 +137,7 @@ classdef DynamoTemplateMatching < Module
            
             newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
             symmetry_order = str2num(newStr);
-            cone_range = obj.configuration.cone_range;
+            cone_range = obj.configuration.cone_range / symmetry_order;
             in_plane_range = obj.configuration.in_plane_range / symmetry_order;
 
             %                 obj.dynamic_configuration.inplane_range = inplane_range;
@@ -171,7 +171,7 @@ classdef DynamoTemplateMatching < Module
             obj.dynamic_configuration.template_matching_cone_sampling = cone_sampling;
             obj.dynamic_configuration.template_matching_in_plane_sampling = in_plane_sampling;
             obj.dynamic_configuration.template_matching_cone_range = cone_range;
-            obj.dynamic_configuration.template_matching_in_plane_sampling = in_plane_sampling;
+            obj.dynamic_configuration.template_matching_in_plane_range = in_plane_range;
             
             % NOTE: modified function "compute" and "dynamo_normalize_roi"
             pts = dynamo_match(char(tomogram_path),...
