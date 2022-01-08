@@ -5,7 +5,74 @@ if nargin <= 3
     step = -1;
     gpu = -2;
 end
-if string(compute_environment) == "local"
+
+if (fileExists("CONFIGURATION") && ~exist("default_configuration_path", "var")) || (fileExists("CONFIGURATION") && exist("default_configuration_path", "var") && default_configuration_path == "")
+    default_configuration_path = string(fread(fopen("CONFIGURATION"), "*char")');
+end
+
+if string(compute_environment) == "initialize" || string(compute_environment) == "init"
+    if nargin == 1
+        pipeline = LocalPipeline();
+    elseif nargin == 2
+        pipeline = LocalPipeline(configuration_path);
+    elseif nargin >= 3
+        pipeline = LocalPipeline(configuration_path, default_configuration_path);
+    end
+    is_initialized = true;
+    if ~isdeployed
+        if pipeline.default_configuration.general.dynamo_path == ""
+            disp("ERROR: Please provide the path to a dynamo installtion in defaults.json!");
+            is_initialized = is_initialized && false;
+        elseif pipeline.default_configuration.general.dynamo_path ~= "" && ~isempty(dir(pipeline.default_configuration.general.dynamo_path + filesep + "dynamo_activate.m"))
+            disp("INFO: Dynamo path is properly configured!");
+            is_initialized = is_initialized && true;
+        else
+            disp("ERROR: Please check your dynamo path in defaults.json!");
+            is_initialized = is_initialized && false;
+        end
+    end
+    [status, result] = system(pipeline.default_configuration.general.motion_correction_command + " --version");
+    if pipeline.default_configuration.general.motion_correction_command == ""
+    	disp("WARNING: Please provide the path to MotionCor2 if you want to use the motion correction module!");
+        is_initialized = is_initialized && false;
+    elseif status == 0
+        disp("INFO: MotionCor2 command is properly configured!");
+        is_initialized = is_initialized && true;
+    else
+        disp("ERROR: Please check your MotionCor2 command in defaults.json!");
+        is_initialized = is_initialized && false;
+    end
+
+    [status, result] = system(pipeline.default_configuration.general.ctf_correction_command);
+    if pipeline.default_configuration.general.ctf_correction_command == ""
+        disp("WARNING: Please provide the path to Gctf if you want to use the gctf ctf correction module!");
+        is_initialized = is_initialized && false;
+    elseif status == 0
+    	disp("INFO: Gctf command is properly configured!");
+        is_initialized = is_initialized && true;
+    else
+        disp("ERROR: Please check your Gctf command in defaults.json!");
+        is_initialized = is_initialized && false;
+    end
+    
+    [status, result] = system(pipeline.default_configuration.general.conda_path + filesep + "bin" + filesep + "conda");
+    if pipeline.default_configuration.general.conda_path == ""
+    	disp("WARNING: Please provide the path to a conda installtion if you want to use advanced features like various neural net based modules or post processing modules!");
+        is_initialized = is_initialized && false;
+    elseif status == 0
+        disp("INFO: Conda path is properly configured!");
+        is_initialized = is_initialized && true;
+    else
+        disp("ERROR: Please check your conda path in defaults.json!");
+        is_initialized = is_initialized && false;
+    end
+    
+    if is_initialized == true
+        disp("INFO: TomoBEAR is now completely initialized!");
+    else
+        disp("WARNING: TomoBEAR is only partly initialized!");
+    end
+elseif string(compute_environment) == "local"
     %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment
     %global environmentProperties;
@@ -76,7 +143,7 @@ if string(compute_environment) == "local"
     % pipeline + {"test7", 'test8'};
     % pipeline.printPipeline();
 elseif string(compute_environment) == "cleanup"
-        %if isdeployed()
+    %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment
     %global environmentProperties;
     %environmentProperties = initializeEnvironment(default_configuration_path);

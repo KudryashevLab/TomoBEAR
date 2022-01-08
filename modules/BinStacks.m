@@ -93,7 +93,7 @@ classdef BinStacks < Module
                    
                     binned_stack_suffix = "bin_" + num2str(obj.configuration.binnings(i));
                     disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali");
-                    stack_output_path_gold = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + "_" + obj.configuration.ctf_corrected_stack_suffix + "_gold.ali";
+                    stack_output_path_gold = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + "_" + obj.configuration.ctf_corrected_stack_suffix + ".ali";  % "_gold.ali";
                     
                     executeCommand("newstack"...
                         + " -input " + stack_source...
@@ -102,11 +102,11 @@ classdef BinStacks < Module
                         + " -bin " + num2str(bin_factor), false, obj.log_file_id);
                     executeCommand("alterheader -del " + apix + "," + apix + "," + apix + "," + " " + stack_output_path_gold, false, obj.log_file_id);
 %                     system("imodtrans -S " + 1/bin_factor + " " + fid_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_unscaled_erase.fid");
-                    system("imodtrans -sx 4 -sy 4 -sz 1 -2 " + tiltxf_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid" + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase.fid"); %  " + (obj.configuration.binnings(i)/obj.configuration.ft_bin) + "
+%                     system("imodtrans -sx 4 -sy 4 -sz 1 -2 " + tiltxf_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid" + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase.fid"); %  " + (obj.configuration.binnings(i)/obj.configuration.ft_bin) + "
                     stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + "_" + obj.configuration.ctf_corrected_stack_suffix + ".ali";
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{i} = stack_output_path;
-                    system("ccderaser -InputFile " + stack_output_path_gold + " -ModelFile " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase.fid -BetterRadius " + (44.54/bin_factor) + " -PolynomialOrder 0 -CircleObjects / -MergePatches 1 -ExcludeAdjacent 1 -OutputFile " + stack_output_path);
-                    delete(stack_output_path_gold);
+%                     system("ccderaser -InputFile " + stack_output_path_gold + " -ModelFile " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase.fid -BetterRadius " + (44.54/bin_factor) + " -PolynomialOrder 0 -CircleObjects / -MergePatches 1 -ExcludeAdjacent 1 -OutputFile " + stack_output_path);
+%                     delete(stack_output_path_gold);
                     [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "ctf_corrected_binned_aligned_tilt_stacks_folder", obj.log_file_id);
                     %                     end
                 else

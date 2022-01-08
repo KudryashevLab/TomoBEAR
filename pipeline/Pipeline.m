@@ -36,8 +36,8 @@ classdef Pipeline < handle
             configuration_parser = ConfigurationParser();
             
             if configuration_path == "" && default_configuration_path == ""
-                configuration_path = "meta_data" + string(filesep) + "project.json";
-                default_configuration_path = "meta_data" + string(filesep) + "defaults.json";
+                configuration_path = ""; %"meta_data" + string(filesep) + "project.json";
+                default_configuration_path = "configurations" + string(filesep) + "defaults.json";
             elseif default_configuration_path == ""
                 default_configuration_path_tmp = "meta_data" + string(filesep) + "defaults.json";
                 if ~fileExists(default_configuration_path_tmp)
@@ -52,15 +52,19 @@ classdef Pipeline < handle
             %             end
             
             %             if nargin == 1 || nargin == 2
-            [obj.configuration, obj.pipeline_definition] = configuration_parser.parse(configuration_path);
-            
-            
-            if ~isfield(obj.configuration, "general")
-                error("ERROR: No general section in configuration available!")
+            if configuration_path ~= ""
+                [obj.configuration, obj.pipeline_definition] = configuration_parser.parse(configuration_path);
+                if ~isfield(obj.configuration, "general")
+                    error("ERROR: No general section in configuration available!")
+                end
+                obj.configuration.general.environment_properties = obj.environment_properties;
             end
             
             
-            obj.configuration.general.environment_properties = obj.environment_properties;
+            
+            
+            
+            
             %             end
             
             %             if nargin >= 0 && nargin <= 2

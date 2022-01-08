@@ -60,6 +60,8 @@ if isunix()
             fprintf(fid, "%s\n", "unset __conda_setup");
             fprintf(fid, "%s\n", "# <<< conda initialize <<<");
         end
+        % NOTE: use old naming style from IMOD
+        fprintf(fid, "%s\n", "export ETOMO_NAMING_STYLE=0");
         fprintf(fid, "%s\n", "eval $2");
         fclose(fid);
         system("chmod ug+x " + default_configuration.general.matlab_shell);
@@ -72,4 +74,4 @@ addpath(project_path + string(filesep) + "utilities");
 
 initializeEnvironment(default_configuration_path);
 
-clear project_path;
+clear project_path configuration_parser configuration_path default_configuration default_configuration_path;

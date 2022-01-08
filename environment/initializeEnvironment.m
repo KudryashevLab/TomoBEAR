@@ -54,9 +54,9 @@ end
 disp("HOSTNAME = " + host_name);
 
 % NOTE: imod specific code, chose old naming style for imod projects
-disp("INFO:ENV_GET:ETOMO_NAMING_STYLE: " + getenv("ETOMO_NAMING_STYLE"));
-setenv("ETOMO_NAMING_STYLE","0");
-disp("INFO:ENV_SET:ETOMO_NAMING_STYLE: " + getenv("ETOMO_NAMING_STYLE"));
+% disp("INFO:ENV_GET:ETOMO_NAMING_STYLE: " + getenv("ETOMO_NAMING_STYLE"));
+% setenv("ETOMO_NAMING_STYLE","0");
+% disp("INFO:ENV_SET:ETOMO_NAMING_STYLE: " + getenv("ETOMO_NAMING_STYLE"));
 
 % TODO: make it work on cluster (os installation without display)
 environment.imod_version = getIMODVersion();

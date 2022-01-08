@@ -979,6 +979,7 @@
         "shift_factor": 0.25,
         "boot_strap": true,
         "direct_read": true,
-        "steps_per_validation": 10
+        "steps_per_validation": 10,
+        "trainings_set_fraction": 0.8
     }
 }

@@ -14,7 +14,7 @@ Orange processing steps in the flow chart are mandatory and must be executed by 
 
 In case of errors do not hesitate one of the provided persons in the mentioned in the contacts section below.
 
-# Results (preliminray)
+# Results (preliminary)
 
 All results shown here have been achieved in an automated manner. The only manual task which needed to be done is chosing the classes for further processing in between the transition of different binning levels.
 
