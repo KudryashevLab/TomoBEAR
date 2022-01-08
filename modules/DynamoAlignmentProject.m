@@ -141,9 +141,7 @@ classdef DynamoAlignmentProject < Module
                     
                     if obj.configuration.classes == 1 && obj.configuration.swap_particles == false && (contains(tab_all_path(1).folder, "bin_" + previous_binning + "_eo" + filesep) || contains(tab_all_path(1).folder, "particles"))
                         counter = 0;
-                        
                         for i = 1:length(tab_all_path)
-                            
                             table = dread(string(tab_all_path(i).folder) + filesep + tab_all_path(i).name);
                             sub_table = table(:, :);
                             sub_tables{counter + 1} = sub_table;
@@ -169,7 +167,7 @@ classdef DynamoAlignmentProject < Module
                             %                             template = avge.average;
                             
                             new_table = dread(tables{1});
-                            
+ 
                             if binning > 1
                                 aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(obj.configuration, true, binning);
                             else
