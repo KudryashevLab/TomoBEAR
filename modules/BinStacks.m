@@ -45,11 +45,11 @@ classdef BinStacks < Module
                 
                 % TODO:NOTE implement command to erase fiducials and even
                 % and odd stacks
-                tiltxf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                fid_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "fid");
-                erasefid_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "_erase.fid");
+%                 tiltxf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
+%                 fid_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "fid");
+%                 erasefid_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "_erase.fid");
 
-                system("xfmodel -xf " + tiltxf_files{1} + " -back " + erasefid_files{i} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid");
+%                 system("xfmodel -xf " + tiltxf_files{1} + " -back " + erasefid_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid");
 
                 
                 if obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) > 1
