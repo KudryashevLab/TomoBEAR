@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it as below."
+authors:
+  - family-names: Balyschew
+    given-names: Nikita
+    orcid: https://orcid.org/0000-0001-7330-4628
+title: "TomoBEAR: an automated, configurable and customizable full processing pipeline for tomographic cryo electron microscopy data and subtomogram averaging"
+version: 0.1.3.alpha
+doi: 
+date-released: 2021-08-13

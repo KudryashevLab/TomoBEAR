@@ -944,8 +944,8 @@
         "save_figures": true,
         "show_figures": false,
         "box_size": 150,
-        "overlap": 0.5,
-        "offset": 150
+        "overlap": 1,
+        "offset": 0
     },
     "GumNet": {
         "execution_method": "once",
@@ -965,6 +965,8 @@
     },
     "DeepFinder": {
         "execution_method": "once",
+        "checkpoint_module": true,
+        "net_weights": "",
         "deep_finder_env": "",
         "repository_path": "",
         "binning": 0,
