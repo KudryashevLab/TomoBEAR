@@ -188,6 +188,7 @@
         "denoised_ctf_corrected_binned_tomograms_folder": "denoised_ctf_corrected_binned_tomograms",
         "denoised_tomograms_folder": "denoised_tomograms",
         "dose_weighted_tilt_stacks_folder": "dose_weighted_tilt_stacks",
+        "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
         "denoised_binned_tomograms_folder": "denoised_binned_tomograms"
     },
     "StopPipeline": {
