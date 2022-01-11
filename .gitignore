@@ -1,18 +1,17 @@
 # append all sym links to .gitignore file, needs to be run from repository folder
 # find . -type l | sed -e s'/^\.\///g' >> .gitignore
 
-# delete alls sym links in repository, needs to be run from repository folder
+# delete all sym links in repository, needs to be run from repository folder
 # find -type l -delete
 DYNAMO_INITIALIZED
 CONFIGURATION
-
 tomoBEAR/
-
 test
 load_modules.sh
 SUSAN_new/
 SUSAN/
 SUSAN_old/
+extern
 extern/semaphore/
 extern/CTFcorrection_v1_2/
 test_cry/
@@ -52,7 +51,6 @@ codegen
 *.coverage
 *.e*
 *.o*
-
 tomoBEAR
 playgorund/
 nn/
@@ -75,14 +73,10 @@ web/javascript/frontend/node_modules
 *.njsproj
 *.sln
 *.sw?
-
 slurm-*.out
-
 bfg-report/
-
 dynamo/matlab/mbtools/+mbparse/@output
 dynamo/matlab/src/+dpksys
-
 dynamo/matlab/src/dynamo_read_subtomogram.m
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepWrapper/compute.m
 dynamo/matlab/src/+dpkproject/readNextIterationFile.m
@@ -92,7 +86,6 @@ dynamo/matlab/src/+dpktilt/+aux/+align/+pipeline/+steps/+restorers/@MarkerRestor
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepRestorer/setSnapshotInput.m
 dynamo/matlab/src/+dpktilt/+aux/+align/+pipeline/+steps/+restorers/@MarkerRestorer/takeSnapshotOutput.m
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepRestorer/setSnapshotOutput.m
-
 dynamo/matlab/mbtools/+mbgui/+dlg/@msgbox/msgbox.m
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepManager/reload.m
 dynamo/matlab/mbtools/+mboop/+listener/timebomb.m
@@ -101,7 +94,6 @@ dynamo/matlab/src/+dpktilt/+aux/+align/+fitters/+aux/@Status/conditionalUpdateFi
 dynamo/matlab/src/+dpktilt/+aux/+align/+fitters/+aux/@Status/conditionalUpdateResiduals.m
 dynamo/matlab/src/+dpktilt/+aux/+align/+pipeline/+usr/@Enter/detectionBinningFactor.m
 dynamo/matlab/src/+dpktilt/+aux/+tsa/+parsing/loadOldWorkflow.m
-
 dynamo/matlab/src/@dBoxes/assertData.m
 dynamo/matlab/src/@dBoxes/convertSimpleData.m
 dynamo/matlab/src/@dBoxes/enterParticle.m
@@ -122,7 +114,6 @@ dynamo/matlab/src/dynamo_vpr_eo.m
 dynamo/matlab/src/dynamo_write_src.m
 dynamo/matlab/src/dynamo_zaux_multisymbol.m
 dynamo/matlab/src/shorthands/dfsc.m
-
 dynamo/matlab/mbtools/+mboop/+flows/+aux/@StepStatusManager/
 dynamo/matlab/src/column_checkin.m
 dynamo/matlab/src/dynamo__parse_str2numall.m
@@ -137,7 +128,6 @@ dynamo/matlab/src/dynamo_rot_solid.m
 dynamo/matlab/src/dynamo_table_compare.m
 dynamo/matlab/src/dynamo_tags_in_table.m
 dynamo/matlab/src/maprange.m
-
 dynamo/matlab/src/shorthands/dnan.m
 dynamo/matlab/src/+dpkvol/@Volume/extractBlock.m
 dynamo/matlab/src/dynamo_extract_slices.m
