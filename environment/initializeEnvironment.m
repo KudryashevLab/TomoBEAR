@@ -141,7 +141,12 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     fclose(fid);
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable);
+    
+    if ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
+        compileTomoBEAR
+    end
 end
+
 
 % TODO: add parameter to decide for whom to allow execution
 system("chmod ug+x " + default_configuration.general.qsub_wrapper);
