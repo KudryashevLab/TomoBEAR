@@ -144,6 +144,8 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     
     if ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
         compileTomoBEAR
+        fid = fopen(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED", "w+");
+        fclose(fid);
     end
 end
 
