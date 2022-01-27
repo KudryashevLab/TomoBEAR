@@ -121,7 +121,7 @@ if ~isdeployed
     end
     addpath(default_configuration.general.SUSAN_path);
 end
-if ~fileExists(default_configuration.general.pipeline_executable)
+if ~fileExists(default_configuration.general.pipeline_executable) || default_configuration.general.regenerate_load_modules_file == true
     fid = fopen(default_configuration.general.pipeline_executable, "w+");
     fprintf(fid, "%s\n", "#!/bin/bash");
     fprintf(fid, "%s\n", "#https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself");
@@ -131,13 +131,18 @@ if ~fileExists(default_configuration.general.pipeline_executable)
     fprintf(fid, "\t%s\n", "SCRIPTPATH=""$8""");
     fprintf(fid, "%s\n", "fi");
     fprintf(fid, "%s\n", "export PATH=$SCRIPTPATH/dynamo/cuda/bin:$PATH");
-    fprintf(fid, "%s\n", "export PATH=" + default_configuration.general.SUSAN_path + "/+SUSAN/bin:$PATH");
-    fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
+    if  isfield(default_configuration.general, "SUSAN_path") && default_configuration.general.SUSAN_path ~= ""
+        fprintf(fid, "%s\n", "export PATH=/home/risanche/Projects/SUSAN/devel/+SUSAN/bin:$PATH");
+    end
+    if fileExists("./load_modules.sh")
+        fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
+    end
     fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh $9 $1 $2 $3 $4 $5 $6 $7");
     fclose(fid);
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable);
 end
+
 % TODO: add parameter to decide for whom to allow execution
 system("chmod ug+x " + default_configuration.general.qsub_wrapper);
 system("chmod ug+x " + default_configuration.general.sbatch_wrapper);

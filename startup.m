@@ -65,7 +65,7 @@ if isunix()
         fprintf(fid, "%s\n", "eval $2");
         fclose(fid);
         system("chmod ug+x " + default_configuration.general.matlab_shell);
-    end
+    end 
 end
 
 setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);

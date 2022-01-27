@@ -21,7 +21,7 @@
         "slurm": false,
         "gpu_worker_multiplier": 1,
         "pipeline_location": "",
-        "pipeline_executable": "run_tomoBEAR.sh",
+        "pipeline_executable": "runTomoBEAR.sh",
         "sbatch_wrapper": "sbatch.sh",
         "cuda_forward_compatibility": true,
         "random_number_generator_seed": 0,
@@ -189,7 +189,8 @@
         "denoised_tomograms_folder": "denoised_tomograms",
         "dose_weighted_tilt_stacks_folder": "dose_weighted_tilt_stacks",
         "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
-        "denoised_binned_tomograms_folder": "denoised_binned_tomograms"
+        "denoised_binned_tomograms_folder": "denoised_binned_tomograms",
+        "denoised_tilt_stacks_folder": "denoised_tilt_stacks"
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -928,7 +929,10 @@
         "execution_method": "once",
         "repository_path": "",
         "spoc_env": "",
-        "binning": 0
+        "binning": 0,
+        "train_split": 0.9,
+        "neighbouring_projections": 1,
+        "tensorboard": true
     },
     "EstimateTomogramResolution": {
         "execution_method": "once",
@@ -963,7 +967,9 @@
         "susan_padding": 0,
         "per_particle_ctf_correction": "phase_flip",
         "padding_policy": "noise",
-        "normalization": "zm"
+        "normalization": "zm",
+        "use_delta_shifts": false,
+        "box_size": 0
     },
     "DeepFinder": {
         "execution_method": "once",
