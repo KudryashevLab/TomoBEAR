@@ -129,7 +129,7 @@
         "dose_order": [],
         "dt_crop_max_mb": 250000,
         "dt_crop_in_memory": 1,
-        "regenerate_load_modules_file": false,
+        "regenerate_load_modules_file": true,
         "ge_flags": "",
         "qsub_wrapper": "qsub.sh",
         "email": "",
