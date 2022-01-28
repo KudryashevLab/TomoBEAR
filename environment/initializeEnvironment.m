@@ -137,12 +137,16 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     if fileExists("./load_modules.sh")
         fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
     end
-    fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh $9 $1 $2 $3 $4 $5 $6 $7");
+    fprintf(fid, "%s\n", "if [ ""$#"" -ne 9 ]; then");
+        fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh $9 $1 $2 $3 -1 -1 -1 -2");
+    fprintf(fid, "%s\n", "else");
+        fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh " + default_configuration.general.mcr_location + " $1 $2 $3 $4 $5 $6 $7");
+    fprintf(fid, "%s\n", "fi");
     fclose(fid);
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable);
     
-    if ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
+    if exist(default_configuration.general.project_name, "dir") && ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
         compileTomoBEAR
         fid = fopen(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED", "w+");
         fclose(fid);

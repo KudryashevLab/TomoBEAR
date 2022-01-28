@@ -27,8 +27,8 @@ if isunix()
             for i = 1:length(default_configuration.general.modules)
                 fprintf(fid, "module load %s\n", string(default_configuration.general.modules(i)));
             end
-            system("chmod ug+x ./load_modules.sh");
             fclose(fid);
+            system("chmod ug+x ./load_modules.sh");
         end
     end
     
