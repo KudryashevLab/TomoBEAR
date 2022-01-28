@@ -69,8 +69,10 @@ if isunix()
 end
 
 setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
-addpath(project_path + string(filesep) + "environment");
-addpath(project_path + string(filesep) + "utilities");
+if ~isdeployed()
+    addpath(project_path + string(filesep) + "environment");
+    addpath(project_path + string(filesep) + "utilities");
+end
 
 initializeEnvironment(default_configuration_path);
 
