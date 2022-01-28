@@ -88,9 +88,9 @@ elseif string(compute_environment) == "local"
     end
     
     
-    if nargin > 7
-        disp("WARNING: Too many input arguments.");
-    end
+%     if nargin > 7
+%         disp("WARNING: Too many input arguments.");
+%     end
     
     %% PRINT GENERATED PIPELINE
     pipeline.print();
@@ -158,9 +158,9 @@ elseif string(compute_environment) == "cleanup"
     end
     
     
-    if nargin > 7
-        disp("WARNING: Too many input arguments.");
-    end
+%     if nargin > 7
+%         disp("WARNING: Too many input arguments.");
+%     end
     
     %% PRINT GENERATED PIPELINE
     pipeline.print();
@@ -186,6 +186,12 @@ elseif string(compute_environment) == "slurm"
         strating_tomogram = -1;
         ending_tomogram = -1;
         step = -1;
+        gpu = -2;
+    else    
+        starting_tomogram = str2double(starting_tomogram);
+        ending_tomogram = str2double(ending_tomogram);
+        step = str2double(step);
+        gpu = str2double(gpu);
     end
     %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment
@@ -198,9 +204,9 @@ elseif string(compute_environment) == "slurm"
     elseif nargin == 2
         pipeline = SlurmPipeline(configuration_path);
     elseif nargin >= 3
-        if nargin > 3
-            disp("WARNING: Too many input arguments.");
-        end
+%         if nargin > 3
+%             disp("WARNING: Too many input arguments.");
+%         end
         pipeline = SlurmPipeline(configuration_path, default_configuration_path);
     end
     
@@ -232,9 +238,9 @@ elseif string(compute_environment) == "grid"
     elseif nargin == 2
         pipeline = GridEnginePipeline(configuration_path);
     elseif nargin >= 3
-        if nargin > 3
-            disp("WARNING: Too many input arguments.");
-        end
+%         if nargin > 3
+%             disp("WARNING: Too many input arguments.");
+%         end
         pipeline = GridEnginePipeline(configuration_path, default_configuration_path);
     end
     

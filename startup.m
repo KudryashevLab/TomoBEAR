@@ -51,7 +51,7 @@ if isunix()
             fprintf(fid, "%s\n", "if [ $? -eq 0 ]; then");
             fprintf(fid, "%s\n", "eval ""$__conda_setup""");
             fprintf(fid, "%s\n", "else");
-            fprintf(fid, "%s\n", "if [ -f """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh""]; then");
+            fprintf(fid, "%s\n", "if [ -f """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh"" ]; then");
             fprintf(fid, "%s\n", ". """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh""");
             fprintf(fid, "%s\n", "else");
             fprintf(fid, "%s\n", "export PATH=""" + default_configuration.general.conda_path + "/2020.02/bin:$PATH""");
