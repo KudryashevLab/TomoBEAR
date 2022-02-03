@@ -928,7 +928,7 @@
     "CryoCARE": {
         "execution_method": "once",
         "repository_path": "",
-        "spoc_env": "",
+        "cryoCARE_env": "",
         "binning": 0,
         "train_split": 0.9,
         "neighbouring_projections": 1,

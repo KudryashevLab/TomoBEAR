@@ -93,27 +93,29 @@ if build == true
         error("ERROR: not supported in this version of MATLAB, R2020b needed, please run the application compiler app!")
     end
 end
-system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh");
-system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/" + default_configuration.general.project_name);
-fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + "run_" + default_configuration.general.project_name + ".sh", "r+");
-counter = 1;
-while ~feof(fid)
-    text_line{counter} = string(fgets(fid));
-    if contains(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;")
-        if default_configuration.general.ld_library_path == ""
-            text_line{counter} = strrep(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;",...
-                "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.:${MCRROOT}/runtime/glnxa64 ;");
-        else
-            text_line{counter} = strrep(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;",...
-                "LD_LIBRARY_PATH=" + default_configuration.general.ld_library_path + ":.:${MCRROOT}/runtime/glnxa64 ;");
+if exist(default_configuration.general.pipeline_location + filesep + default_configuration.general.project_name, "dir")
+    system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh");
+    system("chmod ug+x " + default_configuration.general.project_name + "/for_redistribution_files_only/" + default_configuration.general.project_name);
+    fid = fopen(default_configuration.general.project_name + filesep + "for_redistribution_files_only" + filesep + "run_" + default_configuration.general.project_name + ".sh", "r+");
+    counter = 1;
+    while ~feof(fid)
+        text_line{counter} = string(fgets(fid));
+        if contains(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;")
+            if default_configuration.general.ld_library_path == ""
+                text_line{counter} = strrep(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;",...
+                    "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.:${MCRROOT}/runtime/glnxa64 ;");
+            else
+                text_line{counter} = strrep(text_line{counter}, "LD_LIBRARY_PATH=.:${MCRROOT}/runtime/glnxa64 ;",...
+                    "LD_LIBRARY_PATH=" + default_configuration.general.ld_library_path + ":.:${MCRROOT}/runtime/glnxa64 ;");
+            end
         end
+        counter = counter + 1;
     end
-    counter = counter + 1;
-end
 
-fseek(fid, 0, "bof");
-for i = 1:counter-1
-    fprintf(fid, "%s", text_line{i});
+    fseek(fid, 0, "bof");
+    for i = 1:counter-1
+        fprintf(fid, "%s", text_line{i});
+    end
+    fclose(fid);
 end
-fclose(fid);
 end

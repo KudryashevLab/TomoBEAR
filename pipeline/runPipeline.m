@@ -81,9 +81,9 @@ elseif string(compute_environment) == "local"
     %% PIPELINE GENERATION
     if nargin == 1
         pipeline = LocalPipeline("meta_data/project.json");
-    elseif nargin == 2
+    elseif nargin == 2 && ~exist("default_configuration_path", "var")
         pipeline = LocalPipeline(configuration_path);
-    elseif nargin >= 3
+    elseif nargin >= 3 || nargin == 2 && exist("default_configuration_path", "var")
         pipeline = LocalPipeline(configuration_path, default_configuration_path);
     end
     
@@ -201,9 +201,9 @@ elseif string(compute_environment) == "slurm"
     %% PIPELINE GENERATION
     if nargin == 1
         pipeline = SlurmPipeline();
-    elseif nargin == 2
+    elseif nargin == 2 && ~exist("default_configuration_path", "var")
         pipeline = SlurmPipeline(configuration_path);
-    elseif nargin >= 3
+    elseif nargin >= 3 || nargin == 2 && exist("default_configuration_path", "var")
 %         if nargin > 3
 %             disp("WARNING: Too many input arguments.");
 %         end

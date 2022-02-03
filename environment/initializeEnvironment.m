@@ -124,8 +124,9 @@ end
 if ~fileExists(default_configuration.general.pipeline_executable) || default_configuration.general.regenerate_load_modules_file == true
     fid = fopen(default_configuration.general.pipeline_executable, "w+");
     fprintf(fid, "%s\n", "#!/bin/bash");
+    fprintf(fid, "%s\n", "unset LD_PRELOAD");
     fprintf(fid, "%s\n", "#https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself");
-    fprintf(fid, "%s\n", "if [ ""$#"" -ne 9 ]; then");
+    fprintf(fid, "%s\n", "if [ ""$#"" -ne 8 ]; then");
     fprintf(fid, "\t%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )""");
     fprintf(fid, "%s\n", "else");
     fprintf(fid, "\t%s\n", "SCRIPTPATH=""$8""");
@@ -139,7 +140,7 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     end
     fprintf(fid, "%s\n", "if [ ""$#"" -eq 2 ]; then");
         fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh " + default_configuration.general.mcr_location + " $1 $2 configurations/defaults.json -1 -1 -1 -2");
-    fprintf(fid, "%s\n", "elif [ ""$#"" -ne 9 ]; then");
+    fprintf(fid, "%s\n", "elif [ ""$#"" -ne 8 ]; then");
         fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh " + default_configuration.general.mcr_location + " $1 $2 $3 -1 -1 -1 -2");
     fprintf(fid, "%s\n", "else");
         fprintf(fid, "%s\n", "$SCRIPTPATH/" + default_configuration.general.project_name + "/for_redistribution_files_only/run_" + default_configuration.general.project_name + ".sh " + default_configuration.general.mcr_location + " $1 $2 $3 $4 $5 $6 $7");
@@ -162,7 +163,11 @@ system("chmod ug+x " + default_configuration.general.sbatch_wrapper);
 
 
 if ~isdeployed()
-    fid = fopen("./TomoBEAR.prj", "w+");
+    if default_configuration.general.pipeline_location  ~= ""
+        fid = fopen(default_configuration.general.pipeline_location + filesep + "TomoBEAR.prj", "w+");
+    else
+        fid = fopen("TomoBEAR.prj", "w+");
+    end
     fprintf(fid, "<deployment-project plugin=""plugin.ezdeploy"" plugin-version=""1.0"">\n");
   fprintf(fid, "<configuration build-checksum=""2813730637"" file=""${PROJECT_ROOT}/TomoBEAR.prj"" location=""${PROJECT_ROOT}"" name=""TomoBEAR"" preferred-package-location=""${PROJECT_ROOT}/TomoBEAR/for_redistribution"" preferred-package-type=""package.type.install"" target=""target.ezdeploy.standalone"" target-name=""Application Compiler"">\n");
     fprintf(fid, "<param.appname>TomoBEAR</param.appname>\n");
@@ -203,7 +208,7 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
     fprintf(fid, "<param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>\n");
     fprintf(fid, "<param.windows.command.prompt>false</param.windows.command.prompt>\n");
     fprintf(fid, "<param.create.log>true</param.create.log>\n");
-    fprintf(fid, "<param.log.file>pipeline_distribution.log</param.log.file>\n");
+    fprintf(fid, "<param.log.file>TomoBEAR_distribution.log</param.log.file>\n");
     fprintf(fid, "<param.native.matlab>false</param.native.matlab>\n");
     fprintf(fid, "<param.checkbox>false</param.checkbox>\n");
     fprintf(fid, "<param.example />\n");
@@ -245,21 +250,18 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
    fprintf(fid, "</fileset.main>\n");
     fprintf(fid, "<fileset.resources>\n");
       fprintf(fid, "<file>${PROJECT_ROOT}/dynamo</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/helper</file>\n");
+      %fprintf(fid, "<file>${PROJECT_ROOT}/helper</file>\n");
       fprintf(fid, "<file>${PROJECT_ROOT}/modules</file>\n");
       fprintf(fid, "<file>${PROJECT_ROOT}/utilities</file>\n");
+      fprintf(fid, "<file>${PROJECT_ROOT}/configuration</file>\n");
+      fprintf(fid, "<file>${PROJECT_ROOT}/json</file>\n");
+      fprintf(fid, "<file>${PROJECT_ROOT}/pipeline</file>\n");
       if isfield(default_configuration.general, "SUSAN_path") && default_configuration.general.SUSAN_path ~= ""
         fprintf(fid, "<file>" + default_configuration.general.SUSAN_path + "/+SUSAN</file>\n");
       end
     fprintf(fid, "</fileset.resources>\n");
     fprintf(fid, "<fileset.package />\n");
     fprintf(fid, "<fileset.depfun>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/configuration/ConfigurationParser.m</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/json/JSON.m</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/pipeline/GridEnginePipeline.m</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/pipeline/LocalPipeline.m</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/pipeline/Pipeline.m</file>\n");
-      fprintf(fid, "<file>${PROJECT_ROOT}/pipeline/SlurmPipeline.m</file>\n");
     fprintf(fid, "</fileset.depfun>\n");
     fprintf(fid, "<build-deliverables>\n");
       fprintf(fid, "<file location=""${PROJECT_ROOT}/TomoBEAR/for_testing"" name=""splash.png"" optional=""false"">${PROJECT_ROOT}/TomoBEAR/for_testing/splash.png</file>\n");
@@ -315,8 +317,8 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
       fprintf(fid, "<unix>true</unix>\n");
       fprintf(fid, "<linux>true</linux>\n");
       fprintf(fid, "<solaris>false</solaris>\n");
-      fprintf(fid, "<osver>" + system("hostnamectl | grep ""Kernel: Linux"" | awk -F' ' '{print $3}'") + "</osver>\n");
-
+      [status, output] = system("hostnamectl | grep ""Kernel: Linux"" | awk -F' ' '{print $3}'");
+      fprintf(fid, "<osver>" + output + "</osver>\n");
     else
       fprintf(fid, "<unix>false</unix>\n"); 
       fprintf(fid, "<linux>false</linux>\n");
@@ -355,6 +357,7 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
     fprintf(fid, "</platform>\n");
   fprintf(fid, "</configuration>\n");
 fprintf(fid, "</deployment-project>\n");
+system("chmod ug+rw " + default_configuration.general.pipeline_location + filesep + "TomoBEAR.prj");
 end
 
 end

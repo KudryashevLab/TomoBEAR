@@ -1,7 +1,7 @@
 % TODO: decide what to do with userpath
 %userpath("clear");
 %userpath(project_path);
-
+disp("INFO: startup...");
 project_path = string(pwd());
 
 if ~isdeployed()
@@ -73,7 +73,8 @@ if ~isdeployed()
     addpath(project_path + string(filesep) + "environment");
     addpath(project_path + string(filesep) + "utilities");
 end
-
+disp("INFO: initializing environment...");
 initializeEnvironment(default_configuration_path);
 
 clear project_path configuration_parser configuration_path default_configuration default_configuration_path;
+disp("INFO: environment initialized...");
