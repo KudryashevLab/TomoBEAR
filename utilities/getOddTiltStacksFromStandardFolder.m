@@ -7,7 +7,11 @@ if isfield(configuration, "odd_tilt_stacks_folder") && flatten == true
     tilt_stack_path = configuration.processing_path + string(filesep)...
         + configuration.output_folder + string(filesep)...
         + configuration.odd_tilt_stacks_folder...
+<<<<<<< Updated upstream
         + string(filesep) + "**" + string(filesep) + "*_odd.st";
+=======
+        + string(filesep) + "**" + string(filesep) + "*.st";
+>>>>>>> Stashed changes
     tilt_stacks = dir(tilt_stack_path);
 elseif isfield(configuration, "odd_tilt_stacks_folder") && flatten == false
     tilt_stack_path = configuration.processing_path + string(filesep)...
@@ -22,7 +26,11 @@ elseif isfield(configuration, "odd_tilt_stacks_folder") && flatten == false
                 && tilt_stacks_folders(i).name ~= "..")
             tilt_stacks{counter} = dir(tilt_stacks_folders(i).folder...
                 + string(filesep) + tilt_stacks_folders(i).name...
+<<<<<<< Updated upstream
                 + string(filesep) + "*_odd.st");
+=======
+                + string(filesep) + "*.st");
+>>>>>>> Stashed changes
             counter = counter + 1;
         end
     end
