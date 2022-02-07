@@ -313,7 +313,11 @@ classdef SlurmPipeline < Pipeline
             if first_step_to_execute == true
                 command = command + pipeline_executable_string;
                 if execute == true
-                    [status, output] = system("unset LD_PRELOAD && " + command);
+                    if ~isdeployed
+                        [status, output] = system("unset LD_PRELOAD && PATH=$PATH_COPY && LD_LIBRARY_PATH=$LD_LIBRARY_PATH_COPY " + command);
+                    else
+                        [status, output] = system(command);
+                    end
                     %                     job_ids(end + 1) = str2num(strtrim(output));
                 else
                     disp(command);
