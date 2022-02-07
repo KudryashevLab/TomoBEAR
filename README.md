@@ -20,7 +20,7 @@ All results shown here have been achieved in an automated manner. The only manua
 
 ## EMPIAR-10064
 
-On the EMPIAR-10064 dataset TomoBEAR achieved 11.52 Angstrom as can be seen below.
+On the EMPIAR-10064 dataset TomoBEAR achieved 11.5 Angstrom as can be seen below.
 
 ![Ribosome EMPIAR-10064 Map](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_map.png)
 ![Ribosome EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_fsc.png)
