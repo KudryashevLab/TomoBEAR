@@ -78,6 +78,11 @@ web/javascript/frontend/node_modules
 *.sw?
 slurm-*.out
 bfg-report/
+matlab_shell.sh
+run_tomoBEAR.sh
+run_TomoBEAR.sh
+dynamo/matlab/src/dynamo_table_rescale.m
+dynamo/matlab/src/+dpkproject/recomputeCC.m
 dynamo/matlab/mbtools/+mbparse/@output
 dynamo/matlab/src/+dpksys
 dynamo/matlab/src/dynamo_read_subtomogram.m

@@ -69,9 +69,13 @@ classdef MotionCor2 < Module
         end
         
         function [motion_corrected_files, symbolic_link_standard_folder] = correctWithMotionCor2(obj, mrc_list)
-            dose_order = obj.configuration.dose_order;
-            if any(dose_order == 0) == true
-                dose_order = dose_order + 1;
+            if ~isempty(obj.configuration.dose_order)
+                dose_order = obj.configuration.dose_order;
+                if any(dose_order == 0) == true
+                    dose_order = dose_order + 1;
+                end
+            else
+                dose_order = ones(1, length(mrc_list));
             end
             % TODO: support for frame integration files
             field_names = fieldnames(obj.configuration.tomograms);

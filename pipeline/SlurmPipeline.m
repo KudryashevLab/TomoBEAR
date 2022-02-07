@@ -308,12 +308,12 @@ classdef SlurmPipeline < Pipeline
             end
             pipeline_executable_string = pipeline_executable + " local " + obj.configuration_path + " " + obj.default_configuration_path + " " + starting_tomogram + " " + ending_tomogram + " " + ending_step;
             
-            pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location + " " + configuration.general.mcr_location;
+            pipeline_executable_string = pipeline_executable_string + " " + gpu + " " + configuration.general.pipeline_location;
             
             if first_step_to_execute == true
                 command = command + pipeline_executable_string;
                 if execute == true
-                    [status, output] = system(command);
+                    [status, output] = system("unset LD_PRELOAD && " + command);
                     %                     job_ids(end + 1) = str2num(strtrim(output));
                 else
                     disp(command);
