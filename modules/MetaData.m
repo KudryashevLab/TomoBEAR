@@ -43,7 +43,7 @@ classdef MetaData < Module
                 configuration = obj.configuration;
                 tomograms = cell(1, length(obj.field_names));
                 apix_list = zeros(1, length(obj.field_names));
-               for i = 1:length(field_names)%(,0) par
+               parfor i = 1:length(field_names)%(,0) 
                     tomograms{i} = struct();
                     field_name = field_names{i};
                     num_images_2 = [];

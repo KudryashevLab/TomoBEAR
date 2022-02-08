@@ -15,11 +15,7 @@ classdef DeepFinder < Module
             return_path = cd(obj.configuration.output_path);
             
             paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
-<<<<<<< Updated upstream
             if ~isempty(paths)
-=======
-                        if ~isempty(paths)
->>>>>>> Stashed changes
                 alignment_folder = dir(paths{1} + filesep + "alignment_project*");
                 alignment_folder_splitted = strsplit(alignment_folder.name, "_");
                 previous_binning = str2double(alignment_folder_splitted{end});
