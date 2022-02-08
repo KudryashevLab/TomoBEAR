@@ -41,7 +41,7 @@ classdef SortFiles < Module
             configuration = obj.configuration;
             log_file_id = -1;
             %TODO: make it also sequential
-            parfor i = 1:length(angles_sorted)
+            parfor i = 1:length(angles_sorted)%(,0) 
                 % TODO: is configuration.tomogram_output_prefix or better use the configuration.tomogram_input_prefix
                 file_name_out = sprintf(tomogram_output_prefix + "_%03d_%03d_%+05.1f", configuration.set_up.j,...
                     i, angles_sorted(i));

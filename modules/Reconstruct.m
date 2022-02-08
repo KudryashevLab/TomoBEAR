@@ -490,7 +490,7 @@ classdef Reconstruct < Module
                         end
                     end
                     
-                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files") && ~isempty(binned_even_tilt_stacks)
                         binned_even_tilt_stacks_tmp = binned_even_tilt_stacks(find(contains({binned_even_tilt_stacks.name}, name)));
                         disp("INFO: even tomograms will be generated.");
                         
@@ -541,7 +541,7 @@ classdef Reconstruct < Module
                         %                         end
                     end
                     
-                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files") && ~isempty(binned_odd_tilt_stacks)
                         binned_odd_tilt_stacks_tmp = binned_odd_tilt_stacks(find(contains({binned_odd_tilt_stacks.name}, name)));
                         disp("INFO: odd tomograms will be generated.");
                         
@@ -592,7 +592,7 @@ classdef Reconstruct < Module
                         %                         end
                     end
                     
-                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files") && ~isempty(binned_dose_weighted_tilt_stacks)
                         binned_dose_weighted_tilt_stacks_tmp = binned_dose_weighted_tilt_stacks(find(contains({binned_dose_weighted_tilt_stacks.name}, name)));
                         disp("INFO: dose weighted tomograms will be generated.");
                         
@@ -643,7 +643,7 @@ classdef Reconstruct < Module
                         end
                     end
                     
-                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")  && ~isempty(binned_dose_weighted_sum_tilt_stacks)
                         binned_dose_weighted_sum_tilt_stacks_tmp = binned_dose_weighted_sum_tilt_stacks(find(contains({binned_dose_weighted_sum_tilt_stacks.name}, name)));
                         disp("INFO: dose weighted sum tomograms will be generated.");
                         

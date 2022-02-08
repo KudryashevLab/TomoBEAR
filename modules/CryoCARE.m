@@ -89,7 +89,7 @@ classdef CryoCARE < Module
             fclose(fid);
             if ~exist(obj.configuration.project_name + "_model","dir")
                 if obj.configuration.use_conda == true
-                    [status, output_data] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf train_data_config.json");
+                    [status, output_data] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf train_data_config.json");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "");
                 end
@@ -132,7 +132,7 @@ classdef CryoCARE < Module
             fclose(fid);
             if ~exist(obj.configuration.project_name + "_model","dir")
                 if obj.configuration.use_conda == true
-                    [status, output_train] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf train_config.json");
+                    [status, output_train] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf train_config.json");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "");
                 end
@@ -202,11 +202,11 @@ classdef CryoCARE < Module
                     end
                     [SUCCESS,MESSAGE,MESSAGEID] = mkdir(strjoin({name_parts{1:2}}, "_"));
                     if obj.configuration.use_conda == true
-                        [status, output] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=/mpcdf/soft/CentOS_7/packages/x86_64/anaconda/3/2020.02/lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf predict_config.json");
+                        [status, output] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf predict_config.json");
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
-                    output_stack_list{j} = "" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name;
+                    output_stack_list{j} = char("" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name);
                 end
                 if tilt_stacks == true
                     stack_output_path = "" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name;

@@ -47,14 +47,14 @@ if isunix()
         if isfield(default_configuration.general, "conda_path") && default_configuration.general.conda_path ~= ""
             fprintf(fid, "%s\n", "# >>> conda initialize >>>");
             fprintf(fid, "%s\n", "# !! Contents within this block are managed by 'conda init' !!");
-            fprintf(fid, "%s\n", "__conda_setup=""$('" + default_configuration.general.conda_path + "/2020.02/bin/conda' 'shell.bash' 'hook' 2> /dev/null)""");
+            fprintf(fid, "%s\n", "__conda_setup=""$('" + default_configuration.general.conda_path + filesep + "bin/conda' 'shell.bash' 'hook' 2> /dev/null)""");
             fprintf(fid, "%s\n", "if [ $? -eq 0 ]; then");
             fprintf(fid, "%s\n", "eval ""$__conda_setup""");
             fprintf(fid, "%s\n", "else");
             fprintf(fid, "%s\n", "if [ -f """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh"" ]; then");
             fprintf(fid, "%s\n", ". """ + default_configuration.general.conda_path + "/etc/profile.d/conda.sh""");
             fprintf(fid, "%s\n", "else");
-            fprintf(fid, "%s\n", "export PATH=""" + default_configuration.general.conda_path + "/2020.02/bin:$PATH""");
+            fprintf(fid, "%s\n", "export PATH=""" + default_configuration.general.conda_path + filesep + "bin:$PATH""");
             fprintf(fid, "%s\n", "fi");
             fprintf(fid, "%s\n", "fi");
             fprintf(fid, "%s\n", "unset __conda_setup");
@@ -64,11 +64,16 @@ if isunix()
         fprintf(fid, "%s\n", "export ETOMO_NAMING_STYLE=0");
         fprintf(fid, "%s\n", "eval $2");
         fclose(fid);
-        system("chmod ug+x " + default_configuration.general.matlab_shell);
+        [status, output] = system("chmod ug+x " + default_configuration.general.matlab_shell);
+        setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
+    elseif fileExists(default_configuration.general.matlab_shell)
+        setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
+        [status, output] = system("chmod ug+x " + default_configuration.general.matlab_shell);
+    else
+        
     end 
 end
 
-setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
 if ~isdeployed()
     addpath(project_path + string(filesep) + "environment");
     addpath(project_path + string(filesep) + "utilities");

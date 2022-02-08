@@ -248,8 +248,7 @@ classdef CreateStacks < Module
                     %                     border_image([obj.configuration.border_pixels+1:end-obj.configuration.border_pixels-1],[obj.configuration.border_pixels+1:end-obj.configuration.border_pixels-1]) =...
                     %                         normalized_micrograph([obj.configuration.border_pixels+1:end-obj.configuration.border_pixels-1],[obj.configuration.border_pixels+1:end-obj.configuration.border_pixels-1]);
                     %                     normalized_micrograph = border_image;
-                    
-                    
+                                        
                     border_image([1:obj.configuration.border_pixels end-obj.configuration.border_pixels:end],:) = 1.0;
                     border_image(:,[1:obj.configuration.border_pixels end-obj.configuration.border_pixels:end]) = 1.0;
                     medfilt_border_image = imgaussfilt(border_image, 50);
@@ -271,11 +270,11 @@ classdef CreateStacks < Module
                 end
                 
                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
-                    stack_output_path_dose_weighted = obj.output_path + string(filesep) + path_parts(end) + "_dose_weighted.st";
+                    stack_output_path_dose_weighted = obj.output_path + string(filesep) + path_parts(end) + "_dw.st";
                 end
                 
                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
-                    stack_output_path_dose_weighted_sum = obj.output_path + string(filesep) + path_parts(end) + "_dose_weighted_sum.st";
+                    stack_output_path_dose_weighted_sum = obj.output_path + string(filesep) + path_parts(end) + "_dws.st";
                 end
                 
                 for i = 1:length(motion_corrected_files)
@@ -419,25 +418,25 @@ classdef CreateStacks < Module
             if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
                 executeCommand("newstack " + strjoin(output_stack_list_even, " ") + " " + stack_output_path_even, false, obj.log_file_id);
                 executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_even, false, obj.log_file_id);
-                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "even_tilt_stacks_folder", obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path_even, "even_tilt_stacks_folder", obj.log_file_id);
             end
             
             if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
                 executeCommand("newstack " + strjoin(output_stack_list_odd, " ") + " " + stack_output_path_odd, false, obj.log_file_id);
                 executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_odd, false, obj.log_file_id);
-                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "odd_tilt_stacks_folder", obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path_odd, "odd_tilt_stacks_folder", obj.log_file_id);
             end
             
             if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")
                 executeCommand("newstack " + strjoin(output_stack_list_dose_weighted, " ") + " " + stack_output_path_dose_weighted, false, obj.log_file_id);
                 executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_dose_weighted, false, obj.log_file_id);
-                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "dose_weighted_tilt_stacks_folder", obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path_dose_weighted, "dose_weighted_tilt_stacks_folder", obj.log_file_id);
             end
             
             if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
                 executeCommand("newstack " + strjoin(output_stack_list_dose_weighted_sum, " ") + " " + stack_output_path_dose_weighted_sum, false, obj.log_file_id);
                 executeCommand("alterheader -del " + apix + "," + apix + "," + apix + " " + stack_output_path_dose_weighted_sum, false, obj.log_file_id);
-                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "dose_weighted_sum_tilt_stacks_folder", obj.log_file_id);
+                [tilt_stack_symbolic_link_output, tilt_stack_symbolic_link] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path_dose_weighted_sum, "dose_weighted_sum_tilt_stacks_folder", obj.log_file_id);
             end
             
             
