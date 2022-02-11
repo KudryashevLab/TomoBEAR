@@ -14,6 +14,8 @@
 *.idx
 *.mw
 
+# delete all sym links in repository, needs to be run from repository folder
+# find -type l -delete
 DYNAMO_INITIALIZED
 CONFIGURATION
 matlab_shell.sh
