@@ -1,8 +1,19 @@
 # append all sym links to .gitignore file, needs to be run from repository folder
 # find . -type l | sed -e s'/^\.\///g' >> .gitignore
+*.suc
+*.aux
+*.djs
+*.synctex.gz
+*.sym
+*.syc
+*.sub
+*.pdf
+*.acr
+*.bbl
+*.blg
+*.idx
+*.mw
 
-# delete all sym links in repository, needs to be run from repository folder
-# find -type l -delete
 DYNAMO_INITIALIZED
 CONFIGURATION
 matlab_shell.sh
