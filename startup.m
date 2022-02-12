@@ -83,3 +83,7 @@ initializeEnvironment(default_configuration_path);
 
 clear project_path configuration_parser configuration_path default_configuration default_configuration_path;
 disp("INFO: environment initialized...");
+if ~isdeployed()
+    dbstop if error
+    dbstop if warning
+end

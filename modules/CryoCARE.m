@@ -88,7 +88,7 @@ classdef CryoCARE < Module
             fid = fopen("train_data_config.json", "w+");
             fprintf(fid, "%s", train_data_config_json);
             fclose(fid);
-            if ~exist(obj.configuration.project_name + "_model","dir")
+            if ~fileExists("train_data.npz") && ~fileExists("val_data.npz")
                 if obj.configuration.use_conda == true
                     % obj.configuration.conda_path + filesep + "bin" + filesep + "conda activate " + obj.configuration.cryoCARE_env + 
                     [status, output_data] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json");
@@ -132,7 +132,7 @@ classdef CryoCARE < Module
             fid = fopen("train_config.json", "w+");
             fprintf(fid, "%s", train_config_json);
             fclose(fid);
-            if ~exist(obj.configuration.project_name + "_model","dir")
+            if ~exist(obj.configuration.project_name + "_model" + filesep + "history.dat","dir")
                 if obj.configuration.use_conda == true
                     [status, output_train] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json");
                 else
@@ -181,7 +181,8 @@ classdef CryoCARE < Module
                     predict_config_struct = struct;
                     predict_config_struct.model_name = obj.configuration.project_name + "_model";
                     predict_config_struct.path = obj.output_path;
-                    
+                    name_parts = strsplit((even_tomograms(i).name), ".");
+                    name_parts = strsplit(name_parts{1}, "_");
                     if tilt_stacks == false
                         predict_config_struct.even = train_data_config_struct.even{i};
                         predict_config_struct.odd = train_data_config_struct.odd{i};                    
@@ -193,8 +194,7 @@ classdef CryoCARE < Module
                         predict_config_struct.n_tiles = {floor(width / patch_shape), floor(height / patch_shape)};
                         predict_config_struct.output_name = obj.output_path + "denoised_tilt_stack" + filesep + even_files(j).name;
                     end
-                    name_parts = strsplit((even_tomograms(i).name), ".");
-                    name_parts = strsplit(name_parts{1}, "_");
+
                     predict_config_json = jsonencode(predict_config_struct,'PrettyPrint',true);
                     fid = fopen("predict_config.json", "w+");
                     fprintf(fid, "%s", predict_config_json);
@@ -209,7 +209,7 @@ classdef CryoCARE < Module
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
                     if tilt_stacks == true
-                        output_stack_list{j} = char(obj.output_path + "denoised_tilt_stack" + filesep + even_files(j).name);
+                        output_stack_list{j} = char(obj.output_path + filesep + "denoised_tilt_stack" + filesep + even_files(j).name);
                     end
                 end
                 if tilt_stacks == true
