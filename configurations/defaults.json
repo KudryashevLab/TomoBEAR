@@ -438,7 +438,7 @@
             "comparam.newst.newstack.AntialiasFilter": -1,
             "runtime.AlignedStack.any.binByFactor": "<REPLACE>",
             "runtime.AlignedStack.any.correctCTF": 1,
-            "runtime.AlignedStack.any.eraseGold": 2,
+            "runtime.AlignedStack.any.eraseGold": 1,
             "comparam.align.tiltalign.RobustFitting": 1,
             "comparam.tilt.tilt.THICKNESS": "<REPLACE>",
             "runtime.Reconstruction.any.useSirt": 0,
