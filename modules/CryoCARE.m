@@ -1,4 +1,5 @@
 % NOTE: https://arxiv.org/pdf/1810.05420.pdf
+% NOTE: https://github.com/juglab/cryoCARE_pip
 
 classdef CryoCARE < Module
     methods
@@ -68,28 +69,30 @@ classdef CryoCARE < Module
             end
             
             [width, height, z] = getHeightAndWidthFromHeader(train_data_config_struct.even{i}, -1);
-            patch_shape = 512;
+            patch_shape = obj.configuration.patch_shape;
             if tilt_stacks == false
                 patch_shape = patch_shape / binning;
                 train_data_config_struct.patch_shape = {patch_shape, patch_shape, patch_shape};
                 train_data_config_struct.num_slices = round((width / patch_shape) * (height / patch_shape) * (z / patch_shape));
                 train_data_config_struct.tilt_axis = "Y";
+                train_data_config_struct.split = round(height / max(height * obj.configuration.train_split, patch_shape), 2,);
             else
-                patch_shape = patch_shape / 2;
-                train_data_config_struct.patch_shape = {obj.configuration.neighbouring_projections, patch_shape, patch_shape};
+                patch_shape = patch_shape / 4;
+                train_data_config_struct.patch_shape = {patch_shape, patch_shape};
                 train_data_config_struct.num_slices = round((width / patch_shape) * (height / patch_shape) * (z / obj.configuration.neighbouring_projections));
                 train_data_config_struct.tilt_axis = "X";
+                train_data_config_struct.split = round(width / max(width * obj.configuration.train_split, patch_shape), 2);
             end
-            train_data_config_struct.split = obj.configuration.train_split;
             train_data_config_struct.n_normalization_samples = train_data_config_struct.num_slices * floor(i/2);
-            train_data_config_struct.path = "./";
+            train_data_config_struct.path = obj.output_path;
             train_data_config_json = jsonencode(train_data_config_struct, 'PrettyPrint', true);
             fid = fopen("train_data_config.json", "w+");
             fprintf(fid, "%s", train_data_config_json);
             fclose(fid);
-            if ~exist(obj.configuration.project_name + "_model","dir")
+            if ~fileExists("train_data.npz") && ~fileExists("val_data.npz")
                 if obj.configuration.use_conda == true
-                    [status, output_data] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf train_data_config.json");
+                    % obj.configuration.conda_path + filesep + "bin" + filesep + "conda activate " + obj.configuration.cryoCARE_env + 
+                    [status, output_data] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "");
                 end
@@ -110,29 +113,29 @@ classdef CryoCARE < Module
             % }
             
             train_config_struct = struct;
-            train_config_struct.train_data = "./";
-            train_config_struct.epochs = 200;
-            train_config_struct.steps_per_epoch = 200;
-            train_config_struct.batch_size = 16;
+            train_config_struct.train_data = obj.output_path;
+            train_config_struct.epochs = obj.configuration.epochs;
+            train_config_struct.steps_per_epoch = floor(train_data_config_struct.num_slices / obj.configuration.batch_size); %obj.configuration.steps_per_epoch;
+            train_config_struct.batch_size = obj.configuration.batch_size;
             if tilt_stacks == false
                 train_config_struct.axes = "ZYXC";
             else
                 train_config_struct.axes = "YXC";
             end
-            train_config_struct.unet_kern_size = 3;
-            train_config_struct.unet_n_depth = 3;
-            train_config_struct.unet_n_first = 16;
-            train_config_struct.learning_rate = 0.0004;
+            train_config_struct.unet_kern_size = obj.configuration.unet_kern_size;
+            train_config_struct.unet_n_depth = obj.configuration.unet_n_depth;
+            train_config_struct.unet_n_first = obj.configuration.unet_n_first;
+            train_config_struct.learning_rate = obj.configuration.learning_rate;
             train_config_struct.train_tensorboard = obj.configuration.tensorboard;
             train_config_struct.model_name = obj.configuration.project_name + "_model";
-            train_config_struct.path = "./";
+            train_config_struct.path = obj.output_path;
             train_config_json = jsonencode(train_config_struct, 'PrettyPrint', true);
             fid = fopen("train_config.json", "w+");
             fprintf(fid, "%s", train_config_json);
             fclose(fid);
-            if ~exist(obj.configuration.project_name + "_model","dir")
+            if ~exist(obj.configuration.project_name + "_model" + filesep + "history.dat","dir")
                 if obj.configuration.use_conda == true
-                    [status, output_train] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf train_config.json");
+                    [status, output_train] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "");
                 end
@@ -178,8 +181,9 @@ classdef CryoCARE < Module
                     
                     predict_config_struct = struct;
                     predict_config_struct.model_name = obj.configuration.project_name + "_model";
-                    predict_config_struct.path = "./";
-                    
+                    predict_config_struct.path = obj.output_path;
+                    name_parts = strsplit((even_tomograms(i).name), ".");
+                    name_parts = strsplit(name_parts{1}, "_");
                     if tilt_stacks == false
                         predict_config_struct.even = train_data_config_struct.even{i};
                         predict_config_struct.odd = train_data_config_struct.odd{i};                    
@@ -188,11 +192,10 @@ classdef CryoCARE < Module
                     else
                         predict_config_struct.even = "" + even_files(j).folder + filesep + even_files(j).name;
                         predict_config_struct.odd = "" + odd_files(j).folder + filesep + odd_files(j).name;                    
-                        predict_config_struct.n_tiles = {1, floor(width / patch_shape), floor(height / patch_shape)};
-                        predict_config_struct.output_name = "" + "denoised_tilt_stack" + filesep + even_files(j).name;
+                        predict_config_struct.n_tiles = {floor(width / patch_shape), floor(height / patch_shape)};
+                        predict_config_struct.output_name = obj.output_path + "denoised_tilt_stack" + filesep + even_files(j).name;
                     end
-                    name_parts = strsplit((even_tomograms(i).name), ".");
-                    name_parts = strsplit(name_parts{1}, "_");
+
                     predict_config_json = jsonencode(predict_config_struct,'PrettyPrint',true);
                     fid = fopen("predict_config.json", "w+");
                     fprintf(fid, "%s", predict_config_json);
@@ -202,11 +205,13 @@ classdef CryoCARE < Module
                     end
                     [SUCCESS,MESSAGE,MESSAGEID] = mkdir(strjoin({name_parts{1:2}}, "_"));
                     if obj.configuration.use_conda == true
-                        [status, output] = system("conda activate " + obj.configuration.cryoCARE_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH  python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf predict_config.json");
+                        [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf " + obj.output_path + filesep + "predict_config.json");
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
-                    output_stack_list{j} = char("" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name);
+                    if tilt_stacks == true
+                        output_stack_list{j} = char(obj.output_path + filesep + "denoised_tilt_stack" + filesep + even_files(j).name);
+                    end
                 end
                 if tilt_stacks == true
                     stack_output_path = "" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name;

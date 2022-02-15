@@ -54,7 +54,7 @@ classdef SortFiles < Module
                     disp("INFO: Linking from " + source + newline + " to "...
                         + destination + "!");
                     % TODO: Check status and / or output
-                    [~, ~] = createSymbolicLink(source, destination, log_file_id);
+                    [~, ~] = createSymbolicLink(source, destination, log_file_id, false);
                 else
                     disp("INFO: Copying from " + source + newline + " to "...
                         + destination + "!");

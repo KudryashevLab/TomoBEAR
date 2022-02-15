@@ -932,7 +932,15 @@
         "binning": 0,
         "train_split": 0.9,
         "neighbouring_projections": 1,
-        "tensorboard": true
+        "tensorboard": true,
+        "epochs": 200,
+        "steps_per_epoch": 200,
+        "batch_size": 16,
+        "unet_kern_size": 3,
+        "unet_n_depth": 3,
+        "unet_n_first": 16,
+        "learning_rate": 0.0004,
+        "patch_shape": 512
     },
     "EstimateTomogramResolution": {
         "execution_method": "once",

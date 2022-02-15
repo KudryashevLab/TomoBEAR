@@ -365,7 +365,13 @@ classdef BatchRunTomo < Module
                         %% ERROR: batchruntomo - A value was expected but not found for the last option on the command line
                         
                         output = executeCommand(command, true, obj.log_file_id);
-                        
+                            
+                        % NOTE: just removing some garbage
+                        if contains(output, "processchunks ERROR: align.com has given processing error")
+                            disp("WARNING:COMMAND_OUTPUT: " + output);
+                            output = erase(output, "ERROR: align.com has given processing error");
+                        end
+
                         if contains(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING")
                             disp("WARNING:COMMAND_OUTPUT: " + output);
                             new_output = erase(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING");
@@ -447,7 +453,6 @@ classdef BatchRunTomo < Module
                                 seed_points_tilt = point_file_content{1, 4};
                                 seed_points_contour = point_file_content{1, 1};
                             else
-                                % TODO: input zero tilt instead of projection 16
                                 seed_points_x = (point_file_content{1,2}(point_file_content{1,4} == find(angles == 0) - 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
                                     + (prexg_file_content{1,5}(point_file_content{1,4}(point_file_content{1,4} == find(angles == 0) - 1) + 1) / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin);
                                 seed_points_y = (point_file_content{1,3}(point_file_content{1,4} == find(angles == 0) - 1)  / obj.configuration.pre_aligned_stack_binning * obj.configuration.ft_bin)...
@@ -683,6 +688,12 @@ classdef BatchRunTomo < Module
                     
                     output = executeCommand(command, true, obj.log_file_id);
                     
+                    % NOTE: just removing some garbage
+                    if contains(output, "processchunks ERROR: align.com has given processing error")
+                        disp("WARNING:COMMAND_OUTPUT: " + output);
+                        output = erase(output, "ERROR: align.com has given processing error");
+                    end
+
                     if contains(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING")
                         disp("WARNING:COMMAND_OUTPUT: " + output);
                         new_output = erase(output, "ERROR: TILTALIGN - TOO FEW DATA POINTS TO DO ROBUST FITTING");
