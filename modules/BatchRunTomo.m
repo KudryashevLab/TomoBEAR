@@ -55,7 +55,7 @@ classdef BatchRunTomo < Module
                 createStandardFolder(obj.configuration, "ctf_corrected_binned_tomograms_folder", false);
             end
             
-            if isfield(obj.configuration.tomograms.tomogram_001, "motion_corrected_even_files")
+            if isfield(obj.configuration.tomograms.tomogram_001, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_002, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_003, "motion_corrected_even_files")
                 createStandardFolder(obj.configuration, "aligned_even_tilt_stacks_folder", false);
                 createStandardFolder(obj.configuration, "aligned_odd_tilt_stacks_folder", false);
             end
@@ -501,7 +501,7 @@ classdef BatchRunTomo < Module
                         end
                         if end_steps(j) >= 8 % obj.configuration.ending_step == 8
                             if obj.configuration.aligned_stack_binning > 1
-                                [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name);
+                                [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name);
                                 if fileExists(current_location + string(filesep) + name + ".ali")
                                     createSymbolicLink(current_location + string(filesep) + name + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
                                 else
@@ -528,7 +528,7 @@ classdef BatchRunTomo < Module
                                             + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali -TransformFile "...
                                             + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
                                             + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
-                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name);
                                         if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
                                             createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                                         else
@@ -540,7 +540,7 @@ classdef BatchRunTomo < Module
                                             + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali -TransformFile "...
                                             + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
                                             + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
-                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                                        [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name);
                                         if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
                                             createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                                         else
