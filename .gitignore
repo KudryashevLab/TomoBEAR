@@ -17,6 +17,7 @@
 DYNAMO_INITIALIZED
 CONFIGURATION
 matlab_shell.sh
+run_TomoBEAR.sh
 TomoBEAR.prj
 tomoBEAR/
 TomoBEAR/

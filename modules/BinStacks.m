@@ -49,8 +49,8 @@ classdef BinStacks < Module
 
 %                 system("xfmodel -xf " + tiltxf_files{1} + " -back " + erasefid_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid");
 
-                
-                if obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) > 1
+                if obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) == 1
+                elseif obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) > 1
                     bin_factor = obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning;
                     if obj.configuration.aligned_stack_binning > 1
                         tilt_stacks_path = obj.configuration.processing_path...

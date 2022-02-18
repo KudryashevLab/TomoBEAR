@@ -149,7 +149,7 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     % TODO: add parameter to decide for whom to allow execution
     system("chmod ug+x " + default_configuration.general.pipeline_executable);
     
-    if exist(default_configuration.general.project_name, "dir") && ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
+    if exist("./" + default_configuration.general.project_name, "dir") && ~fileExists(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED")
         compileTomoBEAR
         fid = fopen(default_configuration.general.project_name + filesep + "BUILD_INITIALIZED", "w+");
         fclose(fid);
@@ -357,7 +357,11 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
     fprintf(fid, "</platform>\n");
   fprintf(fid, "</configuration>\n");
 fprintf(fid, "</deployment-project>\n");
-system("chmod ug+rw " + default_configuration.general.pipeline_location + filesep + "TomoBEAR.prj");
+if default_configuration.general.pipeline_location ~= ""
+    system("chmod ug+rw " + default_configuration.general.pipeline_location + filesep + "TomoBEAR.prj");
+else
+    system("chmod ug+rw TomoBEAR.prj");
+end
 end
 
 end
