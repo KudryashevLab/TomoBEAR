@@ -36,7 +36,8 @@ if isunix()
         fid = fopen(default_configuration.general.matlab_shell, "w+");
         fprintf(fid, "%s\n", "#!/bin/bash");
         fprintf(fid, "%s\n", "SCRIPTPATH=""$( cd -- ""$(dirname ""$0"")"" >/dev/null 2>&1 ; pwd -P )""");
-        
+%        fprintf(fid, "%s\n", "if [ -z ${LD_LIBRARY_PATH_COPY+x} ]; then LD_LIBRARY_PATH=$LD_LIBRARY_PATH_COPY; fi");
+
         if fileExists("./load_modules.sh")
             fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
         end
@@ -81,7 +82,7 @@ end
 disp("INFO: initializing environment...");
 initializeEnvironment(default_configuration_path);
 
-clear project_path configuration_parser configuration_path default_configuration default_configuration_path;
+clear project_path configuration_parser configuration_path default_configuration default_configuration_path ans fid output status;
 disp("INFO: environment initialized...");
 if ~isdeployed()
     dbstop if error

@@ -220,9 +220,6 @@ classdef SlurmPipeline < Pipeline
                 sbatch_wrapper = configuration.general.pipeline_location + string(filesep) + configuration.general.sbatch_wrapper;
                 pipeline_executable = configuration.general.pipeline_location + string(filesep) + configuration.general.pipeline_executable;
             else
-            command = command + " --job-name=" + step_name + " ";
-            
-            if configuration.general.slurm_partition ~= ""
                 current_dir = string(pwd) + string(filesep);
                 sbatch_wrapper = current_dir + configuration.general.sbatch_wrapper;
                 pipeline_executable = current_dir + configuration.general.pipeline_executable;
@@ -230,6 +227,9 @@ classdef SlurmPipeline < Pipeline
             
             command = sbatch_wrapper;
             
+            command = command + " --job-name=" + step_name + " ";
+            
+            if configuration.general.slurm_partition ~= ""            
                 command = command + " --partition=" + configuration.general.slurm_partition + " ";
             else
                 command = command + " ";

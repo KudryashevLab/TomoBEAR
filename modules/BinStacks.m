@@ -50,6 +50,48 @@ classdef BinStacks < Module
 %                 system("xfmodel -xf " + tiltxf_files{1} + " -back " + erasefid_files{1} + " " + obj.output_path + filesep + field_names{obj.configuration.set_up.j} + "_erase_inverted.fid");
 
                 if obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) == 1
+                    bin_factor = obj.configuration.binnings(i);
+                    tilt_stacks = getTiltStacks(obj.configuration, true);
+                    tilt_stacks = tilt_stacks(contains({tilt_stacks(:).folder}, sprintf("tomogram_%03d", obj.configuration.set_up.j)));
+                   
+                    if isempty(tilt_stacks)
+                        obj.status = 0;
+                        return;
+                    end
+                   
+                    xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
+                   
+                    [path, name, extension] = fileparts(tilt_stacks.name);
+                   
+                    xf_file_source = xf_file_paths{1};
+                   
+                    xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
+                   
+                    obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
+                   
+                    stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                    stack_destination = obj.output_path + string(filesep) + name + ".st";
+                    obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
+                   
+                    %                     for j = 1:length(obj.configuration.binnings)
+                    binned_stack_suffix = "bin_" + num2str(obj.configuration.binnings(i));
+                    disp("INFO: Creating " + name + "_" + binned_stack_suffix + ".ali...");
+                    stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + ".ali";
+                    obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{i} = stack_output_path;
+                    [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
+                    executeCommand("newstack"...
+                        + " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin))...
+                        + " -input " + stack_destination...
+                        + " -output " + stack_output_path...
+                        + " -xform " + xf_file_destination...
+                        + " -antialias " + obj.configuration.antialias_filter...
+                        + " -bin " + num2str(bin_factor), false, obj.log_file_id);
+                    executeCommand("alterheader -del " + apix + "," + apix + "," + apix + "," + " " + stack_output_path, false, obj.log_file_id);
+                    if obj.configuration.binnings(i) > 1
+                        [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "binned_aligned_tilt_stacks_folder", obj.log_file_id);
+                    else
+                        [output_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "aligned_tilt_stacks_folder", obj.log_file_id);
+                    end
                 elseif obj.configuration.use_ctf_corrected_aligned_stack == true && (obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning) > 1
                     bin_factor = obj.configuration.binnings(i) / obj.configuration.aligned_stack_binning;
                     if obj.configuration.aligned_stack_binning > 1
