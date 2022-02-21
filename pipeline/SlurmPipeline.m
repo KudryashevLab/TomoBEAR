@@ -95,6 +95,8 @@ classdef SlurmPipeline < Pipeline
                         disp("WARNING: pipeline ending step is bigger then configured pipeline steps")
                     end
                     pipeline_steps = length(pipeline_definition);
+                else
+                    pipeline_steps = length(pipeline_definition);
                 end
                     
                     
@@ -159,6 +161,10 @@ classdef SlurmPipeline < Pipeline
                                 else
                                     node = "";
                                 end
+                                if mod(j, length(nodes_length))
+                                    previous_job_ids = job_ids;
+                                    job_ids = [];
+                                end
                             end
                             if configuration.general.jobs_per_node == 1 && configuration.general.gpus_per_node > 1
                             	gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
@@ -214,6 +220,9 @@ classdef SlurmPipeline < Pipeline
                 sbatch_wrapper = configuration.general.pipeline_location + string(filesep) + configuration.general.sbatch_wrapper;
                 pipeline_executable = configuration.general.pipeline_location + string(filesep) + configuration.general.pipeline_executable;
             else
+            command = command + " --job-name=" + step_name + " ";
+            
+            if configuration.general.slurm_partition ~= ""
                 current_dir = string(pwd) + string(filesep);
                 sbatch_wrapper = current_dir + configuration.general.sbatch_wrapper;
                 pipeline_executable = current_dir + configuration.general.pipeline_executable;
@@ -221,9 +230,6 @@ classdef SlurmPipeline < Pipeline
             
             command = sbatch_wrapper;
             
-            command = command + " --job-name=" + step_name + " ";
-            
-            if configuration.general.slurm_partition ~= ""
                 command = command + " --partition=" + configuration.general.slurm_partition + " ";
             else
                 command = command + " ";
@@ -255,7 +261,7 @@ classdef SlurmPipeline < Pipeline
             
             % TODO: rename slurm_time
             if configuration.general.slurm_time ~= ""
-                command = command + " --time=" + configuration.general.time + " ";
+                command = command + " --time=" + configuration.general.slurm_time + " ";
             else
                 command = command + " ";
             end

@@ -75,7 +75,11 @@ classdef CryoCARE < Module
                 train_data_config_struct.patch_shape = {patch_shape, patch_shape, patch_shape};
                 train_data_config_struct.num_slices = round((width / patch_shape) * (height / patch_shape) * (z / patch_shape));
                 train_data_config_struct.tilt_axis = "Y";
+<<<<<<< HEAD
+                train_data_config_struct.split = round(height / max(height * obj.configuration.train_split, patch_shape), 2);
+=======
                 train_data_config_struct.split = round(max(height * obj.configuration.train_split, patch_shape) / height, 2);
+>>>>>>> 74db4046bca0f9379aefde22adc22949e7ceac35
             else
                 patch_shape = patch_shape / 1;
                 train_data_config_struct.patch_shape = {patch_shape, patch_shape};
