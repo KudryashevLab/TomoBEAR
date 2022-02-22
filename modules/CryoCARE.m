@@ -103,9 +103,9 @@ classdef CryoCARE < Module
             if ~fileExists("train_data.npz") && ~fileExists("val_data.npz")
                 if obj.configuration.use_conda == true
                     % obj.configuration.conda_path + filesep + "bin" + filesep + "conda activate " + obj.configuration.cryoCARE_env + 
-                    [status, output_data] = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json", false, obj.log_file_id);
+                    output_data = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json", false, obj.log_file_id);
                 else
-                    [status, output] = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
+                    output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
             end
             
@@ -146,9 +146,9 @@ classdef CryoCARE < Module
             fclose(fid);
             if ~exist(obj.configuration.project_name + "_model" + filesep + "history.dat","file")
                 if obj.configuration.use_conda == true
-                    [status, output_train] = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json", false, obj.log_file_id);
+                    output_train = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json", false, obj.log_file_id);
                 else
-                    [status, output] = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
+                    output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
             end
             
@@ -218,9 +218,9 @@ classdef CryoCARE < Module
                     fclose(fid);
 
                     if obj.configuration.use_conda == true
-                        [status, output] = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf " + obj.output_path + filesep + "predict_config.json", false, obj.log_file_id);
+                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf " + obj.output_path + filesep + "predict_config.json", false, obj.log_file_id);
                     else
-                        [status, output] = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path, false, obj.log_file_id);
+                        output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path, false, obj.log_file_id);
                     end
                     if tilt_stacks == true
                         output_stack_list{j} = char(obj.output_path + filesep + "denoised_tilt_stack" + filesep + even_files(j).name);
