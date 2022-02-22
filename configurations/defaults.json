@@ -190,7 +190,8 @@
         "dose_weighted_tilt_stacks_folder": "dose_weighted_tilt_stacks",
         "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
         "denoised_binned_tomograms_folder": "denoised_binned_tomograms",
-        "denoised_tilt_stacks_folder": "denoised_tilt_stacks"
+        "denoised_tilt_stacks_folder": "denoised_tilt_stacks",
+        "aretomo_command": ""
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -940,7 +941,8 @@
         "unet_n_depth": 3,
         "unet_n_first": 16,
         "learning_rate": 0.0004,
-        "patch_shape": 512
+        "patch_shape": 512,
+        "tomograms_to_train_on": 0
     },
     "EstimateTomogramResolution": {
         "execution_method": "once",
@@ -999,5 +1001,16 @@
         "direct_read": false,
         "steps_per_validation": 10,
         "trainings_set_fraction": 0.8
+    },
+    "AreTomo": {
+        "execution_method": "parallel",
+        "weighted_back_projection": true,
+        "tilt_axis_determination": 0,
+        "align_height_ratio": 0.75,
+        "apply_dose_weighting": false,
+        "sart": "20 5",
+        "flip_volume": 1,
+        "flip_intensity": 0,
+        "citation": ""
     }
 }

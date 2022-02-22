@@ -67,7 +67,7 @@ classdef TemplateMatchingPostProcessing < Module
             particles_to_be_cropped = obj.configuration.particles_to_be_cropped;
             break_flag = false;
             for i = 1:length(tab_tomo)
-                if tab_tomo{i}(1,20) == 0
+                if isempty(tab_tomo{i}) || tab_tomo{i}(1,20) == 0
                     continue;
                 end
                 if i == 1
