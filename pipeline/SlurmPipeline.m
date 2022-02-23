@@ -154,14 +154,14 @@ classdef SlurmPipeline < Pipeline
                                 else
                                     gpu = -1;
                                 end
-                                [job_ids(end + 1: end + configuration.general.jobs_per_node), first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, (j * configuration.general.jobs_per_node) + 1, min(dynamic_configuration.tomograms_count,(j * configuration.general.jobs_per_node) + configuration.general.jobs_per_node), i - 1, obj.pipeline_definition{i}, node, gpu);
+                                [job_ids(end + 1: end + 1), first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, (j * configuration.general.jobs_per_node) + 1, min(dynamic_configuration.tomograms_count,(j * configuration.general.jobs_per_node) + configuration.general.jobs_per_node), i - 1, obj.pipeline_definition{i}, node, gpu);
                                 current_node = current_node + 1;
                                 if ~isempty(configuration.general.nodes)
                                     node = configuration.general.nodes(mod(current_node, nodes_length)+1);
                                 else
                                     node = "";
                                 end
-                                if mod(j, length(nodes_length))
+                                if mod(j, length(configuration.general.nodes)) == length(configuration.general.nodes) - 1 && j < ceil(dynamic_configuration.tomograms_count/configuration.general.jobs_per_node) - 1 && j > 0  
                                     previous_job_ids = job_ids;
                                     job_ids = [];
                                 end
@@ -172,7 +172,8 @@ classdef SlurmPipeline < Pipeline
                             else
                                 gpu = -1;
                             end
-                            [job_ids(end + 1), first_step_to_execute] = obj.queueJobs(configuration, job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, obj.pipeline_definition{i}, node, gpu);
+                            previous_job_ids = job_ids;
+                            [job_ids, first_step_to_execute] = obj.queueJobs(configuration, previous_job_ids, first_step_to_execute, 1, dynamic_configuration.tomograms_count, i - 1, obj.pipeline_definition{i}, node, gpu);
                         elseif isfield(merged_configuration, "execution_method") && merged_configuration.execution_method == "control"
                             if configuration.general.jobs_per_node == 1 && configuration.general.gpus_per_node > 1
                             	gpu = mod(gpu_counter, configuration.general.gpus_per_node) + 1;
