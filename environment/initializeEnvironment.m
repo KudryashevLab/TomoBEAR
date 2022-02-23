@@ -119,7 +119,9 @@ if ~isdeployed
         fid = fopen("DYNAMO_INITIALIZED", "w+");
         fclose(fid);
     end
-    addpath(default_configuration.general.SUSAN_path);
+    if isfield(default_configuration.general, "SUSAN_path") && default_configuration.general.SUSAN_path ~= ""
+        addpath(default_configuration.general.SUSAN_path);
+    end
 end
 if ~fileExists(default_configuration.general.pipeline_executable) || default_configuration.general.regenerate_load_modules_file == true
     fid = fopen(default_configuration.general.pipeline_executable, "w+");
@@ -133,7 +135,7 @@ if ~fileExists(default_configuration.general.pipeline_executable) || default_con
     fprintf(fid, "%s\n", "fi");
     fprintf(fid, "%s\n", "export PATH=$SCRIPTPATH/dynamo/cuda/bin:$PATH");
     if  isfield(default_configuration.general, "SUSAN_path") && default_configuration.general.SUSAN_path ~= ""
-        fprintf(fid, "%s\n", "export PATH=/home/risanche/Projects/SUSAN/devel/+SUSAN/bin:$PATH");
+        fprintf(fid, "%s\n", "export PATH=" + default_configuration.general.SUSAN_path + filesep + "+SUSAN" + filesep + "bin:$PATH");
     end
     if fileExists("./load_modules.sh")
         fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
@@ -257,7 +259,7 @@ fprintf(fid, "${LD_LIBRARY_PATH}:MR/v911/runtime/glnxa64:MR/v911/bin/glnxa64:MR/
       fprintf(fid, "<file>${PROJECT_ROOT}/json</file>\n");
       fprintf(fid, "<file>${PROJECT_ROOT}/pipeline</file>\n");
       if isfield(default_configuration.general, "SUSAN_path") && default_configuration.general.SUSAN_path ~= ""
-        fprintf(fid, "<file>" + default_configuration.general.SUSAN_path + "/+SUSAN</file>\n");
+        fprintf(fid, "<file>" + default_configuration.general.SUSAN_path + filesep + "+SUSAN</file>\n");
       end
     fprintf(fid, "</fileset.resources>\n");
     fprintf(fid, "<fileset.package />\n");
