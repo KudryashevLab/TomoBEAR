@@ -939,7 +939,8 @@
         "unet_n_depth": 3,
         "unet_n_first": 16,
         "learning_rate": 0.0004,
-        "patch_shape": 512
+        "patch_shape": 512,
+        "tomograms_to_train_on": 0
     },
     "EstimateTomogramResolution": {
         "execution_method": "once",
