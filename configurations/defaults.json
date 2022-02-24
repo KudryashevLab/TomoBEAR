@@ -1010,5 +1010,9 @@
         "flip_volume": 1,
         "flip_intensity": 0,
         "citation": ""
+    },
+    "RelionAlignmentProject": {
+        "execution_method": "once",
+        "binning": 1
     }
 }
