@@ -130,6 +130,11 @@ if configuration.automatic_filename_parts_recognition == true
                 dynamic_configuration.original_files(i).time_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_"));
                 dynamic_configuration.original_files(i).adjusted_date_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
                 dynamic_configuration.original_files(i).adjusted_time_position = length(strsplit(current_file_name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).date_time = strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_");
+                dynamic_configuration.original_files(i).date = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).date_position};
+                dynamic_configuration.original_files(i).time = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).time_position};
+                dynamic_configuration.original_files(i).date_time = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).date_position} + "_" + dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).time_position};
+                configuration.ignore_file_system_time_stamps = false;
             end
             dynamic_configuration.original_files(i).tilt_stack = false;
             dynamic_configuration.tilt_stacks = false;
@@ -175,6 +180,11 @@ if configuration.automatic_filename_parts_recognition == true
                 dynamic_configuration.original_files(i).time_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_"));
                 dynamic_configuration.original_files(i).adjusted_date_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(1,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
                 dynamic_configuration.original_files(i).adjusted_time_position = length(strsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_")) - dynamic_configuration.original_files(i).position_adjustment;
+                dynamic_configuration.original_files(i).date_time = srsplit(original_files(i).name(name_number_ext{1}(1,1):month_date_time_ext{1}(2,2)), "_");
+                dynamic_configuration.original_files(i).date = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).date_position};
+                dynamic_configuration.original_files(i).time = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).time_position};
+                dynamic_configuration.original_files(i).date_time = dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).date_position} + "_" + dynamic_configuration.original_files(i).date_time{dynamic_configuration.original_files(i).time_position};
+                configuration.ignore_file_system_time_stamps = false;
             end
             
             dynamic_configuration.tilt_stacks = false;
@@ -185,7 +195,7 @@ if configuration.automatic_filename_parts_recognition == true
             dynamic_configuration.tilt_stacks = true;
         end
     end
-    
+    [values, indices] = sort({dynamic_configuration.original_files.name});
     if dynamic_configuration.tilt_stacks == false
         start_indices = find([dynamic_configuration.original_files(:).zero_tilt]);
         file_paths = (string({original_files.folder}) + string(filesep) + string({original_files.name}))';
@@ -213,9 +223,9 @@ else
         dynamic_configuration.mrc_count_per_tomogram = median(start_indices(2:end) - start_indices(1:end - 1));
     else
         counter = 1;
-        for i = 1:length(original_files)
-            if ~isempty(regexp(original_files(i).name,"_[+-]*0{2}\.0", "match"))
-                start_indices(counter) = i;
+        for i = 2:length(original_files)
+            if ~isempty(regexp(original_files(i).name,"_[+-]*0{2}\.0", "match")) % abs(dynamic_configuration.original_files(i-1).angle) < abs(dynamic_configuration.original_files(i).angle)
+                start_indices(counter) = i-1;
                 counter = counter + 1;
             end
         end
@@ -243,7 +253,11 @@ if configuration.ignore_file_system_time_stamps == false
         [path, name, extension] = fileparts(file_paths(i));
         name_parts = strsplit(name, '_');
         if isfield(configuration, "date_position") && configuration.date_position ~= 0
-            month_day = name_parts(configuration.date_position);
+            if isfield(dynamic_configuration.original_files(i),"date")
+                month_day = dynamic_configuration.original_files(i).date;
+            else
+                month_day = name_parts(configuration.date_position);
+            end
         else
             % NOTE: assumption is that data is copied like that "cp --preserve=timestamps -R /sbdata/EM/Krios_K2/2018-12-29_yizhang_5ht3rMVs_64k/64k_97e/* ."
             [status, output] = system("stat " + file_paths(i));
@@ -252,7 +266,11 @@ if configuration.ignore_file_system_time_stamps == false
             month_day = tok{1}{1};
         end
         if isfield(configuration, "time_position") && configuration.time_position ~= 0
-            time = name_parts(configuration.time_position);
+            if isfield(dynamic_configuration.original_files(i),"time")
+                time = dynamic_configuration.original_files(i).time;
+            else
+                time = name_parts(configuration.time_position);
+            end
         else
             [status, output] = system("stat " + file_paths(i));
             [mat,tok,ext] = regexp(output, "Modify: (\d+-\d+-\d+) (\d+:\d+:\d+.\d+)", "match",...
