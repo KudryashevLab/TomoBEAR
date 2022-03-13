@@ -1007,12 +1007,16 @@
         "align_height_ratio": 0.75,
         "apply_dose_weighting": false,
         "sart": "20 5",
+        "roi": "0 0",
+        "roi_file": "",
+        "patch": "0 0",
         "flip_volume": 1,
         "flip_intensity": 0,
         "citation": ""
     },
     "RelionAlignmentProject": {
         "execution_method": "once",
+        "checkpoint_module": true,
         "binning": 1
     }
 }

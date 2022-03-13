@@ -28,22 +28,40 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                 printVariable(apix);
             end
-            if obj.configuration.use_rawtlt == true
-                tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-            else
-                tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
+            tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","_bin_1.ali.tlt","last");
+            tilt_files{1} = strrep(tilt_files{1}, "._", "_");
+            if isempty(tilt_files)
+                if obj.configuration.use_rawtlt == true
+                    tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
+                else
+                    tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
+                end
             end
-            
             if obj.configuration.use_aligned_stack && ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
                 tilt_stacks = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
             else
-                xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                xf_files = xf_files{1};
+                xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","st.aln","last");
+                if isempty(xf_files)
+                    xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
+                    xf_files = xf_files{1};
+                else
+                    fid_in = fopen(xf_files{1});
+                    lines_in_cells = textscan(fid_in, "%s","Delimiter","\n");
+                    fclose(fid_in);
+                    fid_out = fopen(obj.output_path + filesep + obj.name + ".xf", "w+");
+                    for i = 4:length(lines_in_cells{1})
+                        numbers_in_line = textscan(lines_in_cells{1}{i}, "%f %f %f %f %f %f %f %f %f %f");
+                        rotation_matrix = rotz(numbers_in_line{2});
+                        fprintf(fid_out, "%f %f %f %f %f %f\n", rotation_matrix(1,1), rotation_matrix(1,2), rotation_matrix(2,1), rotation_matrix(2,2), numbers_in_line{4}, numbers_in_line{5});
+                    end
+                    fclose(fid_out);
+                    xf_files = obj.output_path + filesep + obj.name + ".xf";
+                end
                 tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
                 tilt_stacks = tilt_stacks(contains({tilt_stacks(:).name}, sprintf("%s_%03d", obj.configuration.tomogram_output_prefix, obj.configuration.set_up.j)));
             end
             [path, name, extension] = fileparts(tilt_files{1});
-            tilt_index_angle_mapping = sort(obj.configuration.tomograms.(name).tilt_index_angle_mapping(2,:));
+            tilt_index_angle_mapping = sort(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(2,:));
             for i = 1:length(tilt_stacks)
                 [path, name, extension] = fileparts(tilt_files{i});
                 if iscell(tilt_stacks)
@@ -55,9 +73,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 slice_folder = destination_folder + string(filesep) + obj.configuration.slice_folder;
                 obj.dynamic_configuration.defocus_slice_folder_path = slice_folder;
                 [status_mkdir, message, message_id] = mkdir(slice_folder);
-                defocus_file_destination = destination_folder + string(filesep) + name + ".defocus";
+                defocus_file_destination = destination_folder + string(filesep) + obj.name + ".defocus";
                 defocus_file_id = fopen(defocus_file_destination, "w");
-                tilt_file_destination = destination_folder + string(filesep) + name + ".tlt";
+                tilt_file_destination = destination_folder + string(filesep) + obj.name + ".tlt";
                 createSymbolicLink(tilt_files{i}, tilt_file_destination, obj.log_file_id);
                 tilt_file_id = fopen(tilt_file_destination, "r");
                 if tilt_file_id == -1
@@ -65,8 +83,8 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 end
                 % NOTE: use the raw stack if aligned stack binning is
                 % higher than 1
-                if (isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == false) || obj.configuration.aligned_stack_binning > 1
-                    xf_file_destination = destination_folder + string(filesep) + name + ".xf";
+                if ((isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == false) || obj.configuration.aligned_stack_binning > 1) && isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","_bin_1.ali.tlt","last"))
+                    xf_file_destination = destination_folder + string(filesep) + obj.name + ".xf";
                     output = createSymbolicLink(xf_files{i}, xf_file_destination, obj.log_file_id);
                 end
                 disp("INFO: splitting " + tilt_stack_name + "...");
@@ -83,7 +101,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 output = createSymbolicLink(source, destination, obj.log_file_id);
                 output = executeCommand("newstack -split 1 -append mrc "...
                     + destination + " "...
-                    + slice_folder + string(filesep) + name...
+                    + slice_folder + string(filesep) + obj.name...
                     + "_" + obj.configuration.slice_suffix + "_", false, obj.log_file_id);
                 return_folder = cd(slice_folder);
                 disp("INFO: **GCTF ESTIMATION**");
@@ -98,34 +116,34 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     else
                         apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
                     end
-                    disp("INFO: Starting Gctf estimation on " + name + "!");
+                    disp("INFO: Starting Gctf estimation on " + obj.name + "!");
                     command = "CUDA_VISIBLE_DEVICES=" + (obj.configuration.set_up.gpu - 1) + " " +obj.configuration.ctf_correction_command...
                         + " --apix " + apix...
                         + " "...
-                        + name + "_" + obj.configuration.slice_suffix + "_";
-                    if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, name)
-                        if max(obj.configuration.tilt_index_angle_mapping.(name)(4,:)) < 10
-                            file = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0));
+                        + obj.name + "_" + obj.configuration.slice_suffix + "_";
+                    if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, obj.name)
+                        if max(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)) < 10
+                            file = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == 0));
                         else
-                            file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(name)(4,tilt_index_angle_mapping == 0));
+                            file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == 0));
                         end
                     else
-                        if max(obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,:)) < 10
-                            file = sprintf("%d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
+                        if max(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)) < 10
+                            file = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
                         else
-                            file = sprintf("%02d", obj.configuration.tomograms.(name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
+                            file = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
                         end
                     end
                     command = command + file + ".mrc";
                     output = executeCommand(command, false, obj.log_file_id);
-                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + obj.name + "_" + obj.configuration.slice_suffix + "_"...
                         + file...
                         + "_EPA.log");
                     delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + "micrographs_all_gctf.star");
-                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + obj.name + "_" + obj.configuration.slice_suffix + "_"...
                         + file...
                         + "_gctf.log")
-                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + name + "_" + obj.configuration.slice_suffix + "_"...
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + obj.name + "_" + obj.configuration.slice_suffix + "_"...
                         + file...
                         + ".ctf")
                     line_divided_text = textscan(output, '%s', 'delimiter', '\n');
@@ -157,9 +175,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 if obj.configuration.do_EPA ==  true
                     command = command + " --do_EPA";
                 end
-                command = command + " " + name + "*.mrc";
+                command = command + " " + obj.name + "*.mrc";
                 output = executeCommand(command, false, obj.log_file_id);
-                view_list = dir(slice_folder + string(filesep) + name + "_*_" + "gctf.log");
+                view_list = dir(slice_folder + string(filesep) + obj.name + "_*_" + "gctf.log");
                 if obj.configuration.defocus_file_version <= 2
                     j_length = length(view_list);
                 else

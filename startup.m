@@ -25,7 +25,7 @@ if isunix()
         if ~isempty(default_configuration.general.modules)
             fid = fopen("./load_modules.sh", "w+");
             for i = 1:length(default_configuration.general.modules)
-                fprintf(fid, "module load %s\n", string(default_configuration.general.modules(i)));
+                fprintf(fid, "module load %s > /dev/null\n", string(default_configuration.general.modules(i)));
             end
             fclose(fid);
             system("chmod ug+x ./load_modules.sh");
@@ -39,7 +39,7 @@ if isunix()
 %        fprintf(fid, "%s\n", "if [ -z ${LD_LIBRARY_PATH_COPY+x} ]; then LD_LIBRARY_PATH=$LD_LIBRARY_PATH_COPY; fi");
 
         if fileExists("./load_modules.sh")
-            fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh");
+            fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh > /dev/null");
         end
         
         if default_configuration.general.additional_shell_initialization_script ~= ""

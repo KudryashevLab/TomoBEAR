@@ -406,17 +406,8 @@ classdef LocalPipeline < Pipeline
                         
                         %end
                         
-                        if fileExists(time_file_path) && merged_configuration.execution_method ~= "once"
-                            fid = fopen(time_file_path, 'r');
-                            previous_time = textscan(fid, "%s");
-                            previous_time = previous_time{1};
-                            previous_time = str2double(previous_time);
-                            processing_step_end_time = processing_step_end_time + previous_time;
-                        end
-                        
-                        fid = fopen(time_file_path, 'wt');
-                        fprintf(fid, "%s", string(num2str(processing_step_end_time)));
-                        fclose(fid);
+
+
                         
                         %                         TODO: needs revision if only one both variables is set
                         %                         if (isfield(merged_configuration, "tomogram_interval") && isempty(merged_configuration.tomogram_interval) ...
@@ -427,7 +418,18 @@ classdef LocalPipeline < Pipeline
                         %                             fprintf(fid, "%s", string(num2str(tomogram_status{i - 1})));
                         %                             fclose(fid);
                         %                         else
-                        if (dynamic_configuration.tomograms_count == tomogram_end && tomogram_begin == 1) || (tomogram_end == -1 && tomogram_begin == -1)
+                        if (dynamic_configuration.tomograms_count == tomogram_end && tomogram_begin == 1) || (tomogram_end == -1 && tomogram_begin == -1)                            
+                            if fileExists(time_file_path) && merged_configuration.execution_method ~= "once"
+                                fid = fopen(time_file_path, 'r');
+                                previous_time = textscan(fid, "%s");
+                                previous_time = previous_time{1};
+                                previous_time = str2double(previous_time);
+                                processing_step_end_time = processing_step_end_time + previous_time;
+                            end
+                            fid = fopen(time_file_path, 'wt');
+                            fprintf(fid, "%s", string(num2str(processing_step_end_time)));
+                            fclose(fid);
+                            
                             fid = fopen(success_file_path, 'wt');
                             fprintf(fid, "%s", string(num2str(tomogram_status{i - 1})));
                             fclose(fid);

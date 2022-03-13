@@ -1045,7 +1045,7 @@ classdef DynamoAlignmentProject < Module
                         
                         for i = 1:N
                             tomos.tomo_id(i) = tomos_id(i);
-                            stack_path = string(aligned_tilt_stacks(i).folder) + filesep + string(aligned_tilt_stacks(i).name);
+                            stack_path = string(aligned_tilt_stacks(find(contains({aligned_tilt_stacks(:).name}, sprintf("%03d", tomos_id(i))))).folder) + filesep + string(aligned_tilt_stacks(find(contains({aligned_tilt_stacks(:).name}, sprintf("%03d", tomos_id(i))))).name);
                             tomos.set_stack (i, stack_path);
                             tomos.set_angles (i, char(string(tlt_files{tomos_id(i)}(1).folder) + filesep + tlt_files{tomos_id(i)}(1).name));
                             % TODO: exclude line if ctf_correction_method

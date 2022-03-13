@@ -23,14 +23,26 @@ classdef DynamoTemplateMatching < Module
                 if  isfield(obj.configuration, "use_denoised_tomograms") &&  obj.configuration.use_denoised_tomograms == true
                     if  isfield(obj.configuration, "template_matching_binning") && obj.configuration.template_matching_binning > 1
                         tomograms = getDenoisedCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                        if isempty(tomograms)
+                            tomograms = getDenoisedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                        end
                     else
                         tomograms = getDenoisedCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
+                        if isempty(tomograms)
+                            tomograms = getDenoisedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                        end
                     end
                 else
                     if isfield(obj.configuration, "template_matching_binning") && obj.configuration.template_matching_binning > 1
                         tomograms = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                        if isempty(tomograms)
+                            tomograms = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                        end
                     else
                         tomograms = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
+                        if isempty(tomograms)
+                            tomograms = getTomogramsFromStandardFolder(obj.configuration, true);
+                        end
                     end
                 end
             else

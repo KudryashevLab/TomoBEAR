@@ -15,10 +15,21 @@ classdef CryoCARE < Module
                 binning = binnings_sorted(end);
                 even_tomograms = getCtfCorrectedBinnedEvenTomogramsFromStandardFolder(obj.configuration, true, binning);
                 odd_tomograms = getCtfCorrectedBinnedOddTomogramsFromStandardFolder(obj.configuration, true, binning);
-            else
+                if isempty(even_tomograms)
+                    even_tomograms = getBinnedEvenTomogramsFromStandardFolder(obj.configuration, true, binning);
+                    odd_tomograms = getBinnedOddTomogramsFromStandardFolder(obj.configuration, true, binning);
+                end
+                if isempty(even_tomograms) || isempty(odd_tomograms)
+                    disp("INFO: no tomograms found with last specified binning!");
+                end
+            elseif obj.configuration.binning > 1
                 binning = obj.configuration.binning;
                 even_tomograms = getCtfCorrectedBinnedEvenTomogramsFromStandardFolder(obj.configuration, true, binning);
                 odd_tomograms = getCtfCorrectedBinnedOddTomogramsFromStandardFolder(obj.configuration, true, binning);
+                if isempty(even_tomograms)
+                    even_tomograms = getBinnedEvenTomogramsFromStandardFolder(obj.configuration, true, binning);
+                    odd_tomograms = getBinnedOddTomogramsFromStandardFolder(obj.configuration, true, binning);
+                end
                 if isempty(even_tomograms) || isempty(odd_tomograms)
                     disp("INFO: no tomograms found with specified binning!");
                 end
@@ -59,7 +70,7 @@ classdef CryoCARE < Module
             %   "n_normalization_samples": 500,
             %   "path": "./"
             % }
-            
+            disp("INFO: generating config to generate train data...")
             train_data_config_struct = struct;
             train_data_config_struct.even = cell(1);
             train_data_config_struct.odd = cell(1);
@@ -108,7 +119,7 @@ classdef CryoCARE < Module
                     output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
             end
-            
+            disp("INFO: generating training data finished...");
             %% cat train_config.json
             % {
             %   "train_data": "./",
@@ -122,7 +133,7 @@ classdef CryoCARE < Module
             %   "model_name": "model_name",
             %   "path": "./"
             % }
-            
+            disp("INFO: generating config for training...");
             train_config_struct = struct;
             train_config_struct.train_data = obj.output_path;
             train_config_struct.epochs = obj.configuration.epochs;
@@ -151,7 +162,7 @@ classdef CryoCARE < Module
                     output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
             end
-            
+            disp("INFO: training finished...");
             %% predict_config.json
             % {
             %   "model_name": "model_name",
@@ -163,6 +174,7 @@ classdef CryoCARE < Module
             % }
             
             for i = 1:length(even_tomograms)
+                disp("INFO: generating config for predicting tomogram " + i + "...");
                 if tilt_stacks == true
                     if exist("tilt_stack_even", "dir")
                         rmdir("tilt_stack_even", "s");
@@ -242,7 +254,7 @@ classdef CryoCARE < Module
                     end
                 end
             end
-            
+            disp("INFO: predicting denoised tomograms finished...");
             cd(return_path);
         end
     end
