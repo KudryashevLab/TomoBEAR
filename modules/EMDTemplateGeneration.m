@@ -40,8 +40,7 @@ classdef EMDTemplateGeneration < Module
             map_path_char = char(map_path);
             
             if obj.configuration.dark_density == true
-                template = -dread(map_path_char);
-            else
+              else
                 template = dread(map_path_char);
             end
             
@@ -67,7 +66,7 @@ classdef EMDTemplateGeneration < Module
             %             tilt_geometry = obj.configuration.tilt_geometry;
             %             projections = abs(tilt_geometry(1)-tilt_geometry(2)) / tilt_geometry(3);
             %             m = projections;
-            template_scaled_to_actual_data = length(template) * (1 / apix * obj.configuration.ft_bin);
+            template_scaled_to_actual_data = length(template) * (1 / (apix * obj.configuration.ft_bin));
             %             if obj.configuration.use_half_template_size == true
             %                 template_scaled_to_actual_data = template_scaled_to_actual_data / 2;
             %             end

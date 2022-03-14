@@ -346,7 +346,8 @@
         "citation": "",
         "citation_link": "",
         "doi": "",
-        "do_EPA": true
+        "do_EPA": true,
+        "estimated_astigmatism": 1000
     },
     "ViewStacks": {
         "execution_method": "sequential",
