@@ -94,7 +94,7 @@ classdef DeepFinder < Module
                 
                 
                 if obj.configuration.use_conda == true
-                    [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + pipeline_location + filesep + "modules" + filesep + "DeepFinder" + filesep + "generate_XML.py --tblpath table.tbl");
+                    [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + pipeline_location + filesep + "modules" + filesep + "DeepFinder" + filesep + "generate_XML.py --tblpath table.tbl");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                 end
@@ -149,7 +149,7 @@ classdef DeepFinder < Module
                     fclose(fid_target);
                     
                     if obj.configuration.use_conda == true
-                        [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + name + "_target_params.xml");
+                        [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + name + "_target_params.xml");
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
@@ -243,7 +243,7 @@ classdef DeepFinder < Module
                 fclose(fid);
                 
                 if obj.configuration.use_conda == true
-                    [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "train -p train_params.xml");
+                    [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "train -p train_params.xml");
                 else
                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                 end
@@ -264,7 +264,7 @@ classdef DeepFinder < Module
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.mrc")
                     
                     if obj.configuration.use_conda == true
-                        [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "segment -p " + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) * 2 + " -t " + tomograms(i).folder + filesep + tomograms(i).name + " -c 2 -w " + net_weights + " -o " + name + "_segmentation.mrc");
+                        [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "segment -p " + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) * 2 + " -t " + tomograms(i).folder + filesep + tomograms(i).name + " -c 2 -w " + net_weights + " -o " + name + "_segmentation.mrc");
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
@@ -272,7 +272,7 @@ classdef DeepFinder < Module
                 
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.xml")
                     if obj.configuration.use_conda == true
-                        [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "cluster -l " + name + "_segmentation.mrc" + " -r " + floor((length(average)* (previous_binning / binning)) / 2) + " -o " + name + "_segmentation.xml");
+                        [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "cluster -l " + name + "_segmentation.mrc" + " -r " + floor((length(average)* (previous_binning / binning)) / 2) + " -o " + name + "_segmentation.xml");
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
@@ -287,7 +287,7 @@ classdef DeepFinder < Module
             initial_tables = dir(tab_all_path + filesep + "*.tbl");
             
             if obj.configuration.use_conda == true
-                [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + pipeline_location + filesep + "modules" + filesep + "DeepFinder" + filesep + "xml_to_dynamo_tbl.py --dirpath " + obj.output_path + " --tbl table.tbl --outputname " + obj.output_path + filesep + "tab_" + sprintf('%03d',(length(initial_tables) + 1)) + "_all_bin_" + binning  + "_" + particle_count + ".tbl");
+                [status, output] = system("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + pipeline_location + filesep + "modules" + filesep + "DeepFinder" + filesep + "xml_to_dynamo_tbl.py --dirpath " + obj.output_path + " --tbl table.tbl --outputname " + obj.output_path + filesep + "tab_" + sprintf('%03d',(length(initial_tables) + 1)) + "_all_bin_" + binning  + "_" + particle_count + ".tbl");
             else
                 [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
             end

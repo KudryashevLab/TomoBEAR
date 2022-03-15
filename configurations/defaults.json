@@ -896,7 +896,10 @@
         "ssnr": [1, 0],
         "padding_policy": "noise",
         "normalization": "zm",
-        "use_symmetry": true
+        "use_symmetry": true,
+        "use_SUSAN_averager": true,
+        "show_figures": false,
+        "save_figures": true
     },
     "SPOC": {
         "execution_method": "once",
@@ -1018,6 +1021,6 @@
     "RelionAlignmentProject": {
         "execution_method": "once",
         "checkpoint_module": true,
-        "binning": 1
+        "binning": 0
     }
 }

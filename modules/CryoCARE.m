@@ -114,7 +114,7 @@ classdef CryoCARE < Module
             if ~fileExists("train_data.npz") && ~fileExists("val_data.npz")
                 if obj.configuration.use_conda == true
                     % obj.configuration.conda_path + filesep + "bin" + filesep + "conda activate " + obj.configuration.cryoCARE_env + 
-                    output_data = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json", false, obj.log_file_id);
+                    output_data = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.cryoCARE_env + " python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_extract_train_data.py --conf " + obj.output_path + filesep + "train_data_config.json", false, obj.log_file_id);
                 else
                     output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
@@ -157,7 +157,7 @@ classdef CryoCARE < Module
             fclose(fid);
             if ~exist(obj.configuration.project_name + "_model" + filesep + "history.dat","file")
                 if obj.configuration.use_conda == true
-                    output_train = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json", false, obj.log_file_id);
+                    output_train = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.cryoCARE_env + " python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_train.py --conf " + obj.output_path + filesep + "train_config.json", false, obj.log_file_id);
                 else
                     output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "", false, obj.log_file_id);
                 end
@@ -230,7 +230,7 @@ classdef CryoCARE < Module
                     fclose(fid);
 
                     if obj.configuration.use_conda == true
-                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n cryocare python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf " + obj.output_path + filesep + "predict_config.json", false, obj.log_file_id);
+                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.cryoCARE_env + " python " + obj.configuration.cryoCARE_repository_path + filesep + "cryocare/scripts/cryoCARE_predict.py --conf " + obj.output_path + filesep + "predict_config.json", false, obj.log_file_id);
                     else
                         output = executeCommand("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path, false, obj.log_file_id);
                     end
