@@ -265,10 +265,10 @@ classdef DeepFinder < Module
             particle_count = 0;
             for i = 1:length(tomograms)
                 [folder, name, extension] = fileparts(tomograms(i).folder);
-                splitted_name = strplit(name);
-                if ~any(table(:, 20) == num2str(splitted_name{2}))
-                    continue;
-                end
+%                 splitted_name = strplit(name);
+%                 if ~any(table(:, 20) == num2str(splitted_name{2}))
+%                     continue;
+%                 end
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.mrc")
                     
                     if obj.configuration.use_conda == true
