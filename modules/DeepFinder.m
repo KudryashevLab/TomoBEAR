@@ -113,9 +113,13 @@ classdef DeepFinder < Module
                 fprintf(fid_train, "\t<path_out path=""" + obj.output_path + filesep + obj.configuration.project_name + "_weights" + filesep + """/>\n");
                 path_tomo = {};
                 path_target = {};
+                unique_indices = unique(table(:, 20));
                 for i = 1:length(tomograms)
                     [folder, name, extension] = fileparts(tomograms(i).folder);
-                    
+                    splitted_name = strsplit(name, "_");
+                    if ~any(table(:, 20) == num2str(splitted_name{2}))
+                        continue;
+                    end
                     
                     %                 if obj.configuration.use_conda == true
                     %                     [status, output] = system("conda activate " + obj.configuration.deep_finder_env + " && LD_LIBRARY_PATH=" + obj.configuration.conda_path + "/lib:$LD_LIBRARY_PATH  python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "anotate -t " + + " -o object_list.xml");
@@ -261,6 +265,10 @@ classdef DeepFinder < Module
             particle_count = 0;
             for i = 1:length(tomograms)
                 [folder, name, extension] = fileparts(tomograms(i).folder);
+                splitted_name = strplit(name);
+                if ~any(table(:, 20) == num2str(splitted_name{2}))
+                    continue;
+                end
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.mrc")
                     
                     if obj.configuration.use_conda == true

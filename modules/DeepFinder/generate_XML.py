@@ -55,16 +55,16 @@ def main(tblpath):
     ### df.drop_duplicates()
 
     distinct_tomos_by_id = new_df["tomo_idx"].drop_duplicates()
-    distinct_tomos_by_list = distinct_tomos_by_id.to_list()
+    distinct_tomos_by_list = sort(distinct_tomos_by_id.to_list())
     print(type(distinct_tomos_by_list))
 
-    for i in distinct_tomos_by_list:
-        tomo_df = new_df[new_df["tomo_idx"] == i]
+    for i in range(length(distinct_tomos_by_list)):
+        tomo_df = new_df[new_df["tomo_idx"] == distinct_tomos_by_list[i]]
         tomo_df["x"] = tomo_df["x"].div(args.binning) + tomo_df["dx"].div(args.binning) #.round(1)
         tomo_df["y"] = tomo_df["y"].div(args.binning) + tomo_df["dy"].div(args.binning) #.round(1)
         tomo_df["z"] = tomo_df["z"].div(args.binning) + tomo_df["dz"].div(args.binning) #.round(1)
         tomo_df["class_label"] = 1
-        tomo_df["tomo_idx"] = i - 1
+        tomo_df["tomo_idx"] = i
 
         my_xml = tomo_df.to_xml(
             "tomogram_" + '{:03}'.format(i) + ".xml",
