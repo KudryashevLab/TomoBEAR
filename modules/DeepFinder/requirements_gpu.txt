@@ -1,0 +1,13 @@
+tensorflow-gpu
+Keras
+numpy
+h5py
+lxml
+mrcfile
+scikit-learn
+scikit-image
+matplotlib
+PyQt5
+pyqtgraph
+openpyxl
+pandas
