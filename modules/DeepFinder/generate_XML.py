@@ -58,7 +58,7 @@ def main(tblpath):
     distinct_tomos_by_list = sorted(distinct_tomos_by_id.to_list())
     print(type(distinct_tomos_by_list))
 
-    for i in range(length(distinct_tomos_by_list)):
+    for i in range(len(distinct_tomos_by_list)):
         tomo_df = new_df[new_df["tomo_idx"] == distinct_tomos_by_list[i]]
         tomo_df["x"] = tomo_df["x"].div(args.binning) + tomo_df["dx"].div(args.binning) #.round(1)
         tomo_df["y"] = tomo_df["y"].div(args.binning) + tomo_df["dy"].div(args.binning) #.round(1)
