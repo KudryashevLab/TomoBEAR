@@ -55,7 +55,7 @@ def main(tblpath):
     ### df.drop_duplicates()
 
     distinct_tomos_by_id = new_df["tomo_idx"].drop_duplicates()
-    distinct_tomos_by_list = sort(distinct_tomos_by_id.to_list())
+    distinct_tomos_by_list = sorted(distinct_tomos_by_id.to_list())
     print(type(distinct_tomos_by_list))
 
     for i in range(length(distinct_tomos_by_list)):
