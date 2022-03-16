@@ -494,7 +494,7 @@ classdef Reconstruct < Module
                         binned_even_tilt_stacks_tmp = binned_even_tilt_stacks(find(contains({binned_even_tilt_stacks.name}, name)));
                         disp("INFO: even tomograms will be generated.");
                         
-                        even_tomogram_destination = obj.output_path + string(filesep) + name + "_even.st";
+                        even_tomogram_destination = obj.output_path + string(filesep) + name + "_unrotated_even.rec";
                         
                         command = "tilt -InputProjections " + binned_even_tilt_stacks_tmp.folder + string(filesep) + binned_even_tilt_stacks_tmp.name...
                             + " -OutputFile " + even_tomogram_destination...
@@ -545,7 +545,7 @@ classdef Reconstruct < Module
                         binned_odd_tilt_stacks_tmp = binned_odd_tilt_stacks(find(contains({binned_odd_tilt_stacks.name}, name)));
                         disp("INFO: odd tomograms will be generated.");
                         
-                        odd_tomogram_destination = obj.output_path + string(filesep) + name + "_odd.st";
+                        odd_tomogram_destination = obj.output_path + string(filesep) + name + "_unrotated_odd.rec";
                         
                         command = "tilt -InputProjections " + binned_odd_tilt_stacks_tmp.folder + string(filesep) + binned_odd_tilt_stacks_tmp.name...
                             + " -OutputFile " + odd_tomogram_destination...
@@ -596,7 +596,7 @@ classdef Reconstruct < Module
                         binned_dose_weighted_tilt_stacks_tmp = binned_dose_weighted_tilt_stacks(find(contains({binned_dose_weighted_tilt_stacks.name}, name)));
                         disp("INFO: dose weighted tomograms will be generated.");
                         
-                        dose_weighted_tomogram_destination = obj.output_path + string(filesep) + name + "_dw.st";
+                        dose_weighted_tomogram_destination = obj.output_path + string(filesep) + name + "_unrotated_dw.rec";
                         
                         command = "tilt -InputProjections " + binned_dose_weighted_tilt_stacks_tmp.folder + string(filesep) + binned_dose_weighted_tilt_stacks_tmp.name...
                             + " -OutputFile " + dose_weighted_tomogram_destination...

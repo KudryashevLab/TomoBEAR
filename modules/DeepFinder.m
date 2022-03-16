@@ -54,12 +54,35 @@ classdef DeepFinder < Module
                     end
                 end
                 
-                if isempty(tomograms) || obj.configuration.use_denoised_tomograms == false
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == true
+                    disp("WARNING: no denoised ctf corrected tomograms found...");
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getDenoisedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
+                    else
+                        tomograms = getDenoisedTomogramsFromStandardFolder(obj.configuration, true);
+                    end
+                end
+                
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == false
+                    disp("WARNING: no denoised tomograms found...");
                     if obj.configuration.template_matching_binning > 1
                         tomograms = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
                     else
                         tomograms = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
                     end
+                end
+
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == false
+                    disp("WARNING: no ctf corrected tomograms found...");
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getTomogramsFromStandardFolder(obj.configuration, true);
+                    end
+                end
+
+                if isempty(tomograms)
+                    error("WARNING: no tomograms found!");
                 end
             else
                 if obj.configuration.use_denoised_tomograms == true
@@ -114,10 +137,13 @@ classdef DeepFinder < Module
                 path_tomo = {};
                 path_target = {};
                 unique_indices = unique(table(:, 20));
+                if ~isempty(tomograms)
+                    error("ERROR: no tomgrams found for processing!")
+                end
                 for i = 1:length(tomograms)
                     [folder, name, extension] = fileparts(tomograms(i).folder);
                     splitted_name = strsplit(name, "_");
-                    if ~any(table(:, 20) == num2str(splitted_name{2}))
+                    if ~any(unique_indices == str2double(splitted_name{2}))
                         continue;
                     end
                     
@@ -266,7 +292,7 @@ classdef DeepFinder < Module
             for i = 1:length(tomograms)
                 [folder, name, extension] = fileparts(tomograms(i).folder);
 %                 splitted_name = strplit(name);
-%                 if ~any(table(:, 20) == num2str(splitted_name{2}))
+%                 if ~any(table(:, 20) == str2double(splitted_name{2}))
 %                     continue;
 %                 end
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.mrc")
