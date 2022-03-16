@@ -174,12 +174,12 @@ classdef DeepFinder < Module
                         error("ERROR: unknown startegy, please check spelling!");
                     end
                     fprintf(fid_target, "\t</path_mask_list>\n");
-                    fprintf(fid_target, "\t<path_target path=""" + obj.output_path + filesep + name + "_target.mrc""/>\n");
+                    fprintf(fid_target, "\t<path_target path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(i-1)) + "_target.mrc""/>\n");
                     fprintf(fid_target, "</paramsGenerateTarget>\n");
                     fclose(fid_target);
                     
                     if obj.configuration.use_conda == true
-                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + name + "_target_params.xml", obj.log_file_id);
+                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + splitted_name{1} + "_" + sprintf("%03d",(i-1)) + "_target_params.xml", obj.log_file_id);
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
