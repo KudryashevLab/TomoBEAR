@@ -152,7 +152,7 @@ classdef DeepFinder < Module
                     %                 else
                     %                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     %                 end
-                    fid_target = fopen(name + "_target_params.xml", "w+");
+                    fid_target = fopen(splitted_name{1} + "_" + sprintf("%03d",(i-1)) + "_target_params.xml", "w+");
                     fprintf(fid_target, "<paramsGenerateTarget>\n");
                     fprintf(fid_target, "\t<path_objl path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(i-1)) + ".xml""/>\n");
                     fprintf(fid_target, "\t<path_initial_vol path=""""/>\n");
