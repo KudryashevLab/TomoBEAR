@@ -154,7 +154,7 @@ classdef DeepFinder < Module
                     %                 end
                     fid_target = fopen(name + "_target_params.xml", "w+");
                     fprintf(fid_target, "<paramsGenerateTarget>\n");
-                    fprintf(fid_target, "\t<path_objl path=""" + obj.output_path + filesep + name + ".xml""/>\n");
+                    fprintf(fid_target, "\t<path_objl path=""" + obj.output_path + filesep + splitted_name + (i-1) + ".xml""/>\n");
                     fprintf(fid_target, "\t<path_initial_vol path=""""/>\n");
                     fprintf(fid_target, "\t<tomo_size>\n");
                     fprintf(fid_target, "\t\t<X size=""" + width + """/>\n");
