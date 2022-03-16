@@ -137,7 +137,7 @@ classdef DeepFinder < Module
                 path_tomo = {};
                 path_target = {};
                 unique_indices = unique(table(:, 20));
-                if ~isempty(tomograms)
+                if isempty(tomograms)
                     error("ERROR: no tomgrams found for processing!")
                 end
                 for i = 1:length(tomograms)
