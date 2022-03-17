@@ -18,7 +18,7 @@ else
 end
 
 configuration_parser = ConfigurationParser();
-[default_configuration, ~] = configuration_parser.parse(default_configuration_path);
+[default_configuration, ~] = configuration_parser.parse(strtrim(default_configuration_path));
 
 if isunix()
     if ~fileExists("./load_modules.sh") || default_configuration.general.regenerate_load_modules_file == true
