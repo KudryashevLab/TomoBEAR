@@ -1,4 +1,5 @@
-classdef DynamoTiltSeriesAlignment < Module
+
+continueclassdef DynamoTiltSeriesAlignment < Module
     methods
         function obj = DynamoTiltSeriesAlignment(configuration)
             obj = obj@Module(configuration);
