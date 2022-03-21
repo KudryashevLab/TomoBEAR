@@ -174,7 +174,13 @@ classdef CryoCARE < Module
             % }
             
             for i = 1:length(even_tomograms)
-                disp("INFO: generating config for predicting tomogram " + i + "...");
+                name_parts = strsplit((even_tomograms(i).name), ".");
+                name_parts = strsplit(name_parts{1}, "_");
+                if exist("" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name, "file")
+                    disp("INFO: skipping predicting tomogram " + i + " due to existence of tomogram...");
+                else
+                    disp("INFO: generating config for predicting tomogram " + i + "...");
+                end
                 if tilt_stacks == true
                     if exist("tilt_stack_even", "dir")
                         rmdir("tilt_stack_even", "s");
@@ -200,8 +206,7 @@ classdef CryoCARE < Module
                 else
                     index = 1;
                 end
-                name_parts = strsplit((even_tomograms(i).name), ".");
-                name_parts = strsplit(name_parts{1}, "_");
+                
                 if exist(strjoin({name_parts{1:2}}, "_"), "dir")
                     [SUCCESS,MESSAGE,MESSAGEID] = rmdir(strjoin({name_parts{1:2}}, "_"), "s");
                 end
