@@ -178,6 +178,7 @@ classdef CryoCARE < Module
                 name_parts = strsplit(name_parts{1}, "_");
                 if exist("" + strjoin({name_parts{1:2}}, "_") + filesep + even_tomograms(i).name, "file")
                     disp("INFO: skipping predicting tomogram " + i + " due to existence of tomogram...");
+                    continue;
                 else
                     disp("INFO: generating config for predicting tomogram " + i + "...");
                 end

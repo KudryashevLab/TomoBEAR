@@ -185,8 +185,8 @@ classdef DeepFinder < Module
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
                     %                 fprintf(fid_train, "</paramsGenerateTarget>\n");
-                    path_tomo{counter_tomo + 1} = "\t\t<tomo" + (counter_tomo) + " path=""" + tomograms(i).folder + filesep + tomograms(i).name + """/>\n";
-                    path_target{counter_tomo + 1} = "\t\t<target" + (counter_tomo) + " path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target.mrc""/>\n";
+                    path_tomo{i} = "\t\t<tomo" + (counter_tomo) + " path=""" + tomograms(i).folder + filesep + tomograms(i).name + """/>\n";
+                    path_target{i} = "\t\t<target" + (counter_tomo) + " path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target.mrc""/>\n";
                     counter_tomo = counter_tomo + 1;
                 end
                 fprintf(fid_train, "\t<path_tomo>\n");
