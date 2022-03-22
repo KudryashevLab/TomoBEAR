@@ -204,7 +204,11 @@ classdef DeepFinder < Module
                 fprintf(fid_train, "\t<path_objl_train path=""" + obj.output_path + filesep + "objl_train.xml" + """/>\n");
                 fprintf(fid_train, "\t<path_objl_valid path=""" + obj.output_path + filesep + "objl_valid.xml" + """/>\n");
                 fprintf(fid_train, "\t<number_of_classes n=""" + obj.configuration.classes + """/>\n");
-                fprintf(fid_train, "\t<patch_size n=""" + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) + """/>\n");
+                if obj.configuration.patch_size == 0
+                    fprintf(fid_train, "\t<patch_size n=""" + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) + """/>\n");
+                else
+                    fprintf(fid_train, "\t<patch_size n=""" + obj.configuration.patch_size + """/>\n");
+                end
                 fprintf(fid_train, "\t<batch_size n=""" + obj.configuration.batch_size + """/>\n");
                 fprintf(fid_train, "\t<number_of_epochs n=""" + obj.configuration.number_of_epochs + """/>\n");
                 fprintf(fid_train, "\t<steps_per_epoch n=""" + obj.configuration.steps_per_epoch + """/>\n");
