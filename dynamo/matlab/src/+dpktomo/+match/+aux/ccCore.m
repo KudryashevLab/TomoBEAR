@@ -18,8 +18,8 @@ function mc = ccCore(rotatedTemplatePadded, rotatedMaskPadded, chunkNormalized, 
 %clear Nmask;
 %norm_data_moving_mask = sqrt(mcn_joint);
 %clear mcn_joint;
-% mcn_final = sqrt(real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized))))^2) / (Nmask^1)) * norm_rotatedTemplate;
-mcn_final = real(sqrt(complex(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized)))).^2) / (Nmask^1))) * norm_rotatedTemplate;
+mcn_final = sqrt(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2))) - 1 * (ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized))).^2) / (Nmask^1)) * norm_rotatedTemplate;
+%mcn_final = real(sqrt(complex(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized.^2)))) - 1 * (real(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNormalized)))).^2) / (Nmask^1))) * norm_rotatedTemplate;
 % clear norm_data_moving_mask;
 %clear norm_rotatedTemplate ;
 
@@ -32,7 +32,7 @@ mcn_final = real(sqrt(complex(ifftn(fftn(rotatedMaskPadded) .* conj(fftn(chunkNo
 % clear P1;
 % identify the elements that would produce singularities in the numerator
 % indproblem=find(mcn_final==0);
-mc = real(ifftn(fftn(rotatedTemplatePadded).*conj(fftn(chunkNormalized))))./mcn_final;
+mc = real(ifftn(fftn(rotatedTemplatePadded).*conj(fftn(chunkNormalized)))./mcn_final);
 % clear RD;
 mc(mcn_final == 0) = -1;
 

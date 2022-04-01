@@ -40,7 +40,8 @@ classdef EMDTemplateGeneration < Module
             map_path_char = char(map_path);
             
             if obj.configuration.dark_density == true
-              else
+                template = -dread(map_path_char);
+            else
                 template = dread(map_path_char);
             end
             

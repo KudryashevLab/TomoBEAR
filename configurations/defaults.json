@@ -1002,7 +1002,8 @@
         "boot_strap": true,
         "direct_read": false,
         "steps_per_validation": 10,
-        "trainings_set_fraction": 0.8
+        "trainings_set_fraction": 0.8,
+        "patch_size": 0
     },
     "AreTomo": {
         "execution_method": "parallel",

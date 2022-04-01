@@ -1,3 +1,4 @@
+
 classdef DynamoTiltSeriesAlignment < Module
     methods
         function obj = DynamoTiltSeriesAlignment(configuration)

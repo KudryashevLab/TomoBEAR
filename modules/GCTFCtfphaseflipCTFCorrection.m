@@ -29,8 +29,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 printVariable(apix);
             end
             tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","_bin_1.ali.tlt","last");
-            tilt_files{1} = strrep(tilt_files{1}, "._", "_");
-            if isempty(tilt_files)
+            if ~isempty(tilt_files)
+                tilt_files{1} = strrep(tilt_files{1}, "._", "_");
+            elseif isempty(tilt_files)
                 if obj.configuration.use_rawtlt == true
                     tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
                 else

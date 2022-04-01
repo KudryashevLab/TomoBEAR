@@ -54,12 +54,35 @@ classdef DeepFinder < Module
                     end
                 end
                 
-                if isempty(tomograms) || obj.configuration.use_denoised_tomograms == false
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == true
+                    disp("WARNING: no denoised ctf corrected tomograms found...");
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getDenoisedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
+                    else
+                        tomograms = getDenoisedTomogramsFromStandardFolder(obj.configuration, true);
+                    end
+                end
+                
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == false
+                    disp("WARNING: no denoised tomograms found...");
                     if obj.configuration.template_matching_binning > 1
                         tomograms = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
                     else
                         tomograms = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
                     end
+                end
+
+                if isempty(tomograms) %|| obj.configuration.use_denoised_tomograms == false
+                    disp("WARNING: no ctf corrected tomograms found...");
+                    if obj.configuration.template_matching_binning > 1
+                        tomograms = getBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
+                    else
+                        tomograms = getTomogramsFromStandardFolder(obj.configuration, true);
+                    end
+                end
+
+                if isempty(tomograms)
+                    error("WARNING: no tomograms found!");
                 end
             else
                 if obj.configuration.use_denoised_tomograms == true
@@ -114,10 +137,14 @@ classdef DeepFinder < Module
                 path_tomo = {};
                 path_target = {};
                 unique_indices = unique(table(:, 20));
+                if isempty(tomograms)
+                    error("ERROR: no tomgrams found for processing!")
+                end
+                counter_tomo = 0;
                 for i = 1:length(tomograms)
                     [folder, name, extension] = fileparts(tomograms(i).folder);
                     splitted_name = strsplit(name, "_");
-                    if ~any(table(:, 20) == num2str(splitted_name{2}))
+                    if ~any(unique_indices == str2double(splitted_name{2}))
                         continue;
                     end
                     
@@ -126,9 +153,9 @@ classdef DeepFinder < Module
                     %                 else
                     %                     [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     %                 end
-                    fid_target = fopen(name + "_target_params.xml", "w+");
+                    fid_target = fopen(splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target_params.xml", "w+");
                     fprintf(fid_target, "<paramsGenerateTarget>\n");
-                    fprintf(fid_target, "\t<path_objl path=""" + obj.output_path + filesep + name + ".xml""/>\n");
+                    fprintf(fid_target, "\t<path_objl path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + ".xml""/>\n");
                     fprintf(fid_target, "\t<path_initial_vol path=""""/>\n");
                     fprintf(fid_target, "\t<tomo_size>\n");
                     fprintf(fid_target, "\t\t<X size=""" + width + """/>\n");
@@ -148,19 +175,20 @@ classdef DeepFinder < Module
                         error("ERROR: unknown startegy, please check spelling!");
                     end
                     fprintf(fid_target, "\t</path_mask_list>\n");
-                    fprintf(fid_target, "\t<path_target path=""" + obj.output_path + filesep + name + "_target.mrc""/>\n");
+                    fprintf(fid_target, "\t<path_target path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target.mrc""/>\n");
                     fprintf(fid_target, "</paramsGenerateTarget>\n");
                     fclose(fid_target);
                     
                     if obj.configuration.use_conda == true
-                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + name + "_target_params.xml", obj.log_file_id);
+                        output = executeCommand("LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.deep_finder_env + " python " + obj.configuration.deep_finder_repository_path + filesep + "bin" + filesep + "generate_target -p " + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target_params.xml", obj.log_file_id);
                     else
                         [status, output] = system("python " + obj.configuration.cryoCARE_repository_path + filesep + "FSC_FDRcontrol.py -halfmap1 " + half_map_1 + " -halfmap2 " + half_map_2 + " -symmetry " + obj.configuration.expected_symmetrie + " -numAsymUnits " + obj.configuration.numAsymUnits + " -p " + obj.configuration.greatest_apix + " -mask " + mask_path);
                     end
                     %                 fprintf(fid_train, "</paramsGenerateTarget>\n");
-                    path_tomo{i} = "\t\t<tomo" + (i-1) + " path=""" + tomograms(i).folder + filesep + tomograms(i).name + """/>\n";
-                    path_target{i} = "\t\t<target" + (i-1) + " path=""" + obj.output_path + filesep + name + "_target.mrc""/>\n";
-                end
+                    path_tomo{counter_tomo + 1} = "\t\t<tomo" + (counter_tomo) + " path=""" + tomograms(i).folder + filesep + tomograms(i).name + """/>\n";
+                    path_target{counter_tomo + 1} = "\t\t<target" + (counter_tomo) + " path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target.mrc""/>\n";
+                    counter_tomo = counter_tomo + 1;
+                end  
                 fprintf(fid_train, "\t<path_tomo>\n");
                 for i = 1:length(path_tomo)
                     fprintf(fid_train, path_tomo{i});
@@ -176,7 +204,11 @@ classdef DeepFinder < Module
                 fprintf(fid_train, "\t<path_objl_train path=""" + obj.output_path + filesep + "objl_train.xml" + """/>\n");
                 fprintf(fid_train, "\t<path_objl_valid path=""" + obj.output_path + filesep + "objl_valid.xml" + """/>\n");
                 fprintf(fid_train, "\t<number_of_classes n=""" + obj.configuration.classes + """/>\n");
-                fprintf(fid_train, "\t<patch_size n=""" + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) + """/>\n");
+                if obj.configuration.patch_size == 0
+                    fprintf(fid_train, "\t<patch_size n=""" + pow2(nextpow2(floor((length(average) * (previous_binning / binning))))) + """/>\n");
+                else
+                    fprintf(fid_train, "\t<patch_size n=""" + obj.configuration.patch_size + """/>\n");
+                end
                 fprintf(fid_train, "\t<batch_size n=""" + obj.configuration.batch_size + """/>\n");
                 fprintf(fid_train, "\t<number_of_epochs n=""" + obj.configuration.number_of_epochs + """/>\n");
                 fprintf(fid_train, "\t<steps_per_epoch n=""" + obj.configuration.steps_per_epoch + """/>\n");
@@ -266,7 +298,7 @@ classdef DeepFinder < Module
             for i = 1:length(tomograms)
                 [folder, name, extension] = fileparts(tomograms(i).folder);
 %                 splitted_name = strplit(name);
-%                 if ~any(table(:, 20) == num2str(splitted_name{2}))
+%                 if ~any(table(:, 20) == str2double(splitted_name{2}))
 %                     continue;
 %                 end
                 if ~fileExists(obj.output_path + filesep + name + "_segmentation.mrc")

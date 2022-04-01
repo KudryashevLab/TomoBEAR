@@ -2523,7 +2523,7 @@ classdef DynamoAlignmentProject < Module
             %             else
             %                 dvrun(char(project_name));
             %             end
-            if obj.configuration.classes > 1 && obj.configuration.swap_particles == true
+            if obj.configuration.classes > 1 %&& obj.configuration.swap_particles == true
                 dynamo_execute_project(char(project_name));
                 visualizations_path = obj.output_path + filesep + "visualizations";
                 [SUCCESS, MESSAGE, MESSAGEID] = mkdir(obj.output_path + filesep + "visualizations");
