@@ -14,7 +14,7 @@ Orange processing steps in the flow chart are mandatory and must be executed by 
 
 In case of errors do not hesitate one of the provided persons in the mentioned in the contacts section below.
 
-# Results (preliminary)
+# Results 
 
 All results shown here have been achieved in an automated manner. The only manual task which needed to be done is chosing the classes for further processing in between the transition of different binning levels.
 
@@ -27,11 +27,7 @@ On the EMPIAR-10064 dataset TomoBEAR achieved 11.52 Angstrom as can be seen belo
 
 ## EMPIAR-10164
 
-On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom as can be seen below.
-
-![HIV EMPIAR-10064 Map 1](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_1.png)
-![HIV EMPIAR-10064 Map 2](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_2.png)
-![HIV EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_fsc.png)
+On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom.
 
 # Acknowledgements
 
