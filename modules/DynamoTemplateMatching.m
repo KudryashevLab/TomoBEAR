@@ -149,7 +149,7 @@ classdef DynamoTemplateMatching < Module
            
             newStr = extractBetween(obj.configuration.expected_symmetrie,2,length(obj.configuration.expected_symmetrie{1}));
             symmetry_order = str2num(newStr);
-            cone_range = obj.configuration.cone_range / symmetry_order;
+            cone_range = obj.configuration.cone_range;% / symmetry_order
             in_plane_range = obj.configuration.in_plane_range / symmetry_order;
 
             %                 obj.dynamic_configuration.inplane_range = inplane_range;
@@ -196,8 +196,8 @@ classdef DynamoTemplateMatching < Module
                 'cr', cone_range,...
                 'cs', cone_sampling,...
                 'ir', in_plane_range,...
-                'is', in_plane_sampling,...
-                'mw', matlab_workers);
+                'is', in_plane_sampling); %,...
+                %'mw', 1
             
             %processCCVolume(configuration, dynamo_template_matching_path);
             %

@@ -188,7 +188,7 @@ classdef DeepFinder < Module
                     path_tomo{counter_tomo + 1} = "\t\t<tomo" + (counter_tomo) + " path=""" + tomograms(i).folder + filesep + tomograms(i).name + """/>\n";
                     path_target{counter_tomo + 1} = "\t\t<target" + (counter_tomo) + " path=""" + obj.output_path + filesep + splitted_name{1} + "_" + sprintf("%03d",(counter_tomo)) + "_target.mrc""/>\n";
                     counter_tomo = counter_tomo + 1;
-                end
+                end  
                 fprintf(fid_train, "\t<path_tomo>\n");
                 for i = 1:length(path_tomo)
                     fprintf(fid_train, path_tomo{i});
