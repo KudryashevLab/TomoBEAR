@@ -64,13 +64,45 @@ if configuration.automatic_filename_parts_recognition == true
         %TODO: probably need to modify prefix extraction
         dynamic_configuration.original_files(i).prefix_length = length(strsplit(dynamic_configuration.original_files(i).prefix, "_"));
         [angle_mat, angle_tok, angle_ext] = regexp(current_file_name, configuration.angle_regex, "match", 'tokens', 'tokenExtents');
-        if ~isempty(angle_ext)
+        if ~isempty(angle_ext) && contains(dynamic_configuration.original_files(i).name, "Square")
+            dynamic_configuration.original_files(i).double_numbering = true;
+            underscore_indices = strfind(dynamic_configuration.original_files(i).name,"_");
+            square_number = extractBetween(dynamic_configuration.original_files(i).name, 7, underscore_indices(1)-1);
+            triple_index(i,1) = str2double(square_number{1});
+            ts_number = extractBetween(dynamic_configuration.original_files(i).name, underscore_indices(2)+1, underscore_indices(3)-1);
+            triple_index(i,2) = str2double(ts_number{1});
             dynamic_configuration.original_files(i).angle_position = length(strsplit(current_file_name(1:angle_ext{1}(2)), "_"));
             dynamic_configuration.original_files(i).position_adjustment = length(strsplit(dynamic_configuration.original_files(i).prefix, "_")) - 1;
             
             dynamic_configuration.original_files(i).angle_extents = angle_ext{1};
             dynamic_configuration.original_files(i).angle = str2double(current_file_name(angle_ext{1}(1):angle_ext{1}(2)));
-            if isfield(configuration, "first_tilt_angle") && configuration.first_tilt_angle ~= ""
+            triple_index(i,3) = dynamic_configuration.original_files(i).angle;
+            if isfield(configuration, "first_tilt_angle") &&  ~isstring(configuration.first_tilt_angle)
+                dynamic_configuration.original_files(i).zero_tilt = dynamic_configuration.original_files(i).angle == configuration.first_tilt_angle;
+            elseif i == 1
+                dynamic_configuration.first_tilt_angle = dynamic_configuration.original_files(i).angle;
+                dynamic_configuration.original_files(i).zero_tilt = 1;
+            else
+                dynamic_configuration.original_files(i).zero_tilt = dynamic_configuration.original_files(i).angle == dynamic_configuration.first_tilt_angle;
+            end
+            dynamic_configuration.tilt_stacks = false;
+
+
+            dynamic_configuration.original_files(i).tomogram_number_position = 1;
+            dynamic_configuration.original_files(i).adjusted_tomogram_number_position = 1;
+            dynamic_configuration.original_files(i).tilt_number_position = 3;
+            dynamic_configuration.original_files(i).adjusted_tilt_number_position = 3;
+            dynamic_configuration.original_files(i).date_position = 5;
+            dynamic_configuration.original_files(i).time_position = 6;
+            dynamic_configuration.original_files(i).missing_underscore_between_tomogram_name_and_number = true;
+            dynamic_configuration.original_files(i).double_numbering = true;
+        elseif ~isempty(angle_ext) 
+            dynamic_configuration.original_files(i).angle_position = length(strsplit(current_file_name(1:angle_ext{1}(2)), "_"));
+            dynamic_configuration.original_files(i).position_adjustment = length(strsplit(dynamic_configuration.original_files(i).prefix, "_")) - 1;
+            
+            dynamic_configuration.original_files(i).angle_extents = angle_ext{1};
+            dynamic_configuration.original_files(i).angle = str2double(current_file_name(angle_ext{1}(1):angle_ext{1}(2)));
+            if isfield(configuration, "first_tilt_angle") &&  ~isstring(configuration.first_tilt_angle)
                 dynamic_configuration.original_files(i).zero_tilt = dynamic_configuration.original_files(i).angle == configuration.first_tilt_angle;
             elseif i == 1
                 dynamic_configuration.first_tilt_angle = dynamic_configuration.original_files(i).angle;
@@ -195,7 +227,13 @@ if configuration.automatic_filename_parts_recognition == true
             dynamic_configuration.tilt_stacks = true;
         end
     end
+    
     [values, indices] = sort({dynamic_configuration.original_files.name});
+    if contains(dynamic_configuration.original_files(i).name, "Square") && dynamic_configuration.tilt_stacks == false
+        [B, I] = sortrows(triple_index, [1 2]);
+        dynamic_configuration.original_files = dynamic_configuration.original_files(I);
+    end
+
     if dynamic_configuration.tilt_stacks == false
         start_indices = find([dynamic_configuration.original_files(:).zero_tilt]);
         file_paths = (string({original_files.folder}) + string(filesep) + string({original_files.name}))';

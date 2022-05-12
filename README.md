@@ -20,16 +20,18 @@ All results shown here have been achieved in an automated manner. The only manua
 
 ## EMPIAR-10064
 
-On the EMPIAR-10064 dataset TomoBEAR achieved 11.5 Angstrom as can be seen below.
+On the EMPIAR-10064 dataset TomoBEAR achieved 11.52 Angstrom as can be seen below.
 
 ![Ribosome EMPIAR-10064 Map](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_map.png)
 ![Ribosome EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_fsc.png)
 
 ## EMPIAR-10164
 
-On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom.
+On the EMPIAR-10164 dataset TomoBEAR achieved 4.47 Angstrom as can be seen below.
 
-
+![HIV EMPIAR-10064 Map 1](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_1.png)
+![HIV EMPIAR-10064 Map 2](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_map_2.png)
+![HIV EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/hiv_empiar_10164_fsc.png)
 
 # Acknowledgements
 
@@ -43,7 +45,7 @@ Many thanks to the [DFG (Deutsche Forschungsgesellschaft)](https://www.dfg.de) f
 
 Many thanks to the [structural biology scientific research group of Werner Kühlbrandt](https://www.biophys.mpg.de/2207989/werner_kuehlbrandt) at the [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de) and the [MPIBP](https://www.biophys.mpg.de) in Hesse in Frankfurt for support.
 
-Many thanks to the [Kudryashev scientific research group](https://www.mdc-berlin.de/kudryashev) established in 2021 at the [MDC Berlin (Max-Delbrück-Center for Molecular Medicine)](https://www.mdc-berlin.de) in Berlin for testing and reporting of bugs.
+Many thanks to the [Kudryashev scientific research group](https://www.mdc-berlin.de/kudryashev) established in 2021 at the [MDCMM (Max-Delbrück-Center for Molecular Medicine)](https://www.mdc-berlin.de) in Berlin for testing and reporting of bugs.
 
 # Contacts
 [Misha Kudryashev (Principal Investigator)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)

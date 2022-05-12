@@ -56,9 +56,9 @@ classdef AreTomo < Module
             %             else
             angle_command_snippet = "-TiltRange " + min_and_max_tilt_angles(1) + " " + min_and_max_tilt_angles(end);
             
-            if obj.configuration.
-            patch_alignment_command_snippet = "-Patch";
-            %             end
+            if obj.configuration.patch
+                patch_alignment_command_snippet = "-Patch " + strjoin(obj.configuration.patch," ");
+            end
             stack_destination = obj.output_path + filesep + obj.name + "_bin_1.ali";
 
             executeCommand(obj.configuration.aretomo_command + " -InMrc " + tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + tilt_stacks(obj.configuration.set_up.adjusted_j).name...
