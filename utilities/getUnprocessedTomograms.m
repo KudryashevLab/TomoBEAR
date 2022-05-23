@@ -228,18 +228,18 @@ if configuration.automatic_filename_parts_recognition == true
         end
     end
     
-    [values, indices] = sort({dynamic_configuration.original_files.name});
+    %[values, indices] = sort({dynamic_configuration.original_files.name});
     if contains(dynamic_configuration.original_files(i).name, "Square") && dynamic_configuration.tilt_stacks == false
-        [B, I] = sortrows(triple_index, [1 2]);
+        [~, I] = sortrows(triple_index, [1 2]);
         dynamic_configuration.original_files = dynamic_configuration.original_files(I);
     end
 
     if dynamic_configuration.tilt_stacks == false
         start_indices = find([dynamic_configuration.original_files(:).zero_tilt]);
-        file_paths = (string({original_files.folder}) + string(filesep) + string({original_files.name}))';
+        file_paths = (string({dynamic_configuration.original_files.folder}) + string(filesep) + string({dynamic_configuration.original_files.name}))';
     else
         start_indices = 1:length(dynamic_configuration.original_files(:));
-        file_paths = (string({original_files.folder}) + string(filesep) + string({original_files.name}))';
+        file_paths = (string({dynamic_configuration.original_files.folder}) + string(filesep) + string({dynamic_configuration.original_files.name}))';
     end
 else
     bytes = [original_files.bytes]';
