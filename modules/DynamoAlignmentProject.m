@@ -2547,22 +2547,28 @@ classdef DynamoAlignmentProject < Module
                     tomogram_numbers = unique(tbl(:, 20));
                     
                     for i = 1:length(tomogram_numbers)
-                        f = figure('visible', 'off');
                         tom = i;
-                        plot3(tbl(tbl(:, 20) == tom, 24), tbl(tbl(:, 20) == tom, 25), tbl(tbl(:, 20) == tom, 26), '.');
-                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
-                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
-                        close(f);
-                        
-                        for j = 1:obj.configuration.classes
-                            cls = j;
+                        tbl_tom_sel = tbl(:, 20) == tom;
+                        tbl_tom = tbl(tbl_tom_sel,:);
+                        if size(tbl_tom, 1) > 0
                             f = figure('visible', 'off');
-                            plot3(tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 24), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 25), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 26), '.');
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                            plot3(tbl_tom(:, 24), tbl_tom(:, 25), tbl_tom(:, 26), '.');
+                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
+                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
                             close(f);
+                            for j = 1:obj.configuration.classes
+                                cls = j;
+                                tbl_cls_sel = tbl(:, 34) == cls;
+                                tbl_tom_cls = tbl((tbl_tom_sel & tbl_cls_sel),:);
+                                if size(tbl_tom_cls, 1) > 0
+                                    f = figure('visible', 'off');
+                                    plot3(tbl_tom_cls(:, 24), tbl_tom_cls(:, 25), tbl_tom_cls(:, 26), '.');
+                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
+                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                                    close(f);
+                                end
+                            end
                         end
-                        
                     end
                     
                 end
