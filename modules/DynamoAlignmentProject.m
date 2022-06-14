@@ -2360,15 +2360,25 @@ classdef DynamoAlignmentProject < Module
                 
                 load([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat']);
                 
-                card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
-                card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                %card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                %card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                
+                poolsize = obj.configuration.environment_properties.cpu_count_physical / obj.configuration.cpu_fraction;
+                % check whether required poolsize do not exceed number of workers
+                % allowed by used parcluster profile settings
+                pc = parcluster('local');
+                if poolsize > pc.NumWorkers
+                    poolsize = pc.NumWorkers;
+                end
+                
+                card.matlab_workers_average = round(poolsize);
                 
                 if isscalar(obj.configuration.gpu) && obj.configuration.gpu == -1
                     card.gpu_identifier_set = 0:obj.configuration.environment_properties.gpu_count - 1;
                     card.how_many_processors = 1;
                 elseif isscalar(obj.configuration.gpu) && obj.configuration.gpu == 0
                     card.gpu_identifier_set = [];
-                    card.how_many_processors = 1;
+                    card.how_many_processors = round(poolsize);
                 else
                     card.gpu_identifier_set = (obj.configuration.gpu - 1)';
                     card.how_many_processors = 1;
