@@ -11,19 +11,8 @@ if string(path) ~= ""
 end
 
 if force || previous_cores == 0 || previous_cores ~= cores
-    % get number of cores available on the used machine
-    % and assigned to MATLAB
-    if cores <= 1
-        poolsize = round(feature('numcores') / cores);
-    else
-        poolsize = cores;
-    end
     
-    % check whether required poolsize do not exceed number of workers
-    % allowed by used parcluster profile settings
-    if poolsize > pc.NumWorkers
-        poolsize = pc.NumWorkers;
-    end
+    poolsize = getCpuPoolSize(cores);
     
     % open a pool
     if isempty(poolobj)
