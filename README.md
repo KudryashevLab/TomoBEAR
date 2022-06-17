@@ -22,7 +22,7 @@ All results shown here have been achieved in an automated manner. The only manua
 
 On the EMPIAR-10064 dataset TomoBEAR achieved 11.25 Angstrom (with ~4k particles) as can be seen below on the FSC curve plot:
 <p align="center">
-<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.png" alt="Ribosome EMPIAR-10064 FSC"/>
+<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.jpg" alt="Ribosome EMPIAR-10064 FSC"/>
 </p>
 
 As well, below is provided ribosome final map view:
