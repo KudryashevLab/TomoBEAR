@@ -9,7 +9,7 @@ Information on the installation, setup and usage and can be found in the corresp
 
 ![Schematic Pipeline Image Light Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_light_mode.svg#gh-light-mode-only)
 ![Schematic Pipeline Image Dark Mode](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
- 
+
 Orange processing steps in the flow chart are mandatory and must be executed by TomoBEAR. Yellow boxes are optional and can be activated if desired.
 
 In case of errors do not hesitate one of the provided persons in the mentioned in the contacts section below.
@@ -20,10 +20,16 @@ All results shown here have been achieved in an automated manner. The only manua
 
 ## EMPIAR-10064
 
-On the EMPIAR-10064 dataset TomoBEAR achieved 11.5 Angstrom as can be seen below.
+On the EMPIAR-10064 dataset TomoBEAR achieved 11.25 Angstrom (with ~4k particles) as can be seen below on the FSC curve plot:
+<p align="center">
+<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.png" alt="Ribosome EMPIAR-10064 FSC"/>
+</p>
 
-![Ribosome EMPIAR-10064 Map](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_map.png)
-![Ribosome EMPIAR-10064 FSC](https://github.com/KudryashevLab/TomoBEAR/blob/main/images/ribosome_empiar_10064_fsc.png)
+As well, below is provided ribosome final map view:
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_map.png" alt="Ribosome EMPIAR-10064 Map"/>
+</p>
 
 ## EMPIAR-10164
 
