@@ -33,7 +33,7 @@ As well, below is provided ribosome final map view:
 
 ## EMPIAR-10164
 
-On the EMPIAR-10164 dataset TomoBEAR achieved 4.5 Angstrom as can be seen below.
+On the EMPIAR-10164 dataset TomoBEAR achieved 4.5 Angstrom.
 
 # Acknowledgements
 
