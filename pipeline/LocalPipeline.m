@@ -544,7 +544,7 @@ classdef LocalPipeline < Pipeline
             counter = 0;
             
             % TODO: revise for better parametrization
-            if isfield(obj.configuration, "gpu_worker_multiplier")...
+            if isfield(obj.configuration.general, "gpu_worker_multiplier")...
                     && (~isfield(merged_configuration, "method")...
                     || (isfield(merged_configuration, "method")...
                     && merged_configuration.method ~= "MotionCor2"))
@@ -571,7 +571,7 @@ classdef LocalPipeline < Pipeline
                 [status_mkdir, message, message_id] = mkdir(pool_folder);
             end
 
-            generatePool(merged_configuration.environment_properties.gpu_count, false, pool_folder);
+            generatePool(workers, false, pool_folder);
             
             cumulative_sum_previous_tomogram_status = cumsum(previous_tomogram_status);
             indices = find(previous_tomogram_status);
@@ -598,7 +598,7 @@ classdef LocalPipeline < Pipeline
             if exist("f", "var") && ~isempty(f)
                 wait(f);
                 [dynamic_configuration_tmp, status_tmp] = fetchOutputs(f, 'UniformOutput', false);
-                % TODO: needs to be dajusted for arbitrary number of
+                % TODO: needs to be adjusted for arbitrary number of
                 % gpus
                 for j = 1:length(dynamic_configuration_tmp)
                     dynamic_configurations_out{counter + 1} = dynamic_configuration_tmp{j};

@@ -11,21 +11,15 @@ if string(path) ~= ""
 end
 
 if force || previous_cores == 0 || previous_cores ~= cores
+    
+    poolsize = getCpuPoolSize(cores);
+    
+    % open a pool
     if isempty(poolobj)
-        if cores <= 1
-            poolsize = round(feature('numcores') / (1/cores));
-        else
-            poolsize = cores;
-        end
         disp("INFO:poolsize: " + poolsize);
         poolobj = parpool(pc, poolsize);
     else
         current_poolsize = poolobj.NumWorkers;
-        if cores <= 1
-            poolsize = round(feature('numcores') / (1/cores));
-        else
-            poolsize = cores;
-        end
         if current_poolsize ~= poolsize
             disp("INFO:poolsize: " + poolsize);
             delete(poolobj);

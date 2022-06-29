@@ -88,6 +88,12 @@ end
 
 environment.debug = false;
 
+if ~fileExists("DYNAMO_INITIALIZED") && exist("dynamo","dir")
+    createDynamoLinks(default_configuration.general.dynamo_path)
+    fid = fopen("DYNAMO_INITIALIZED", "w+");
+    fclose(fid);
+end
+
 if ~isdeployed
     if default_configuration.general.astra_path ~= ""
         astra_path = default_configuration.general.astra_path;
@@ -111,7 +117,7 @@ if ~isdeployed
         dip_initialise;
     end
 
-    project_sub_paths = {"dynamo", {"matlab", {"mbtools", {"src"}, "src", {"shorthands"}}, "mex", {"bin"}}, "utilities", "configuration", "json", "modules", "pipeline"}; %, "helper", {"gpu"}, "extern", {"semaphore"}, "imod", "offxca", "database", "nn", "playground", {"matlab", {"astra"}}, "extern", {"av3", {"utils"}, "bol_scripts", "tom", {"Filtrans", "Geom"}, "irt", "flatten", "window2"}
+    project_sub_paths = {"dynamo", {"cuda", {"bin"}, "matlab", {"mbtools", {"src"}, "src", {"shorthands"}}, "mex", {"bin"}}, "utilities", "configuration", "json", "modules", "pipeline"}; %, "helper", {"gpu"}, "extern", {"semaphore"}, "imod", "offxca", "database", "nn", "playground", {"matlab", {"astra"}}, "extern", {"av3", {"utils"}, "bol_scripts", "tom", {"Filtrans", "Geom"}, "irt", "flatten", "window2"}
     concatAndAddPathsRecursive(project_path, project_sub_paths, string(filesep));
 
 
@@ -119,11 +125,7 @@ if ~isdeployed
         addpath(default_configuration.general.SUSAN_path);
     end
 end
-if ~fileExists("DYNAMO_INITIALIZED") && exist("dynamo","dir")
-    createDynamoLinks(default_configuration.general.dynamo_path)
-    fid = fopen("DYNAMO_INITIALIZED", "w+");
-    fclose(fid);
-end
+
 if ~fileExists(default_configuration.general.pipeline_executable) || default_configuration.general.regenerate_load_modules_file == true
     fid = fopen(default_configuration.general.pipeline_executable, "w+");
     fprintf(fid, "%s\n", "#!/bin/bash");

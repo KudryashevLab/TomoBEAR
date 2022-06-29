@@ -45,6 +45,10 @@ classdef DynamoAlignmentProject < Module
                 
                 particle_counter = 0;
                 
+                % Calculate available size of CPU pool to be opened 
+                % for averaging (and for CPU-based classification)
+                cpu_poolsize = getCpuPoolSize(obj.configuration.cpu_fraction, obj.configuration.environment_properties.cpu_count_physical);
+                
                 if isempty(paths) || obj.configuration.reference == "template"
                     previous_binning = 0;
                     template = getTemplate(obj.configuration);
@@ -440,7 +444,7 @@ classdef DynamoAlignmentProject < Module
                             %                             end
                             %                             obj.configuration.classes = 2;
                             %                         else
-                            avge = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                            avge = daverage(char(particles_path), '-t', new_table, 'mw', cpu_poolsize);
                             template_em_files{1} = char(alignment_project_folder_path + string(filesep) + "average_" + 1 + ".em");
                             dwrite(avge.average, template_em_files{1});
                             
@@ -788,7 +792,7 @@ classdef DynamoAlignmentProject < Module
                                 %                             if previous_binning == binning
                                 %
                                 %                             else
-                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
                                 template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
                                 dwrite(avge.average, template_em_files{i});
                                 %                             end
@@ -847,7 +851,7 @@ classdef DynamoAlignmentProject < Module
                                 %                             if previous_binning == binning
                                 %
                                 %                             else
-                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
                                 template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
                                 dwrite(avge.average, template_em_files{i});
                                 %                             end
@@ -1291,7 +1295,7 @@ classdef DynamoAlignmentProject < Module
                         %                             end
                         %                             obj.configuration.classes = 2;
                         %                         else
-                        avge = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
+                        avge = daverage(char(particles_path), '-t', new_table, 'mw', cpu_poolsize);
                         template_em_files{1} = char(alignment_project_folder_path + string(filesep) + "average_" + 1 + ".em");
                         dwrite(avge.average, template_em_files{1});
                         %                         end
@@ -1418,7 +1422,7 @@ classdef DynamoAlignmentProject < Module
                                 else
                                     
                                     if ~fileExists(char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em"))
-                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_logical));
+                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
                                         template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
                                         dwrite(avge.average, template_em_files{i});
                                         template = avge.average;
@@ -1508,7 +1512,7 @@ classdef DynamoAlignmentProject < Module
                                 else
                                     
                                     if ~fileExists(char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em"))
-                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_logical));
+                                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
                                         template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
                                         dwrite(avge.average, template_em_files{i});
                                         template = avge.average;
@@ -2360,15 +2364,17 @@ classdef DynamoAlignmentProject < Module
                 
                 load([char(alignment_project_folder_path) '/' char(project_name) '/settings/virtual_project.mat']);
                 
-                card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
-                card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                %card.matlab_workers_average = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                %card.how_many_processors = round(obj.configuration.environment_properties.cpu_count_physical * obj.configuration.cpu_fraction);
+                
+                card.matlab_workers_average = cpu_poolsize;
                 
                 if isscalar(obj.configuration.gpu) && obj.configuration.gpu == -1
                     card.gpu_identifier_set = 0:obj.configuration.environment_properties.gpu_count - 1;
                     card.how_many_processors = 1;
                 elseif isscalar(obj.configuration.gpu) && obj.configuration.gpu == 0
                     card.gpu_identifier_set = [];
-                    card.how_many_processors = 1;
+                    card.how_many_processors = cpu_poolsize;
                 else
                     card.gpu_identifier_set = (obj.configuration.gpu - 1)';
                     card.how_many_processors = 1;
@@ -2537,22 +2543,28 @@ classdef DynamoAlignmentProject < Module
                     tomogram_numbers = unique(tbl(:, 20));
                     
                     for i = 1:length(tomogram_numbers)
-                        f = figure('visible', 'off');
                         tom = i;
-                        plot3(tbl(tbl(:, 20) == tom, 24), tbl(tbl(:, 20) == tom, 25), tbl(tbl(:, 20) == tom, 26), '.');
-                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
-                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
-                        close(f);
-                        
-                        for j = 1:obj.configuration.classes
-                            cls = j;
+                        tbl_tom_sel = tbl(:, 20) == tom;
+                        tbl_tom = tbl(tbl_tom_sel,:);
+                        if size(tbl_tom, 1) > 0
                             f = figure('visible', 'off');
-                            plot3(tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 24), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 25), tbl(tbl(:, 20) == tom & tbl(:, 34) == cls, 26), '.');
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                            plot3(tbl_tom(:, 24), tbl_tom(:, 25), tbl_tom(:, 26), '.');
+                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
+                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
                             close(f);
+                            for j = 1:obj.configuration.classes
+                                cls = j;
+                                tbl_cls_sel = tbl(:, 34) == cls;
+                                tbl_tom_cls = tbl((tbl_tom_sel & tbl_cls_sel),:);
+                                if size(tbl_tom_cls, 1) > 0
+                                    f = figure('visible', 'off');
+                                    plot3(tbl_tom_cls(:, 24), tbl_tom_cls(:, 25), tbl_tom_cls(:, 26), '.');
+                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
+                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                                    close(f);
+                                end
+                            end
                         end
-                        
                     end
                     
                 end
