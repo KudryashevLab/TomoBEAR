@@ -398,25 +398,8 @@ classdef DynamoAlignmentProject < Module
                             subtomos.set_padding_policy(char(obj.configuration.padding_policy));
                             subtomos.set_normalization(char(obj.configuration.normalization));
                             subtomos.reconstruct(char(particles_path), tomos_name, particles_raw, box_size);
-                            particle_files = dir([particles_path filesep 'particle*.em']);
-                            ptags = zeros([length(particle_files) 1]);
                             
-                            for l = 1:length(particle_files)
-                                particle_name = strsplit(particle_files(l).name, ".");
-                                particle_number = strsplit(particle_name{1}, "_");
-                                ptag = str2double(particle_number{2});
-                                ptags(l) = ptag;
-                            end
-                            
-                            if ~isempty(setdiff(new_table(:, 1), ptags(:)))
-                                
-                                set_diff = setdiff(new_table(:, 1), ptags(:));
-                                
-                                for i = 1:length(set_diff)
-                                    new_table(new_table(:, 1) == set_diff(i), :) = [];
-                                end
-                                
-                            end
+                            new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
                             
                             if obj.configuration.as_boxes == 1
                                 % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
@@ -776,17 +759,8 @@ classdef DynamoAlignmentProject < Module
                                 for j = 1:length(indices)
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
-                                    
-                                    if previous_binning >= binning
-                                        %                                         if binning > 1
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-                                        %                                         else
-                                        %                                             dtcrop(binned_tomogram_path, sub_table(sub_table(:,20) == indices(j),:), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', 0, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-                                        %                                         end
-                                    elseif previous_binning < binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-                                    end
-                                    
+                                    dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+ 
                                 end
                                 
                                 %                             if previous_binning == binning
@@ -804,7 +778,9 @@ classdef DynamoAlignmentProject < Module
                                 end
                                 
                             end
-                            
+                            if ~obj.configuration.dynamo_allow_padding
+                                new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
+                            end
                         else
                             
                             for i = 1:length(obj.configuration.selected_classes)
@@ -836,12 +812,8 @@ classdef DynamoAlignmentProject < Module
                                 for j = 1:length(indices)
                                     index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
                                     binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
-                                    
-                                    if previous_binning >= binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
-                                    elseif previous_binning < binning
-                                        dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', 1, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', 0);
-                                    end
+                                    dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
+
                                     
                                 end
                                 
@@ -863,7 +835,9 @@ classdef DynamoAlignmentProject < Module
                                 end
                                 
                             end
-                            
+                            if ~obj.configuration.dynamo_allow_padding
+                                new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
+                            end
                         end
                         
                         %TODO: needs to be tested if that is faster or make
@@ -1249,25 +1223,8 @@ classdef DynamoAlignmentProject < Module
                         subtomos.set_padding_policy(char(obj.configuration.padding_policy));
                         subtomos.set_normalization(char(obj.configuration.normalization));
                         subtomos.reconstruct(char(particles_path), tomos_name, particles_raw, box_size);
-                        particle_files = dir([particles_path filesep 'particle*.em']);
-                        ptags = zeros([length(particle_files) 1]);
                         
-                        for l = 1:length(particle_files)
-                            particle_name = strsplit(particle_files(l).name, ".");
-                            particle_number = strsplit(particle_name{1}, "_");
-                            ptag = str2double(particle_number{2});
-                            ptags(l) = ptag;
-                        end
-                        
-                        if ~isempty(setdiff(new_table(:, 1), ptags(:)))
-                            
-                            set_diff = setdiff(new_table(:, 1), ptags(:));
-                            
-                            for i = 1:length(set_diff)
-                                new_table(new_table(:, 1) == set_diff(i), :) = [];
-                            end
-                            
-                        end
+                        new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
                         
                         if obj.configuration.as_boxes == 1
                             % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
