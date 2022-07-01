@@ -97,11 +97,13 @@ classdef TemplateMatchingPostProcessing < Module
                 if obj.configuration.crop_particles == true
                     if obj.configuration.all_in_one_folder == true
                         particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning  + "_bs_" + box_size;
-                        dtcrop(char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name), tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', 1, 'inmemory',1 , 'maxMb', 50000, 'append_tags', true, 'asBoxes', 0);
+                        binned_tomogram_path = char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name);
+                        dtcrop(binned_tomogram_path, tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'append_tags', true, 'asBoxes', 0);
                     else
                         [folder, name, extension] = fileparts(binned_tomograms_paths_filtered(i).folder);
                         particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning  + "_bs_" + box_size + string(name);
-                        dtcrop(char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name), tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', 1, 'inmemory',1 , 'maxMb', 50000, 'append_tags', true, 'asBoxes', 0);
+                        binned_tomogram_path = char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name);
+                        dtcrop(binned_tomogram_path, tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'append_tags', true, 'asBoxes', 0);
                     end
                 end
                 if break_flag == true
@@ -110,13 +112,18 @@ classdef TemplateMatchingPostProcessing < Module
             end
             
             % TODO: integrate SUSAN
-            if obj.configuration.crop_particles == true && obj.configuration.as_boxes == 1
-                if obj.configuration.all_in_one_folder == true
-                    particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning + "_bs_" + box_size;
-                    ownDbox(string(particles_folder),string([char(particles_folder) '.Boxes']));
-                    % TODO: make flag for leaving original particles
-                    % folder
-                    [status, message, messageid] = rmdir(char(particles_folder), 's');
+            if obj.configuration.crop_particles == true
+                if ~obj.configuration.dynamo_allow_padding
+                    tab_all = cleanCroppedParticlesTable(tab_all, char(particles_folder));
+                end
+                if obj.configuration.as_boxes == 1
+                    if obj.configuration.all_in_one_folder == true
+                        particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning + "_bs_" + box_size;
+                        ownDbox(string(particles_folder),string([char(particles_folder) '.Boxes']));
+                        % TODO: make flag for leaving original particles
+                        % folder
+                        [status, message, messageid] = rmdir(char(particles_folder), 's');
+                    end
                 end
             end
             
