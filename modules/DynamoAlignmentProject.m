@@ -159,6 +159,7 @@ classdef DynamoAlignmentProject < Module
                         end
                         
                         if contains(tab_all_path(1).folder, "particles")
+
                             tab_all_path = dir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder + string(filesep) + "*.tbl");
                             
                             for i = 1:length(tab_all_path)
@@ -675,58 +676,11 @@ classdef DynamoAlignmentProject < Module
                 end
                 
                 if binning > 0 && (isempty(dir(particles_path))) % || length(dir(particles_path)) ~= particle_counter)
-                    %                     if obj.configuration.as_boxes == true
-                    %                         particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size + ".Boxes";
-                    %                     else
-                    %                         particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size;
-                    %                     end
-                    %particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning;
-                    disp("INFO: generating particles for binning " + binning);
-                    %                     tmp_folder = getFilesFromLastModuleRun(obj.configuration, "TemplateMatchingPostProcessing", "");
-                    %                     particle_boundaries_files = dir(tmp_folder{1} + filesep + "*.tbl");
-                    %                     particle_boundaries = [];
-                    %                     for i = 1:length(particle_boundaries_files)
-                    %                         particle_boundaries_splitted = strsplit(particle_boundaries_files(i).name);
-                    %                         particle_boundaries(end + 1) = num2str(particle_boundaries_splitted{end});
-                    %                     end
+                    
                     template_em_files = {};
                     
                     if (~isfield(obj.configuration, "use_SUSAN") || obj.configuration.use_SUSAN ~= true) % binning >= obj.configuration.aligned_stack_binning &&
-                        
-                        if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
-                            particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size + "_dw";
-                        else
-                            particles_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size;
-                        end
-                        
-                        if binning == 1
-                            binned_tomograms_paths = getCtfCorrectedTomogramsFromStandardFolder(obj.configuration, true);
-                            
-                            if isempty(binned_tomograms_paths) == true
-                                binned_tomograms_paths = getTomogramsFromStandardFolder(obj.configuration, true);
-                            end
-                            
-                            binned_tomograms_paths_filtered = binned_tomograms_paths;
-                            
-                            if isempty(binned_tomograms_paths_filtered)
-                                error("ERROR: no tomograms to crop particles are available for the selected binning level(" + binning + ")!");
-                            end
-                            
-                        else
-                            binned_tomograms_paths = getCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
-                            
-                            if isempty(binned_tomograms_paths) == true
-                                binned_tomograms_paths = getBinnedTomogramsFromStandardFolder(obj.configuration, true, binning);
-                            end
-                            
-                            binned_tomograms_paths_filtered = binned_tomograms_paths(contains({binned_tomograms_paths.name}, "bin_" + binning));
-                            
-                            if isempty(binned_tomograms_paths_filtered)
-                                error("ERROR: no tomograms to crop particles are available for the selected binning level(" + binning + ")!");
-                            end
-                            
-                        end
-                        
+                                                
                         new_table = [];
                         
                         if obj.configuration.classes == 1 && obj.configuration.swap_particles == false && exist("tab_all_path", "var") && contains(tab_all_path(1).folder, "bin_" + previous_binning + "_eo" + filesep)
@@ -754,23 +708,9 @@ classdef DynamoAlignmentProject < Module
                                     
                                 end
                                 
-                                indices = unique(sub_table(:, 20));
-                                
-                                for j = 1:length(indices)
-                                    index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
-                                    binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
-                                    dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
- 
-                                end
-                                
-                                %                             if previous_binning == binning
-                                %
-                                %                             else
-                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
-                                template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
-                                dwrite(avge.average, template_em_files{i});
-                                %                             end
-                                
+                                % Placing tag of subtable from which data
+                                % came to separately produce average
+                                sub_table(:,23) = i;
                                 if isempty(new_table)
                                     new_table = sub_table;
                                 else
@@ -778,9 +718,7 @@ classdef DynamoAlignmentProject < Module
                                 end
                                 
                             end
-                            if ~obj.configuration.dynamo_allow_padding
-                                new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
-                            end
+
                         else
                             
                             for i = 1:length(obj.configuration.selected_classes)
@@ -807,27 +745,9 @@ classdef DynamoAlignmentProject < Module
                                     
                                 end
                                 
-                                indices = unique(sub_table(:, 20));
-                                
-                                for j = 1:length(indices)
-                                    index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", indices(j))));
-                                    binned_tomogram_path = char(string(binned_tomograms_paths_filtered(index).folder) + string(filesep) + binned_tomograms_paths_filtered(index).name);
-                                    dtcrop(binned_tomogram_path, sub_table(sub_table(:, 20) == indices(j), :), char(particles_path), box_size, 'allow_padding', obj.configuration.dynamo_allow_padding, 'inmemory', obj.configuration.dt_crop_in_memory, 'maxMb', obj.configuration.dt_crop_max_mb, 'asBoxes', obj.configuration.as_boxes);
-
-                                    
-                                end
-                                
-                                %                                	if obj.configuration.as_boxes == true
-                                %                                     particles_path = particles_path + ".Boxes";
-                                %                                 end
-                                %                             if previous_binning == binning
-                                %
-                                %                             else
-                                avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
-                                template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
-                                dwrite(avge.average, template_em_files{i});
-                                %                             end
-                                
+                                % Placing tag of subtable from which data
+                                % came to separately produce average
+                                sub_table(:,23) = i;
                                 if isempty(new_table)
                                     new_table = sub_table;
                                 else
@@ -835,40 +755,9 @@ classdef DynamoAlignmentProject < Module
                                 end
                                 
                             end
-                            if ~obj.configuration.dynamo_allow_padding
-                                new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
-                            end
-                        end
+
+                        end                        
                         
-                        %TODO: needs to be tested if that is faster or make
-                        %option for decision
-                        if obj.configuration.as_boxes == 1
-                            % dBoxes.convertSimpleData(char(particles_path),...
-                            %     [char(particles_path) '.Boxes'],...
-                            %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-                            ownDbox(string(particles_path), string([char(particles_path) '.Boxes']));
-                            
-                            [status, message, messageid] = rmdir(char(particles_path), 's');
-                            %                             new_table(:,1) = 1:length(new_table);
-                            %                             movefile(char([char(particles_path) '.Boxes']), char(particles_path));
-                        end
-                        
-                        %
-                        if obj.configuration.use_noise_classes == true
-                            
-                            for i = length(obj.configuration.selected_classes) + 1:obj.configuration.classes
-                                noise_template{i} = rand(size(template) * (previous_binning / binning)) * obj.configuration.noise_scaling_factor;
-                                template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "template_" + i + ".em");
-                                dwrite(noise_template{i}, template_em_files{i});
-                                %                                 template_em_files{i} = noise_template{i};
-                                %                                 mask_em_files{i} = char(alignment_project_folder_path + string(filesep) + "mask_" + i + ".em");
-                                %                                 dwrite(mask, mask_em_files{i});
-                            end
-                            
-                        end
-                        if exist("avge", "var")
-                            template = avge.average;
-                        end
                     else
                         new_table = [];
                         
@@ -898,7 +787,9 @@ classdef DynamoAlignmentProject < Module
                                     
                                 end
                                 
-                                %sub_table(:,20) = i;
+                                % Placing tag of subtable from which data
+                                % came to separately produce average
+                                sub_table(:,23) = i;
                                 if isempty(new_table)
                                     new_table = sub_table;
                                 else
@@ -935,7 +826,9 @@ classdef DynamoAlignmentProject < Module
                                         
                                     end
                                     
-                                    %sub_table(:,20) = i;
+                                    % Placing tag of subtable from which data
+                                    % came to separately produce average
+                                    sub_table(:,23) = i;
                                     if isempty(new_table)
                                         new_table = sub_table;
                                     else
@@ -985,6 +878,9 @@ classdef DynamoAlignmentProject < Module
                                         
                                     end
                                     
+                                    % Placing tag of subtable from which data
+                                    % came to separately produce average
+                                    sub_table(:,23) = i;
                                     if isempty(new_table)
                                         new_table = sub_table;
                                     else
@@ -996,270 +892,36 @@ classdef DynamoAlignmentProject < Module
                             end
                             
                         end
-                        
-                        if binning > 1
-                            aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(obj.configuration, true, binning);
-                        else
-                            aligned_tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
-                        end
-                        
-                        [width, height, z] = getHeightAndWidthFromHeader(string(aligned_tilt_stacks(1).folder) + filesep + string(aligned_tilt_stacks(1).name), -1);
-                        %tlt_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt", "last");
-                        tlt_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".tlt");
-                        %defocus_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "defocus", "last");
-                        defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(obj.configuration, ".defocus");
-                        tomos_id = unique(new_table(:, 20));
-                        
-                        N = length(tomos_id);
-                        
-                        if isfield(obj.configuration, "tilt_angles")
-                            P = length(obj.configuration.tilt_angles);
-                        else
-                            P = length(obj.configuration.tomograms.tomogram_001.original_angles);
-                        end
-                        
-                        tomos = SUSAN.Data.TomosInfo(N, P);
-                        dose_per_projection = obj.configuration.dose / P;
-                        
-                        for i = 1:N
-                            tomos.tomo_id(i) = tomos_id(i);
-                            stack_path = string(aligned_tilt_stacks(find(contains({aligned_tilt_stacks(:).name}, sprintf("%03d", tomos_id(i))))).folder) + filesep + string(aligned_tilt_stacks(find(contains({aligned_tilt_stacks(:).name}, sprintf("%03d", tomos_id(i))))).name);
-                            tomos.set_stack (i, stack_path);
-                            tomos.set_angles (i, char(string(tlt_files{tomos_id(i)}(1).folder) + filesep + tlt_files{tomos_id(i)}(1).name));
-                            % TODO: exclude line if ctf_correction_method
-                            % is not "defocus_file"
-                            tomos.set_defocus(i, char(string(defocus_files{tomos_id(i)}(1).folder) + filesep + string(defocus_files{tomos_id(i)}(1).name)));
-                            
-                            if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
-                                field_names = fieldnames(obj.configuration.tomograms);
-                                if obj.configuration.tilt_stacks == false
-                                    projections_in_high_dose_image = obj.configuration.tomograms.(field_names{tomos_id(i)}).high_dose_frames / obj.configuration.tomograms.(field_names{tomos_id(i)}).low_dose_frames;
-                                else
-                                    projections_in_high_dose_image = 0;
-                                end
-                                for j = 1:size(tomos.defocus, 1)
-                                    
-                                    if obj.configuration.dose_weight_first_image == true
-                                        
-                                        if obj.configuration.tomograms.(field_names{tomos_id(i)}).high_dose == true
-                                            tomos.defocus(j, 6, i) = obj.configuration.b_factor_per_projection * ((obj.configuration.dose_order(j) - 1 + projections_in_high_dose_image) * dose_per_projection);
-                                        else
-                                            tomos.defocus(j, 6, i) = obj.configuration.b_factor_per_projection * ((obj.configuration.dose_order(j)) * dose_per_projection);
-                                        end
-                                        
-                                    else
-                                        
-                                        if obj.configuration.tomograms.(field_names{tomos_id(i)}).high_dose == true
-                                            
-                                            if j > 1
-                                                tomos.defocus(j, 6, i) = obj.configuration.b_factor_per_projection * ((obj.configuration.dose_order(j) - 1 + projections_in_high_dose_image) * dose_per_projection);
-                                            end
-                                            
-                                        else
-                                            tomos.defocus(j, 6, i) = obj.configuration.b_factor_per_projection * ((obj.configuration.dose_order(j) - 1) * dose_per_projection);
-                                        end
-                                        
-                                    end
-                                    
-                                end
-                                
-                            end
-                            
-                            if obj.configuration.exclude_projections == true && obj.configuration.use_SUSAN == true
-                                
-                                if obj.configuration.tilt_scheme == "dose_symmetric_parallel"
-                                    
-                                    for j = 1:size(tomos.defocus, 1)
-                                        
-                                        if tilt_angles(dose_order == j) >= -((floor(P / 2) - exclude_projections + 1) * tilt_angle_step) && tilt_angles(dose_order == j) <= ((floor(P / 2) - exclude_projections + 1) * tilt_angle_step)
-                                            tomos.proj_weight(dose_order == j, 1, i) = 1;
-                                        else
-                                            tomos.proj_weight(dose_order == j, 1, i) = 0;
-                                        end
-                                        
-                                    end
-                                    
-                                elseif obj.configuration.tilt_scheme == "bi_directional" || obj.configuration.tilt_scheme == "dose_symmetric_sequential" || obj.configuration.tilt_scheme == "dose_symmetric"
-                                    
-                                    for j = 1:size(tomos.defocus, 1)
-                                        
-                                        if j < max(dose_order) - k
-                                            tomos.proj_weight(dose_order == j, 1, i) = 1;
-                                        else
-                                            tomos.proj_weight(dose_order == j, 1, i) = 0;
-                                        end
-                                        
-                                    end
-                                    
-                                end
-                                
-                            end
-                            
-                            if isfield(obj.configuration, "apix") && obj.configuration.apix ~= 0
-                                tomos.pix_size(i) = obj.configuration.apix * obj.configuration.ft_bin * binning;
-                            else
-                                tomos.pix_size(i) = obj.configuration.greatest_apix * obj.configuration.ft_bin * binning;
-                            end
-                            
-                            tomos.tomo_size(i, :) = [width, height, obj.configuration.reconstruction_thickness / binning];
-                            
-                        end
-                        
-                        tomos_name = char("tomos_bin_" + binning + ".tomostxt");
-                        tomos.save(tomos_name);
-                        
-                        %%
-                        %                         new_table(:,[24 25 26]) = new_table(:,[24 25 26]) + new_table(:,[4 5 6]);
-                        %                         new_table(:,[4 5 6]) = 0;
-                        %                         new_table(:,[24 25 26]) = previous_binning/binning*new_table(:,[24 25 26])+1;
-                        %                         table_name = char("table_bin_" + binning + ".tbl");
-                        %                         dwrite(new_table,table_name);
-                        particles_raw = char("particles_bin_" + binning + ".ptclsraw");
-                        ptcls = SUSAN.Data.ParticlesInfo(new_table, tomos);
-                        
-                        if obj.configuration.ctf_correction_method == "IMOD"
-                            tmp_positions = ptcls.position(:, 3);
-                            ptcls.position(:, 3) = 0;
-                            ptcls.update_defocus(tomos);
-                            ptcls.position(:, 3) = tmp_positions;
-                        elseif obj.configuration.ctf_correction_method == "defocus_file"
-                        elseif obj.configuration.ctf_correction_method == "SUSAN"
-                            sampling = size(template, 1); % spacing between particles, in pixels
-                            grid_ctf = SUSAN.Data.ParticlesInfo.grid2D(sampling, tomos);
-                            grid_ctf.save('grid_ctf.ptclsraw');
-                            %% Create CtfEstimator
-                            ctf_est = SUSAN.Modules.CtfEstimator(obj.configuration.SUSAN_ctf_box_size);
-                            ctf_est.binning = obj.configuration.SUSAN_binning; % No binning (2^0).
-                            
-                            if obj.configuration.gpu == -1
-                                ctf_est.gpu_list = 0:gpuDeviceCount - 1;
-                            else
-                                ctf_est.gpu_list = obj.configuration.gpu - 1;
-                            end
-                            
-                            %ctf_est.gpu_list = [0 1 2 3]; % 4 GPUs available.
-                            
-                            ctf_est.resolution.min = obj.configuration.template_matching_binning * apix; % angstroms
-                            ctf_est.resolution.max = binning * apix;
-                            
-                            if isfield(obj.configuration, "global_lower_defocus_average_in_angstrom")
-                                ctf_est.defocus.min = configuration.global_lower_defocus_average_in_angstrom;
-                                ctf_est.defocus.max = configuration.global_upper_defocus_average_in_angstrom;
-                            elseif isfield(obj.configuration, "nominal_defocus_in_nm") && obj.configuration.nominal_defocus_in_nm ~= 0
-                                % TODO: could be also 2 numbers for lower and upper
-                                % limit or factors in different variable names
-                                ctf_est.defocus.min = round(obj.configuration.nominal_defocus_in_nm / obj.configuration.defocus_limit_factor) * 10^4;
-                                ctf_est.defocus.max = round(obj.configuration.nominal_defocus_in_nm * obj.configuration.defocus_limit_factor) * 10^4;
-                            else
-                                ctf_est.defocus.min = obj.configuration.SUSAN_defocus_min; % angstroms
-                                ctf_est.defocus.max = obj.configuration.SUSAN_defocus_max; % angstroms
-                            end
-                            
-                            tomos_ctf = ctf_est.estimate('ctf_grid', 'grid_ctf.ptclsraw', ...
-                                tomos_name);
-                            tomos_ctf.save(tomos_name);
-                        end
-                        
-                        ptcls.save(particles_raw);
-                        
-                        %%
-                        avg = SUSAN.Modules.Averager;
-                        
-                        if obj.configuration.gpu == -1
-                            avg.gpu_list = 0:gpuDeviceCount - 1;
-                        else
-                            avg.gpu_list = obj.configuration.gpu - 1;
-                        end
-                        
-                        box_size = round((size(template, 1) * obj.configuration.box_size) * (previous_binning / binning));
-                        
-                        if mod(box_size, 2) == 1
-                            box_size = box_size + 1;
-                        end
-                        
-                        avg.bandpass.lowpass = min(obj.configuration.susan_lowpass, (box_size / 2) / 2);
-                        avg.padding = obj.configuration.susan_padding / binning;
-                        avg.rec_halves = true;
-                        
-                        if (obj.configuration.per_particle_ctf_correction == "wiener_ssnr")
-                            avg.set_ctf_correction(char("wiener_ssnr"), obj.configuration.ssnr(1), obj.configuration.ssnr(2)); % what about SSNR....: set_ctf_correction('wiener_ssnr', 1, 0.8);
-                        else
-                            avg.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % what about SSNR....: set_ctf_correction('wiener_ssnr', 1, 0.8);
-                        end
-                        
-                        avg.set_padding_policy(char(obj.configuration.padding_policy));
-                        avg.set_normalization(char(obj.configuration.normalization));
-                        
-                        if obj.configuration.use_symmetrie == true
-                            avg.set_symmetry(char(obj.configuration.expected_symmetrie));
-                        end
-                        
-                        %                         if obj.configuration.susan_box_size > 0
-                        %                             box_size = round((size(template,1) * obj.configuration.susan_box_size) * (previous_binning / binning)); %obj.configuration.susan_box_size;
-                        %                             obj.dynamic_configuration.susan_box_size = 1;
-                        %                         else
-                        
-                        %                         end
-                        if obj.configuration.use_dose_weighted_particles == true && obj.configuration.use_SUSAN == true
-                            particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size + "_dw");
-                        else
-                            particles_path = char("../../particles/particles_bin_" + binning + "_bs_" + box_size);
-                        end
-                        
-                        avg.reconstruct(char("ds_ini_bin_" + binning), tomos_name, particles_raw, box_size);
-                        %%
-                        
-                        subtomos = SUSAN.Modules.SubtomoRec;
-                        
-                        if obj.configuration.gpu == -1
-                            subtomos.gpu_list = 0:gpuDeviceCount - 1;
-                        else
-                            subtomos.gpu_list = obj.configuration.gpu - 1;
-                        end
-                        
-                        subtomos.padding = round(obj.configuration.susan_padding / binning);
-                        
-                        subtomos.set_ctf_correction(char(obj.configuration.per_particle_ctf_correction)); % try also wiener if you like
-                        subtomos.set_padding_policy(char(obj.configuration.padding_policy));
-                        subtomos.set_normalization(char(obj.configuration.normalization));
-                        subtomos.reconstruct(char(particles_path), tomos_name, particles_raw, box_size);
-                        
-                        new_table = cleanCroppedParticlesTable(new_table, char(particles_path));
-                        
-                        if obj.configuration.as_boxes == 1
-                            % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
-                            %     [char("../../particles/particles_bin_" + binning  + "_bs_" + box_size) '.Boxes'],...
-                            %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-                            ownDbox(string(particles_path), ...
-                                string([char(particles_path) '.Boxes']));
-                            
-                            [status, message, messageid] = rmdir(char(particles_path), 's');
-                            particles_path = [char(particles_path) '.Boxes'];
-                            %                             new_table(:,1) = 1:length(new_table);
-                            %movefile(char([char("../../particles/particles_bin_" + binning) '.Boxes']), char("../../particles/particles_bin_" + binning));
-                        end
-                        
-                        %
-                        %                         if obj.configuration.classes == 1
-                        %                             for i = 1:2
-                        %                                 if length(sub_tables) == 1
-                        %                                     average = daverage(char(particles_path), '-t', new_table, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
-                        %                                 else
-                        %                                     average = daverage(char(particles_path), '-t', sub_tables{i}, 'mw', round(obj.configuration.cpu_fraction * obj.configuration.environment_properties.cpu_count_physical));
-                        %                                 end
-                        %                                 template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
-                        %                                 dwrite(average.average, template_em_files{i});
-                        %                             end
-                        %                             obj.configuration.classes = 2;
-                        %                         else
-                        avge = daverage(char(particles_path), '-t', new_table, 'mw', cpu_poolsize);
-                        template_em_files{1} = char(alignment_project_folder_path + string(filesep) + "average_" + 1 + ".em");
-                        dwrite(avge.average, template_em_files{1});
-                        %                         end
+                    
                     end
                     
                     tables = {char(alignment_project_folder_path + string(filesep) + "table.tbl")};
                     dwrite(new_table, tables{1});
+                    
+                    % Produce particles using Dynamo or SUSAN
+                    particles_path = generateParticles(obj.configuration, tables{1}, binning, box_size);
+                    
+                    % Generate averages for each class
+                    sub_tables_id = unique(new_table(:,23));
+                    for i = 1:length(sub_tables_id)
+                        sub_table = new_table(new_table(:, 23) == sub_tables_id(i), :);
+                        avge = daverage(char(particles_path), '-t', sub_table, 'mw', cpu_poolsize);
+                        template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "average_" + i + ".em");
+                        dwrite(avge.average, template_em_files{i});
+                    end
+                    
+                    % Generate noise templates for each class if requested
+                    if obj.configuration.use_noise_classes == true
+                        for i = length(obj.configuration.selected_classes) + 1:obj.configuration.classes
+                            noise_template{i} = rand(size(template) * (previous_binning / binning)) * obj.configuration.noise_scaling_factor;
+                            template_em_files{i} = char(alignment_project_folder_path + string(filesep) + "template_" + i + ".em");
+                            dwrite(noise_template{i}, template_em_files{i});
+                            %                                 template_em_files{i} = noise_template{i};
+                            %                                 mask_em_files{i} = char(alignment_project_folder_path + string(filesep) + "mask_" + i + ".em");
+                            %                                 dwrite(mask, mask_em_files{i});
+                        end
+                    end
+                    
                     template = avge.average;
                     
                     if isfield(obj.configuration, "mask_path") && obj.configuration.mask_path ~= ""

@@ -68,6 +68,7 @@
         "binned_exact_filtered_tomograms_folder": "binned_exact_filtered_tomograms",
         "particles_folder": "particles",
         "particles_table_folder": "particles_table",
+        "particles_susan_info_folder": "particles_susan_info",
         "meta_data_folder": "meta_data",
         "dynamo_folder": "dynamo",
         "templates_folder": "templates",
@@ -573,7 +574,13 @@
         "keep_unbinned": true,
         "skip": false,
         "citation": "",
-        "use_denoised_tomograms": false
+        "use_denoised_tomograms": false,
+        "use_SUSAN": false,
+        "ctf_correction_method": "defocus_file",
+        "susan_padding": 200,
+        "per_particle_ctf_correction": "phase_flip",
+        "padding_policy": "zero",
+        "normalization": "zm"
     },
     "DynamoImportTomograms": {
         "execution_method": "once",
