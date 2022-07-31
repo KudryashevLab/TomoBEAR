@@ -17,8 +17,7 @@ if strcmp(method,"") == true
     end
 end
 
-disp(method);
-disp("INFO: generating particles for binning " + binning);
+disp("INFO: generating particles for binning " + binning + " using " + method + "...");
 
 particles_base_folder = configuration.processing_path + string(filesep) + configuration.output_folder + string(filesep) + configuration.particles_folder;
 
@@ -27,10 +26,6 @@ if strcmp(method, "susan") == true && configuration.use_dose_weighted_particles 
 else
     particles_path = particles_base_folder + string(filesep) + "particles_bin_" + binning + "_bs_" + box_size;
 end
-
-% if configuration.as_boxes == true
-%     particles_path = particles_path + ".Boxes";
-% end
 
 % NB: this comment was exported from DynamoAlignmentProject
 % tmp_folder = getFilesFromLastModuleRun(obj.configuration, "TemplateMatchingPostProcessing", "");
@@ -42,14 +37,14 @@ end
 % end
 
 if strcmp(method, "susan") == true
-    generateSUSANParticles(configuration, particles_path, table_path, binning, box_size);
+    particles_path = generateSUSANParticles(configuration, particles_path, table_path, binning, box_size, append_tags);
 else
-    generateDynamoParticles(configuration, particles_path, table_path, binning, box_size, append_tags);
+    particles_path = generateDynamoParticles(configuration, particles_path, table_path, binning, box_size, append_tags);
 end
 
 end
 
-function generateDynamoParticles(configuration, particles_path, table_path, binning, box_size, append_tags)
+function particles_path = generateDynamoParticles(configuration, particles_path, table_path, binning, box_size, append_tags)
 
 if binning == 1
     binned_tomograms_paths = getCtfCorrectedTomogramsFromStandardFolder(configuration, true);
@@ -80,44 +75,39 @@ else
 end
 
 table = dread(table_path);
+tomos_id = unique(table(:,20));
 
-sub_tables_id = unique(table(:,23));
+% prepare volume table index data
+% <tomo_idx> <tomo_path>
+vti_list = strings(1, length(tomos_id)); 
+for tomogram_idx = 1:length(tomos_id)
+    index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", tomos_id(tomogram_idx))));
+    binned_tomogram_path = binned_tomograms_paths_filtered(index).folder + string(filesep) + binned_tomograms_paths_filtered(index).name;
+    vti_list(1, tomogram_idx) = num2str(tomos_id(tomogram_idx)) + " " + binned_tomogram_path;
+end
 
-for sub_table_idx = 1:length(sub_tables_id)
-    
-    sub_table = table(table(:, 23) == sub_tables_id(sub_table_idx), :);
-    tomos_id = unique(sub_table(:,20));
+% write volume table index data list to .doc file
+vti_file_path = particles_path + ".doc";
+fid = fopen(vti_file_path, 'wt');
+fprintf(fid,'%s\n', vti_list{:});
+fclose(fid);
 
-    for tomogram_idx = 1:length(tomos_id)
+% crop particles using volume table index .doc file
+dtcrop(char(vti_file_path), table, char(particles_path), box_size, 'allow_padding', configuration.dynamo_allow_padding, 'inmemory', configuration.dt_crop_in_memory, 'maxMb', configuration.dt_crop_max_mb, 'asBoxes', configuration.as_boxes, 'append_tags', append_tags);
 
-        sub_table_tomogram = sub_table(sub_table(:, 20) == tomos_id(tomogram_idx), :);
-
-        index = find(contains({binned_tomograms_paths_filtered.name}, sprintf("%03d", tomos_id(tomogram_idx))));
-        binned_tomogram_path = char(binned_tomograms_paths_filtered(index).folder + string(filesep) + binned_tomograms_paths_filtered(index).name);
-
-        dtcrop(binned_tomogram_path, sub_table_tomogram, char(particles_path), box_size, 'allow_padding', configuration.dynamo_allow_padding, 'inmemory', configuration.dt_crop_in_memory, 'maxMb', configuration.dt_crop_max_mb, 'asBoxes', 0, 'append_tags', append_tags);
-
-    end
-
+if configuration.as_boxes == true
+    particles_path = particles_path + ".Boxes";
 end
 
 if ~configuration.dynamo_allow_padding
-    table = cleanCroppedParticlesTable(table, char(particles_path));
+    % REFACTOR: upd table name according to actual number of prtcls
+    table = cleanCroppedParticlesTable(table, char(particles_path), configuration.as_boxes);
     dwrite(table, table_path);
 end
 
-% TODO: Parse dBoxes case
-% if configuration.as_boxes == 1
-%     if configuration.all_in_one_folder == true
-%         particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning + "_bs_" + box_size;
-%         ownDbox(string(particles_folder),string([char(particles_folder) '.Boxes']));
-%         [status, message, messageid] = rmdir(char(particles_folder), 's');
-%     end
-% end
-
 end
 
-function generateSUSANParticles(configuration, particles_path, table_path, binning, box_size)
+function particles_path = generateSUSANParticles(configuration, particles_path, table_path, binning, box_size, append_tags)
 
 % Folder to put SUSAN metadata such as TOMOSTXT & PTCLSRAW files
 particles_info_path = configuration.processing_path + string(filesep) + configuration.output_folder + string(filesep) + configuration.particles_susan_info_folder;
@@ -262,7 +252,12 @@ end
 tomos_path = char(particles_info_path + string(filesep) + "tomos_bin_" + binning + ".tomostxt");
 tomos.save(tomos_path);
 
-particles_raw_path = char(particles_info_path + string(filesep) + "particles_bin_" + binning + ".ptclsraw");
+% manually renumber particles consecutively in the table if needed
+if append_tags == true
+    table(:, 1) = 1:size(table,1);
+    dwrite(table, table_path);
+end
+
 ptcls = SUSAN.Data.ParticlesInfo(table, tomos);
                             
 if configuration.ctf_correction_method == "IMOD"
@@ -312,8 +307,30 @@ elseif configuration.ctf_correction_method == "SUSAN"
 %     tomos_ctf = ctf_est.estimate(ctf_est_path, grid_ctf_path, tomos_path);
 %     tomos_ctf.save(tomos_path);
 end
- 
+
+particles_raw_path = char(particles_info_path + string(filesep) + "particles_bin_" + binning + ".ptclsraw");
 ptcls.save(particles_raw_path);
+
+if configuration.as_boxes == true
+    particles_path = particles_path + ".Boxes";
+end
+
+% produce PTCLSRAW files per batch 
+if configuration.as_boxes == true    
+    [ptcls_path, ptcls_file, ~] = fileparts(particles_raw_path);
+    particles_raw_path_prefix = string(ptcls_path) + string(filesep) + string(ptcls_file);
+    
+    batches_num = floor(table(end, 1) / configuration.susan_particle_batch) + 1;
+    particles_raw_batches_paths = strings(1, batches_num);
+    for batch_idx=1:batches_num
+        batch_start = (batch_idx-1) * configuration.susan_particle_batch;
+        particles_raw_batches_paths(1,batch_idx) = particles_raw_path_prefix + "_batch_" + num2str(batch_start) + ".ptclsraw";
+        
+        batch_end = batch_idx * configuration.susan_particle_batch - 1;
+        ptcls_batch = ptcls.select(ptcls.ptcl_id(:) >= batch_start & ptcls.ptcl_id(:) <= batch_end);
+        ptcls_batch.save(char(particles_raw_batches_paths(1,batch_idx)));
+    end
+end
 
 % TODO: extract all the following code to the generateParticlesAverage()
 % Place in this function possibility to use either Dynamo or SUSAN
@@ -364,27 +381,51 @@ else
 end
 
 subtomos.padding = round(configuration.susan_padding / binning);
-
 subtomos.set_ctf_correction(char(configuration.per_particle_ctf_correction)); % try also wiener if you like
 subtomos.set_padding_policy(char(configuration.padding_policy));
 subtomos.set_normalization(char(configuration.normalization));
-subtomos.reconstruct(char(particles_path), tomos_path, particles_raw_path, box_size);
 
-% Table cleaning if particles can be discarded
-table = cleanCroppedParticlesTable(table, char(particles_path));
+if configuration.as_boxes == true
+    for batch_idx=1:batches_num
+        batch_start = (batch_idx-1) * configuration.susan_particle_batch;
+        particles_batch_path = particles_path + string(filesep) + "batch_" + num2str(batch_start);
+        if ~exist(particles_batch_path, 'dir')
+            [status_mkdir, message, message_id] = mkdir(char(particles_batch_path));
+        end
+        disp("Generating particles for batch_" + num2str(batch_start) + ":");
+        subtomos.reconstruct(char(particles_batch_path), tomos_path, char(particles_raw_batches_paths(1,batch_idx)), box_size);
+    end
+else
+    subtomos.reconstruct(char(particles_path), tomos_path, particles_raw_path, box_size);
+end
+
+% remove discarded particles from the table
+table = cleanCroppedParticlesTable(table, char(particles_path), configuration.as_boxes);
 dwrite(table, table_path);
 
-% Parse dBoxes case
-% if obj.configuration.as_boxes == 1
-%     % dBoxes.convertSimpleData(char("../../particles/particles_bin_" + binning  + "_bs_" + box_size),...
-%     %     [char("../../particles/particles_bin_" + binning  + "_bs_" + box_size) '.Boxes'],...
-%     %     'batch', obj.configuration.particle_batch, 'dc', obj.configuration.direct_copy);
-%     ownDbox(string(particles_path), ...
-%         string([char(particles_path) '.Boxes']));
-% 
-%     [status, message, messageid] = rmdir(char(particles_path), 's');
-%     particles_path = [char(particles_path) '.Boxes'];
-%     %                             new_table(:,1) = 1:length(new_table);
-%     %movefile(char([char("../../particles/particles_bin_" + binning) '.Boxes']), char("../../particles/particles_bin_" + binning));
+% write additional files to allow compability of SUSAN-based dBoxes with Dynamo
+if configuration.as_boxes == true
+    dwrite(table(:,1), char(particles_path + string(filesep) + "tags.em"));
+    dwrite(table, char(particles_path + string(filesep) + "crop.tbl"));
+
+    settings_card = strings(1,6);
+    settings_card(1,1) = "fractioned=1;";
+    % here padding is not a particle box padding,
+    % but a number of digits to fill in particle filename
+    settings_card(1,2) = "padding=6;";
+    settings_card(1,3) = "batch=" + num2str(configuration.susan_particle_batch) + ";";
+    settings_card(1,4) = "extension=em;";
+    settings_card(1,5) = "size=" + num2str(box_size) + " " + num2str(box_size) + " " + num2str(box_size) + ";";
+    
+    particles_batch0_path = particles_path + string(filesep) + "batch_0";
+    ptcls_files = dir(char(particles_batch0_path + string(filesep) + "particle*"));
+    ptcls_size_Mb = ptcls_files(1).bytes / (1024 * 1024);
+    settings_card(1,6) = "Mb=" + num2str(ptcls_size_Mb, '%.6f') + ";";
+
+    settings_card_path = particles_path + string(filesep) + "settings.card";
+    fid = fopen(settings_card_path, 'wt');
+    fprintf(fid,'%s\n', settings_card{:});
+    fclose(fid);
+end
 
 end
