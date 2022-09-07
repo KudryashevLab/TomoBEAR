@@ -193,7 +193,8 @@
         "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
         "denoised_binned_tomograms_folder": "denoised_binned_tomograms",
         "denoised_tilt_stacks_folder": "denoised_tilt_stacks",
-        "aretomo_command": ""
+        "aretomo_command": "",
+        "listening_time_threshold_in_minutes": 15
     },
     "StopPipeline": {
         "execution_method": "control"

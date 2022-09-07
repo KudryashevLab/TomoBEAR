@@ -3,17 +3,26 @@ dynamic_configuration = struct;
 original_files = getOriginalFiles(configuration, false);
 original_files = original_files(~startsWith({original_files.name}, "."));
 
-if checkForMultipleExtensions({original_files.name});
+if ~isempty(original_files) && checkForMultipleExtensions({original_files.name})
     error("ERROR: Multiple unknown extensions found!");
 end
 file_count = length(original_files);
 if ~isfield(configuration, "file_count") || (isfield(configuration, "file_count") && (configuration.file_count < file_count))
     dynamic_configuration.file_count = length(original_files);
-    file_count_changed = true;
+    if isempty(original_files)
+        file_count_changed = false;
+        return;
+    else
+        file_count_changed = true;
+    end
 else
     dynamic_configuration.file_count = configuration.file_count;
     dynamic_configuration.tomograms_count = configuration.tomograms_count;
-    dynamic_configuration.starting_tomogram = configuration.starting_tomogram;
+    if ~isfield(configuration, "starting_tomogram")
+        dynamic_configuration.starting_tomogram = 1;
+    else
+        dynamic_configuration.starting_tomogram = configuration.starting_tomogram;
+    end
     file_count_changed = false;
     return;
 end
@@ -380,7 +389,7 @@ if dynamic_configuration.tilt_stacks == false
         else
             tomogram_file_indices = start_indices(i + 1):start_indices(i + 2)-1;
         end
-        
+        disp("INFO: Number of files available: " + num2str(length(tomogram_file_indices)));
         if length(tomogram_file_indices) < configuration.minimum_files
             disp("INFO: Not enough files for this tomogram to do reconstructions!");
             dynamic_configuration.tomograms.(tomogram_name).skipped = true;
@@ -445,6 +454,12 @@ if dynamic_configuration.tilt_stacks == false
         dynamic_configuration.tomograms.(tomogram_name).adjusted_tilt_number_position = dynamic_configuration.original_files(tomogram_file_indices(1)).adjusted_tilt_number_position;
         dynamic_configuration.tomograms.(tomogram_name).date_position = dynamic_configuration.original_files(tomogram_file_indices(1)).date_position;
         dynamic_configuration.tomograms.(tomogram_name).time_position = dynamic_configuration.original_files(tomogram_file_indices(1)).time_position;
+        
+        [~, last_collected_frame_name, ~] = fileparts(sorted_files(tomogram_file_indices(end)));
+        last_collected_frame_name_split = strsplit(last_collected_frame_name, '_');
+        dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_date = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).date_position);
+        dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_time = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).time_position);
+        
         dynamic_configuration.tomograms.(tomogram_name).zero_tilt = [dynamic_configuration.original_files(tomogram_file_indices).zero_tilt];
         [sorted_angle_values, sorted_angle_indices] = sort([dynamic_configuration.original_files(tomogram_file_indices).angle]);
         dynamic_configuration.tomograms.(tomogram_name).sorted_angles = sorted_angle_values;
@@ -520,7 +535,9 @@ else
         current_tomogram = current_tomogram + 1;
     end
 end
-dynamic_configuration.starting_tomogram = current_tomogram;
+
+%dynamic_configuration.starting_tomogram = current_tomogram;
+
 end
 
 

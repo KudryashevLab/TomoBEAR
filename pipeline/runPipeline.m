@@ -72,6 +72,30 @@ if string(compute_environment) == "initialize" || string(compute_environment) ==
     else
         disp("WARNING: TomoBEAR is only partly initialized!");
     end
+elseif string(compute_environment) == "local_live"
+    %% PIPELINE GENERATION
+    if nargin == 1
+        pipeline = LocalLivePipeline("meta_data/project.json");
+    elseif nargin == 2 && ~exist("default_configuration_path", "var")
+        pipeline = LocalLivePipeline(configuration_path);
+    elseif nargin >= 3 || nargin == 2 && exist("default_configuration_path", "var")
+        pipeline = LocalLivePipeline(configuration_path, default_configuration_path);
+    end
+    
+    %% PRINT GENERATED PIPELINE
+    pipeline.print();
+    
+    %% PIPELINE EXECUTION
+    if nargin <= 3
+        pipeline.execute()
+    else
+        if isdeployed() == true
+            pipeline.execute(str2double(starting_tomogram), str2double(ending_tomogram), str2double(step), str2double(gpu));
+        else
+            pipeline.execute(starting_tomogram, ending_tomogram, step, gpu);
+        end
+    end
+    
 elseif string(compute_environment) == "local"
     %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment
