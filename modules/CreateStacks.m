@@ -399,7 +399,7 @@ classdef CreateStacks < Module
             % here because might be used on the DynamoCleanStacks step!
             %obj.temporary_files = output_stack_list;
             
-            if length(output_stack_list) < obj.configuration.minimum_files
+            if (~isfield(obj.configuration, "live_data_mode") || ~obj.configuration.live_data_mode) && (length(output_stack_list) < obj.configuration.minimum_files)
                 disp("INFO: Not enough MRC files to create stack!");
                 obj.status = 0;
                 return;
