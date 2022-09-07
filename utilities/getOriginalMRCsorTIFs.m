@@ -1,5 +1,5 @@
 function [original_files, tif_flag] = getOriginalMRCsorTIFs(configuration, grouped)
-if nargin == 1
+if nargin < 2
     grouped = false;
 end
     
@@ -33,11 +33,13 @@ if counter == 1
     [original_files, tif_flag] = getOriginalTIFs(configuration);
 end
 
-if isempty(original_files)
-	error("ERROR: No micrographs found at location " + mrc_path);
-end
-
-if iscell(original_files)
+if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
+    if ~isfield(configuration, "live_data_mode") || ~configuration.live_data_mode
+        error("ERROR: No micrographs found at location " + mrc_path);
+    else
+        original_files = [];
+    end
+elseif iscell(original_files)
     original_files_tmp = struct("name", '', "folder", '', "date", '',...
         "bytes", 0, "isdir", false, "datenum", 0);
     for i = 1:length(original_files)

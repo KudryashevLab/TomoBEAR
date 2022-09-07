@@ -27,17 +27,17 @@ for i = 1:length(mrc_path)
     counter = counter + 1;
 end
 
-if iscell(original_tifs)
-    original_files_tmp = struct("name", '', "folder", '', "date", '',...
-        "bytes", 0, "isdir", false, "datenum", 0);
-    for i = 1:length(original_tifs)
-        if i == 1
-            original_files_tmp(1:length(original_tifs{i})) = original_tifs{i};
-        else
-            original_files_tmp(end + 1:end + length(original_tifs{i})) = original_tifs{i};
-        end
-    end
-    original_tifs = original_files_tmp;
-end
+% if iscell(original_tifs)
+%     original_files_tmp = struct("name", '', "folder", '', "date", '',...
+%         "bytes", 0, "isdir", false, "datenum", 0);
+%     for i = 1:length(original_tifs)
+%         if i == 1
+%             original_files_tmp(1:length(original_tifs{i})) = original_tifs{i};
+%         else
+%             original_files_tmp(end + 1:end + length(original_tifs{i})) = original_tifs{i};
+%         end
+%     end
+%     original_tifs = original_files_tmp;
+% end
 end
 
