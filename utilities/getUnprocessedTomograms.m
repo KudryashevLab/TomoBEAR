@@ -455,10 +455,12 @@ if dynamic_configuration.tilt_stacks == false
         dynamic_configuration.tomograms.(tomogram_name).date_position = dynamic_configuration.original_files(tomogram_file_indices(1)).date_position;
         dynamic_configuration.tomograms.(tomogram_name).time_position = dynamic_configuration.original_files(tomogram_file_indices(1)).time_position;
         
-        [~, last_collected_frame_name, ~] = fileparts(sorted_files(tomogram_file_indices(end)));
-        last_collected_frame_name_split = strsplit(last_collected_frame_name, '_');
-        dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_date = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).date_position);
-        dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_time = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).time_position);
+        if isfield(configuration, "live_data_mode") && configuration.live_data_mode == true
+            [~, last_collected_frame_name, ~] = fileparts(sorted_files(tomogram_file_indices(end)));
+            last_collected_frame_name_split = strsplit(last_collected_frame_name, '_');
+            dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_date = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).date_position);
+            dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_time = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).time_position);
+        end
         
         dynamic_configuration.tomograms.(tomogram_name).zero_tilt = [dynamic_configuration.original_files(tomogram_file_indices).zero_tilt];
         [sorted_angle_values, sorted_angle_indices] = sort([dynamic_configuration.original_files(tomogram_file_indices).angle]);
