@@ -26,8 +26,10 @@ classdef MotionCor2 < Module
             
             mrc_list = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files;
             
-            if  obj.configuration.method == "MotionCor2"
+            if obj.configuration.method == "MotionCor2"
                 [motion_corrected_files, symbolic_link_standard_folder] = obj.correctWithMotionCor2(mrc_list);
+            elseif obj.configuration.method == "SumOnly"
+                [motion_corrected_files, symbolic_link_standard_folder] = obj.summarizeOnly(mrc_list);
             else
                 [motion_corrected_files, symbolic_link_standard_folder] =  obj.correctWithAlignFrames(mrc_list);
             end
@@ -393,6 +395,40 @@ classdef MotionCor2 < Module
                 %         + path_parts(end) + string(filesep) + name + ".mrc";
                 %         createSymbolicLink(mrc_output, destination, obj.log_file_id);
                 %     end
+                motion_corrected_files{i} = mrc_output;
+            end
+        end
+        
+        function [motion_corrected_files, symbolic_link_standard_folder] = summarizeOnly(obj, mrc_list)
+            disp("INFO: Method - summarize movies without correction");
+            disp("INFO: Getting ready to process...");
+            disp("INFO: Processing micrographs in " + obj.configuration.output_folder);
+            
+            % TODO: support for frame integration files
+            field_names = fieldnames(obj.configuration.tomograms);
+            
+            mkdir(obj.configuration.processing_path + string(filesep)...
+                    + obj.configuration.output_folder + string(filesep)...
+                    + obj.configuration.motion_corrected_files_folder + string(filesep) + field_names{obj.configuration.set_up.j});
+            
+            output_folder = obj.output_path;
+            configuration = obj.configuration;
+            log_file_id = -1;
+            
+            parfor i = 1:length(mrc_list)
+                disp("INFO: Processing " + mrc_list(i) + "...");
+                
+                % TODO: is the output_postfix needed? makes
+                % createSymbolicLinkInStandardFolder more complicated
+                %mrc_output = output_folder + string(filesep) + name + "_" + configuration.output_postfix + ".mrc";
+                [~, name, ~] = fileparts(mrc_list{i});
+                mrc_output = output_folder + string(filesep) + name + ".mrc";
+                
+                input_movie = dread(mrc_list(i));
+                output_frame = sum(input_movie, 3);
+                dwrite(output_frame, mrc_output);
+                
+                [output_symbolic_link_standard_folder, symbolic_link_standard_folder(i)] = createSymbolicLinkInStandardFolder(configuration, mrc_output, "motion_corrected_files_folder", log_file_id);
                 motion_corrected_files{i} = mrc_output;
             end
         end
