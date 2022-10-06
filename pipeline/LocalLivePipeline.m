@@ -269,11 +269,10 @@ classdef LocalLivePipeline < Pipeline
                 tomogram_to_process_mask = zeros([1 dynamic_configuration.tomograms_count]);
                 tomogram_to_process_mask(tomogram_indices_to_check) = 1;
                 
-                if isfield(dynamic_configuration, "tomograms") && ~isempty(dynamic_configuration.tomograms)
-                    tomogram_names = fieldnames(dynamic_configuration.tomograms);
-                else
-                    tomogram_names = fieldnames(configuration.general.tomograms);
+                if ~isfield(dynamic_configuration, "tomograms") || isempty(dynamic_configuration.tomograms)
+                    dynamic_configuration.tomograms = configuration.general.tomograms;
                 end
+                tomogram_names = fieldnames(dynamic_configuration.tomograms);
                 
                 tomogram_enough_files_mask = zeros([1 dynamic_configuration.tomograms_count]);
                 for tomogram_idx = tomogram_indices_to_check
