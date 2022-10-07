@@ -8,6 +8,7 @@ classdef TemplateMatchingPostProcessing < Module
             obj = setUp@Module(obj);
             createStandardFolder(obj.configuration, "particles_folder", true);
             createStandardFolder(obj.configuration, "particles_table_folder", true);
+            createStandardFolder(obj.configuration, "particles_susan_info_folder", true);
         end
         
         function obj = process(obj)
@@ -93,36 +94,18 @@ classdef TemplateMatchingPostProcessing < Module
                     break_flag = false;
                 end
                 
-                % TODO: integrate SUSAN
-                if obj.configuration.crop_particles == true
-                    if obj.configuration.all_in_one_folder == true
-                        particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning  + "_bs_" + box_size;
-                        dtcrop(char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name), tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', 1, 'inmemory',1 , 'maxMb', 50000, 'append_tags', true, 'asBoxes', 0);
-                    else
-                        [folder, name, extension] = fileparts(binned_tomograms_paths_filtered(i).folder);
-                        particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning  + "_bs_" + box_size + string(name);
-                        dtcrop(char(binned_tomograms_paths_filtered(i).folder + string(filesep) + binned_tomograms_paths_filtered(i).name), tab_tomo{i}, char(particles_folder), box_size, 'allow_padding', 1, 'inmemory',1 , 'maxMb', 50000, 'append_tags', true, 'asBoxes', 0);
-                    end
-                end
                 if break_flag == true
                 	break;
                 end
             end
             
-            % TODO: integrate SUSAN
-            if obj.configuration.crop_particles == true && obj.configuration.as_boxes == 1
-                if obj.configuration.all_in_one_folder == true
-                    particles_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_folder + string(filesep) + "particles_bin_" + obj.configuration.template_matching_binning + "_bs_" + box_size;
-                    ownDbox(string(particles_folder),string([char(particles_folder) '.Boxes']));
-                    % TODO: make flag for leaving original particles
-                    % folder
-                    [status, message, messageid] = rmdir(char(particles_folder), 's');
-                end
-            end
-            
             tab_all_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder;
+            tab_all_file_path = char(tab_all_path + string(filesep) + "tab_ini_all_bin_" + obj.configuration.template_matching_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
+            dwrite(tab_all, tab_all_file_path);
             
-            dwrite(tab_all, char(tab_all_path + string(filesep) + "tab_ini_all_bin_" + obj.configuration.template_matching_binning + "_" + num2str(size(tab_all,1)) + ".tbl"));
+            if obj.configuration.crop_particles == true
+                generateParticles(obj.configuration, tab_all_file_path, obj.configuration.template_matching_binning, box_size, true);
+            end
         end
         
         function connected_components(obj)
