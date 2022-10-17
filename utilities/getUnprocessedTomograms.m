@@ -416,7 +416,7 @@ if dynamic_configuration.tilt_stacks == false
         
         dynamic_configuration.tomograms.(tomogram_name).original_angles = angles;
         dynamic_configuration.tomograms.(tomogram_name).original_tomogram_file_indices = tomogram_file_indices;
-        dynamic_configuration.tomograms.(tomogram_name).original_file_paths = sorted_files(tomogram_file_indices);
+        dynamic_configuration.tomograms.(tomogram_name).original_file_paths = file_paths(tomogram_file_indices);%sorted_files(tomogram_file_indices);
         
         if configuration.duplicated_tilts ~= "keep"
             tomogram_file_indices(index_to_dupes) = [];
@@ -433,7 +433,8 @@ if dynamic_configuration.tilt_stacks == false
             dynamic_configuration.tomograms.(tomogram_name).skipped_after_cleaning_duplicates = false;
         end
         
-        dynamic_configuration.tomograms.(tomogram_name).angles = angles;
+        [~, time_sort_idx] = ismember(sorted_files(tomogram_file_indices), file_paths(tomogram_file_indices));
+        dynamic_configuration.tomograms.(tomogram_name).angles = angles(time_sort_idx);
         dynamic_configuration.tomograms.(tomogram_name).tomogram_file_indices = tomogram_file_indices;
         dynamic_configuration.tomograms.(tomogram_name).name = {dynamic_configuration.original_files(tomogram_file_indices).name};
         dynamic_configuration.tomograms.(tomogram_name).folder = dynamic_configuration.original_files(tomogram_file_indices(1)).folder;
