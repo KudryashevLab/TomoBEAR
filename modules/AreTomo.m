@@ -56,13 +56,15 @@ classdef AreTomo < Module
             %             else
             angle_command_snippet = "-TiltRange " + min_and_max_tilt_angles(1) + " " + min_and_max_tilt_angles(end);
             
-            if obj.configuration.patch
+            if obj.configuration.patch ~= "0 0"
                 patch_alignment_command_snippet = "-Patch " + strjoin(obj.configuration.patch," ");
+            else
+                patch_alignment_command_snippet = "";
             end
             stack_destination = obj.output_path + filesep + obj.name + "_bin_1.ali";
 
             executeCommand(obj.configuration.aretomo_command + " -InMrc " + tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + tilt_stacks(obj.configuration.set_up.adjusted_j).name...
-                + " -OutMrc " + stack_destination + " -VolZ 0 -OutBin 1 " + angle_command_snippet + " -Wbp " + wbp + " -TiltAxis " + obj.configuration.tilt_axis_determination + " -AlignZ " + (obj.configuration.align_height_ratio * obj.configuration.reconstruction_thickness) + " -FlipVol " + 0 + " -FlipInt " + obj.configuration.flip_intensity + " -Gpu " + (obj.configuration.set_up.gpu - 1), false, obj.log_file_id);
+                + " -OutMrc " + stack_destination + " -VolZ 0 -OutBin 1 " + angle_command_snippet + " -Wbp " + wbp + " -TiltAxis " + obj.configuration.tilt_axis_determination + " -AlignZ " + (obj.configuration.align_height_ratio * obj.configuration.reconstruction_thickness) + " -FlipVol " + 0 + " -FlipInt " + obj.configuration.flip_intensity + " -Gpu " + (obj.configuration.set_up.gpu - 1) + " " + patch_alignment_command_snippet, false, obj.log_file_id);
             link_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name + filesep + obj.name + ".ali";
             if exist(obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name, "dir")
                 rmdir(obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name,"s");
