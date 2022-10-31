@@ -394,7 +394,11 @@ classdef CreateStacks < Module
                 error("ERROR: unknown normalization method!");
             end
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized = output_stack_list;
-            obj.temporary_files = output_stack_list;
+            
+            % NOTE: tilt_stack_files_normalized should not be deleted 
+            % here because might be used on the DynamoCleanStacks step!
+            %obj.temporary_files = output_stack_list;
+            
             if length(output_stack_list) < obj.configuration.minimum_files
                 disp("INFO: Not enough MRC files to create stack!");
                 obj.status = 0;
@@ -472,33 +476,32 @@ classdef CreateStacks < Module
         end
         
         function obj = cleanUp(obj)
-            if obj.configuration.keep_intermediates == false
-                field_names = fieldnames(obj.configuration.tomograms);
-                
-                
-                %                 for i = 1:length(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files)
-                [folder, name, extension] = fileparts(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files{1});
-                %                 files = dir(folder + string(filesep) + name + "*");
-                %                 [success, message, message_id] =
-                files = dir(folder + string(filesep) + field_names{obj.configuration.set_up.j} + "*");
+            
+            field_names = fieldnames(obj.configuration.tomograms);
+            
+            % Delete slices files created if input data were stacks
+            % TODO: parametrize slice_folder to match created foldername
+            slice_folder = "slices";
+            folder = obj.output_path + string(filesep) + slice_folder;
+            if exist(folder, 'dir')
+                files = dir(folder + string(filesep) + field_names{obj.configuration.set_up.j} + "_" + obj.configuration.slice_suffix + "_*.mrc");
                 obj.deleteFilesOrFolders(files);
-                %                 end
+                obj.deleteFolderIfEmpty(folder);
+            end
+            
+            if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
                 
-                [folder, name, extension] = fileparts(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links{1});
-                %             [success, message, message_id] =
-                files = dir(folder);
-                obj.deleteFilesOrFolders(files);
+                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_files")
+                    files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files;
+                    obj.deleteFilesOrFolders(files);
                 
-                normalized_files = dir(obj.output_path + string(filesep) + "*_" + obj.configuration.normalized_postfix + ".mrc");
-                obj.deleteFilesOrFolders(normalized_files);
-                
-                if isempty(dir(folder))
-                    [success, message,message_id] = rmdir(folder, "s");
+                    files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links;
+                    [folder, ~, ~] = fileparts(files{1});
+                    obj.deleteFilesOrFolders(files);
+                    obj.deleteFolderIfEmpty(folder);
+                    [parent_folder, ~, ~] = fileparts(folder);
+                    obj.deleteFolderIfEmpty(parent_folder);
                 end
-                
-                %             for i = 1:length(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links)
-                %                 [success, message,message_id] = rmdir(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_files_symbolic_links{i}, "s");
-                %             end
             end
             obj = cleanUp@Module(obj);
         end

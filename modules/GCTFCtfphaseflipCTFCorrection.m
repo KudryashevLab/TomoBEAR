@@ -3,7 +3,8 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
         function obj = GCTFCtfphaseflipCTFCorrection(configuration)
             obj = obj@Module(configuration);
         end
-        
+        % TODO: add setUp method and move here creation of corresponding
+        % directories from BatchRunTomo class
         function obj = process(obj)
             disp("INFO: **STARTING PARAMETERS**");
             disp("INFO: Input Folder: " + obj.input_path);
@@ -318,19 +319,23 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
         end
         
         function obj = cleanUp(obj)
-            if obj.configuration.keep_intermediates == false
-                files = dir(obj.output_path);
-                files(1) = [];
-                files(1) = [];
-                files = files(~contains({files(:).name}, ".defocus"));
-                files = files(~contains({files(:).name}, ".log"));
-                for i = 1:length(files)
-                    if files(i).isdir == true
-                        [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
-                    else
-                        delete(files(i).folder + string(filesep) + files(i).name);
-                    end
-                end
+            if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
+                folder = obj.output_path + string(filesep) + obj.configuration.slice_folder;
+                files = dir(folder + string(filesep) + "*");
+                obj.deleteFilesOrFolders(files);
+                obj.deleteFolderIfEmpty(folder);
+                
+%                 files(1) = [];
+%                 files(1) = [];
+%                 files = files(~contains({files(:).name}, ".defocus"));
+%                 files = files(~contains({files(:).name}, ".log"));
+%                 for i = 1:length(files)
+%                     if files(i).isdir == true
+%                         [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
+%                     else
+%                         delete(files(i).folder + string(filesep) + files(i).name);
+%                     end
+%                 end
             end
             obj = cleanUp@Module(obj);
         end
