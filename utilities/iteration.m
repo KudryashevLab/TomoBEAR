@@ -29,8 +29,8 @@ createOutputAndScratchFoldersForPipelineStep(merged_configuration);
 saveJSON(merged_configuration.output_path + string(filesep) + "input.json", merged_configuration);
 function_handle = str2func(pipeline_definition);
 instantiated_class = function_handle(merged_configuration);
-instantiated_class = instantiated_class.setUp();
 if merged_configuration.execute == true
+    instantiated_class = instantiated_class.setUp();
     instantiated_class = instantiated_class.process();
     dynamic_configuration_out = instantiated_class.dynamic_configuration;
 else

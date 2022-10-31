@@ -100,6 +100,11 @@ classdef LocalPipeline < Pipeline
                 [status_mkdir, message, message_id] = mkdir(output_path);
             end
             
+            % Check only existing folders if in non-execution mode (e.g. cleanup)
+            if configuration.general.execute == false
+               pipeline_ending_step = length(dir(output_path + string(filesep) + "*_1"));
+            end
+            
             pipeline_log_file_path = output_path + string(filesep) + "pipeline.log";
             
             if fileExists(pipeline_log_file_path)
@@ -348,19 +353,32 @@ classdef LocalPipeline < Pipeline
                                 || merged_configuration.execution_method == "parallel")
                             
                             if (merged_configuration.execution_method == "in_order"...
-                                    || merged_configuration.execution_method == "parallel") && pipeline_ending_step ~= -1
-                                pool_folder = merged_configuration.processing_path + string(filesep) + merged_configuration.output_folder + string(filesep) +  "jobs" + string(filesep) + "pool_" + merged_configuration.tomogram_end;
-                                if ~exist(pool_folder, "dir")
-                                    [status_mkdir, message, message_id] = mkdir(pool_folder);
+                                    || merged_configuration.execution_method == "parallel")% && pipeline_ending_step ~= -1
+                                if merged_configuration.execute == false
+                                    % No need to open pool in cleanUp mode
+                                    execution_method = "sequential";
+                                elseif pipeline_ending_step ~= -1
+                                    %TO-REVIEW: delete / move
+                                    pool_folder = merged_configuration.processing_path + string(filesep) + merged_configuration.output_folder + string(filesep) +  "jobs" + string(filesep) + "pool_" + merged_configuration.tomogram_end;
+                                    if ~exist(pool_folder, "dir")
+                                        [status_mkdir, message, message_id] = mkdir(pool_folder);
+                                    end
+                                    
+                                    % if merged_configuration.execution_method == "parallel"
+                                    %     generatePool(merged_configuration.cpu_fraction, false, pool_folder);
+                                    % elseif merged_configuration.execution_method == "in_order"
+                                    disp("INFO:VARIABLE:merged_configuration.environment_properties.gpu_count: " + merged_configuration.environment_properties.gpu_count);
+                                    generatePool(merged_configuration.environment_properties.gpu_count, false, pool_folder);
+                                    % end
+                                    execution_method = merged_configuration.execution_method;
+                                else
+                                    execution_method = merged_configuration.execution_method;
                                 end
-                                % if merged_configuration.execution_method == "parallel"
-                                %     generatePool(merged_configuration.cpu_fraction, false, pool_folder);
-                                % elseif merged_configuration.execution_method == "in_order"
-                                disp("INFO:VARIABLE:merged_configuration.environment_properties.gpu_count: " + merged_configuration.environment_properties.gpu_count);
-                                generatePool(merged_configuration.environment_properties.gpu_count, false, pool_folder);
-                                % end
+                            else
+                                execution_method = merged_configuration.execution_method;
                             end
-                            [dynamic_configuration_out, tomogram_status{i - 1}] = obj.("execution_" + merged_configuration.execution_method)(merged_configuration, obj.pipeline_definition{i}, previous_tomogram_status);
+                            
+                            [dynamic_configuration_out, tomogram_status{i - 1}] = obj.("execution_" + execution_method)(merged_configuration, obj.pipeline_definition{i}, previous_tomogram_status);
                         elseif isfield(merged_configuration, "execution_method") && merged_configuration.execution_method == "control"
                             if fileExists(success_file_path)
                                 if pipeline_ending_step + 1 == i
@@ -479,10 +497,9 @@ classdef LocalPipeline < Pipeline
                 ": " + pipeline_definition + "...");
             
             instantiated_class = function_handle(merged_configuration);
-            
-            instantiated_class = instantiated_class.setUp();
-            
+             
             if merged_configuration.execute == true
+                instantiated_class = instantiated_class.setUp();
                 instantiated_class = instantiated_class.process();
                 dynamic_configuration_out = instantiated_class.dynamic_configuration;
             else
