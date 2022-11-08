@@ -11,14 +11,12 @@ classdef EMDTemplateGeneration < Module
         
         function obj = process(obj)
             % TODO: error handling when file is not downloadable
-            % TODO: fix url - use EMDB archive throught ftp instead of PDBe
             url = sprintf("http://www.ebi.ac.uk/pdbe/entry/download/EMD-%s/bundle", obj.configuration.template_emd_number);
             file_name_without_extension = "EMD-" + obj.configuration.template_emd_number;
             file_name =  file_name_without_extension + ".tar.gz";
             
             template_destination = obj.output_path + string(filesep) + file_name;
             
-            % NOTE: look if nedeed when will change PDBe archive to EMDB
             obj.temporary_files(end + 1) = template_destination;
             
             output = executeCommand("wget "...
@@ -29,9 +27,8 @@ classdef EMDTemplateGeneration < Module
             
             %[status, message, message_id] = mkdir(output_);
             
-            %obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
+            obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
             
-            % TODO: fix archive unpacking - use gzip -d to unpack .gz archive
             output = executeCommand("tar"...
                 + " xvfz " + template_destination...
                 + " -C " + obj.output_path);
@@ -108,7 +105,6 @@ classdef EMDTemplateGeneration < Module
             %             template_band_pass_filter = obj.BH_bandpass3d(size(template), 0, 0, 1/template_frequency_cut_off, "GPU", 1);
             %             band_passed_template = gather(real(ifftn(fftn(template) .* template_band_pass_filter)));
             
-            % TODO: what if several masks are available? (e.g., EMD-1001 - 25 masks)
             available_mask = dir(obj.output_path + string(filesep) + "**" + string(filesep) + "*msk*.map");
             
             
