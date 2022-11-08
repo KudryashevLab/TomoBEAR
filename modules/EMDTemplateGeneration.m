@@ -11,32 +11,38 @@ classdef EMDTemplateGeneration < Module
         
         function obj = process(obj)
             % TODO: error handling when file is not downloadable
-            url = sprintf("http://www.ebi.ac.uk/pdbe/entry/download/EMD-%s/bundle", obj.configuration.template_emd_number);
-            file_name_without_extension = "EMD-" + obj.configuration.template_emd_number;
-            file_name =  file_name_without_extension + ".tar.gz";
+%             obj.temporary_files(end + 1) = template_destination;
             
-            template_destination = obj.output_path + string(filesep) + file_name;
+            template_dir = "EMD-" + obj.configuration.template_emd_number;
+            map_dir = template_dir + string(filesep) + "map";
+            masks_dir = template_dir + string(filesep) + "masks";
             
-            obj.temporary_files(end + 1) = template_destination;
+            url = sprintf("ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s/", template_dir);
+            map_dir_ftp = sprintf("pub/databases/emdb/structures/%s", map_dir);
+            masks_dir_ftp = sprintf("pub/databases/emdb/structures/%s", masks_dir);
             
-            output = executeCommand("wget "...
-                + "-O " + template_destination...
-                + " " + url, obj.log_file_id);
+            % NOTE: -m to get files recoursively with infinite depth,
+            % preserve time-stamping, and keep FTP directory listings
+            % NOTE: -nH to cut ftp://ftp.ebi.ac.uk prefix from folder path
+            % NOTE: --cut_dirs=4 to cut pub/databases/emdb/structures 
+            % prefix from folder path
+            % NOTE: --include-directories to include /map and /masks
+            % NOTE: -P to set directory for downloaded data
+            output = executeCommand("wget -m " + url...
+                + " -nH --cut-dirs=4"...
+                + " --include-directories=" + map_dir_ftp + "," + masks_dir_ftp... 
+                + " -P " + obj.output_path, obj.log_file_id);
             
             fprintf("INFO: extracting emd structure %s...", obj.configuration.template_emd_number);
             
-            %[status, message, message_id] = mkdir(output_);
+            %obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
             
-            obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
+            file_name_without_extension = lower(strrep(template_dir, "-", "_"));
+            file_name = file_name_without_extension + ".map";            
+            map_path = obj.output_path + string(filesep) + map_dir + string(filesep) + file_name;
             
-            output = executeCommand("tar"...
-                + " xvfz " + template_destination...
-                + " -C " + obj.output_path);
+            output = executeCommand("gzip -dv " + map_path + ".gz");
             
-            file_name_splitted = strsplit(file_name, ".");
-            file_name_splitted_replaced = strrep(file_name_splitted, "-", "_");
-            file_name_splitted_replaced_lowercased = lower(file_name_splitted_replaced);
-            map_path = obj.output_path + string(filesep) + file_name_without_extension + string(filesep) + "map" + string(filesep) + file_name_splitted_replaced_lowercased{1} + ".map";
             map_path_char = char(map_path);
             
             if obj.configuration.dark_density == true
@@ -90,6 +96,8 @@ classdef EMDTemplateGeneration < Module
             
             
             if obj.configuration.use_bandpassed_template == true
+                % TODO: what if template shapes are not equal?
+                % (e.g., EMD-1001 - [600 x 600 x 30])
                 band_passed_template = dbandpass(template, [obj.configuration.template_bandpass_cut_on_fourier_pixel obj.dynamic_configuration.fp obj.configuration.template_bandpass_smoothing_pixels]);
             else
                 band_passed_template = template;
@@ -104,9 +112,6 @@ classdef EMDTemplateGeneration < Module
             %             template_frequency_cut_off = scaling_ratio .* obj.configuration.template_cut_off;
             %             template_band_pass_filter = obj.BH_bandpass3d(size(template), 0, 0, 1/template_frequency_cut_off, "GPU", 1);
             %             band_passed_template = gather(real(ifftn(fftn(template) .* template_band_pass_filter)));
-            
-            available_mask = dir(obj.output_path + string(filesep) + "**" + string(filesep) + "*msk*.map");
-            
             
             if obj.configuration.type == "emClarity"
                 %                     try
@@ -206,6 +211,11 @@ classdef EMDTemplateGeneration < Module
                 createSymbolicLink(template_destination, template_link_destination, obj.log_file_id);
             end
             
+            % TODO: if mask from emdb is used force user to provide name
+            % TODO: make by default template-derived mask, not EMDB one
+            % (e.g.,EMD-1001 - 25 masks)
+            masks_path = obj.output_path + string(filesep) + masks_dir + string(filesep) + file_name_without_extension + "_msk*.map";
+            available_mask = dir(masks_path);
             
             if ~isempty(available_mask)
                 mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));                
