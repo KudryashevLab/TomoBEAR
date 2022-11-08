@@ -10,38 +10,39 @@ classdef EMDTemplateGeneration < Module
         end
         
         function obj = process(obj)
-            % TODO: error handling when file is not downloadable
-%             obj.temporary_files(end + 1) = template_destination;
+            % TODO: error handling when file (map/mask) is not downloadable
+
+            template_dir = sprintf("EMD-%s", obj.configuration.template_emd_number);
+            url = sprintf("ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s", template_dir);
             
-            template_dir = "EMD-" + obj.configuration.template_emd_number;
-            map_dir = template_dir + string(filesep) + "map";
-            masks_dir = template_dir + string(filesep) + "masks";
+            template_dir_path = obj.output_path + string(filesep) + template_dir;
+            if ~exist(template_dir_path, 'dir')
+                mkdir(template_dir_path)
+            end
             
-            url = sprintf("ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s/", template_dir);
-            map_dir_ftp = sprintf("pub/databases/emdb/structures/%s", map_dir);
-            masks_dir_ftp = sprintf("pub/databases/emdb/structures/%s", masks_dir);
+            map_filename_without_extension = lower(strrep(template_dir, "-", "_"));
+            map_filename = map_filename_without_extension + ".map";          
+            map_path = obj.output_path + string(filesep) + template_dir + string(filesep) + map_filename;
             
-            % NOTE: -m to get files recoursively with infinite depth,
-            % preserve time-stamping, and keep FTP directory listings
-            % NOTE: -nH to cut ftp://ftp.ebi.ac.uk prefix from folder path
-            % NOTE: --cut_dirs=4 to cut pub/databases/emdb/structures 
-            % prefix from folder path
-            % NOTE: --include-directories to include /map and /masks
-            % NOTE: -P to set directory for downloaded data
-            output = executeCommand("wget -m " + url...
-                + " -nH --cut-dirs=4"...
-                + " --include-directories=" + map_dir_ftp + "," + masks_dir_ftp... 
-                + " -P " + obj.output_path, obj.log_file_id);
+            fprintf("INFO: downloading emd structure %s...\n", obj.configuration.template_emd_number);
+            output = executeCommand("wget " + url...
+                + string(filesep) + "map"...
+                + string(filesep) + map_filename + ".gz"...
+                + " -P " + template_dir_path, obj.log_file_id);
             
-            fprintf("INFO: extracting emd structure %s...", obj.configuration.template_emd_number);
-            
-            %obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
-            
-            file_name_without_extension = lower(strrep(template_dir, "-", "_"));
-            file_name = file_name_without_extension + ".map";            
-            map_path = obj.output_path + string(filesep) + map_dir + string(filesep) + file_name;
-            
+            fprintf("INFO: extracting emd structure %s...\n", obj.configuration.template_emd_number);
             output = executeCommand("gzip -dv " + map_path + ".gz");
+            
+            if isfield(obj.configuration, "mask_emd_filename") && obj.configuration.mask_emd_filename ~= ""
+                fprintf("INFO: downloading emd mask %s...\n", obj.configuration.mask_emd_filename);
+                output = executeCommand("wget " + url...
+                    + string(filesep) + "masks"...
+                    + string(filesep) + obj.configuration.mask_emd_filename...
+                    + " -P " + template_dir_path, obj.log_file_id);
+                available_mask_path = obj.output_path + string(filesep) + template_dir + string(filesep) + obj.configuration.mask_emd_filename;
+            else
+                available_mask_path = '';
+            end
             
             map_path_char = char(map_path);
             
@@ -211,13 +212,9 @@ classdef EMDTemplateGeneration < Module
                 createSymbolicLink(template_destination, template_link_destination, obj.log_file_id);
             end
             
-            % TODO: if mask from emdb is used force user to provide name
-            % TODO: make by default template-derived mask, not EMDB one
-            % (e.g.,EMD-1001 - 25 masks)
-            masks_path = obj.output_path + string(filesep) + masks_dir + string(filesep) + file_name_without_extension + "_msk*.map";
-            available_mask = dir(masks_path);
-            
+            available_mask = dir(available_mask_path);
             if ~isempty(available_mask)
+                fprintf("INFO: writing chosen EMD mask (%s)...\n", obj.configuration.mask_emd_filename);
                 mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));                
                 rescaled_mask = obj.rescale_volume(mask, "", scaling_ratio, "CPU");
                 rescaled_mask = makeEvenVolumeDimensions(rescaled_mask);
@@ -237,7 +234,7 @@ classdef EMDTemplateGeneration < Module
                     createSymbolicLink(mask_binarized_destination, mask_link_destination, obj.log_file_id);
                 end
             else
-                
+                fprintf("INFO: writing template-derived mask ...\n");
                 dwrite(mask_binarized, mask_binarized_destination);
                 dwrite(mask_binarized_smoothed_cleaned, mask_smoothed_destination);
                 if obj.configuration.use_smoothed_mask == true
