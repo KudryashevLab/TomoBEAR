@@ -142,7 +142,7 @@ elseif string(compute_environment) == "local"
     %
     % pipeline + {"test7", 'test8'};
     % pipeline.printPipeline();
-elseif string(compute_environment) == "cleanup"
+elseif string(compute_environment) == "cleanup" || string(compute_environment) == "cleanup_all"
     %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment
     %global environmentProperties;
@@ -166,13 +166,40 @@ elseif string(compute_environment) == "cleanup"
     pipeline.print();
     %% PIPELINE EXECUTION
     pipeline.configuration.general.execute = false;
-    pipeline.configuration.general.keep_intermediates = false;
+    
+    % cleanup     - delete intermediate files for the marked steps
+    % cleanup_all - keep intermediate files for the marked steps
+    % to mark step for cleanup use "keep_intermediates": false/true
+    if string(compute_environment) == "cleanup"
+        % check whether user marked at least one step for cleanup
+        pipeline_definition = fieldnames(pipeline.configuration);
+        cleanup_any = false;
+        for i = 1:length(pipeline_definition)
+            if pipeline_definition{i} == "general"
+                continue;
+            elseif isfield(pipeline.configuration.(pipeline_definition{i}), "keep_intermediates")
+                cleanup_any = cleanup_any || ~pipeline.configuration.(pipeline_definition{i}).keep_intermediates;
+            end
+        end
+        if cleanup_any == false
+           disp("ERROR: no steps marked for cleanup!");
+           return;
+        end
+        pipeline.configuration.general.keep_intermediates = true;
+    elseif string(compute_environment) == "cleanup_all"
+        pipeline.configuration.general.keep_intermediates = false;
+    end
+    
     pipeline.configuration.general.ignore_success_files = true;
     pipeline.configuration.general.checkpoint_module = true;
     pipeline.configuration.general.skip_data_check = true;
     starting_tomogram = -1;
     ending_tomogram = -1;
-    step = length(dir(pipeline.configuration.general.processing_path + filesep + pipeline.configuration.general.output_folder + filesep + "*_1"));
+    
+    % Ending step will be setup in pipeline.execute() since
+    % pipeline.configuration.general.output_folder is not accessible here!
+    step = -1;
+    
     gpu = -2;
     
     if isdeployed() == true

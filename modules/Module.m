@@ -35,12 +35,39 @@ classdef (Abstract) Module
         end
         
         function obj = deleteFilesOrFolders(obj, files)
-            for i = 1:length(files)
-                if files(i).isdir == true
-                    [~, ~, ~] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
-                else
-                    delete(files(i).folder + string(filesep) + files(i).name)
+            if iscell(files)
+                files_dir_struct = [];
+                for idx = 1:length(files)
+                    temp_struct = dir(files{idx});
+                    if ~isempty(temp_struct)
+                        files_dir_struct = [files_dir_struct, temp_struct];
+                    end
                 end
+            else
+                files_dir_struct = files;
+            end
+            
+            if ~isempty(files_dir_struct)
+                files_dir_struct_names = {files_dir_struct.name};
+                files_dir_struct = files_dir_struct(~ismember(files_dir_struct_names,{'.','..'}));
+            
+                for idx = 1:length(files_dir_struct)
+                    filename = files_dir_struct(idx).folder + string(filesep) + files_dir_struct(idx).name;
+                    if files_dir_struct(idx).isdir == true && exist(filename, 'dir')
+                        [~, ~, ~] = rmdir(filename, "s");
+                    elseif isfile(filename)
+                        delete(filename);
+                    end
+                end
+            end
+        end
+        
+        function obj = deleteFolderIfEmpty(obj, folder)
+            contents = dir(folder);
+            contentNames = {contents.name};
+            contentNames = contentNames(~ismember(contentNames ,{'.','..'}));
+            if isempty(contentNames)
+                [success, message, message_id] = rmdir(folder, "s");
             end
         end
         
@@ -49,19 +76,31 @@ classdef (Abstract) Module
         end
         
         function obj = cleanUp(obj)
-            if ~isempty(obj.temporary_files) && obj.configuration.keep_intermediates == false
-                for i = 1:length(obj.temporary_files)
-                    [success, message, message_id] = rmdir(obj.temporary_files{i},"s");
-                    if success == 0
-                        delete(obj.temporary_files{i});
-                    end
-                end
-            end
+            % NOTE: disabled the functionality below because decoupled
+            % cleanup and execution modes. Temporary files to be deleted
+            % during execution are currently deleted in the .cleanUp()
+            % insances of the corresponding Module classes.            
+%             if ~isempty(obj.temporary_files) && (obj.configuration.execute == false && obj.configuration.keep_intermediates == false)
+%                 for i = 1:length(obj.temporary_files)
+%                     [success, message, message_id] = rmdir(obj.temporary_files{i},"s");
+%                     if success == 0 && isfile(obj.temporary_files{i})
+%                         delete(obj.temporary_files{i});
+%                     end
+%                 end
+%             end
+            % TODO: review temporary files to be deleted per each module,
+            % collect them in obj.temporary_files and use centralized
+            % deletion implemented here
+            
+            % TODO: think what to do with log file if in cleanup mode
             fclose(obj.log_file_id);
-            obj.duration = toc(obj.start_time);
-            fid = fopen(obj.output_path + string(filesep) + "TIME", "w");
-            fprintf(fid, "%s", string(num2str(obj.duration)));
-            fclose(fid);
+            
+            if obj.configuration.execute == true
+                obj.duration = toc(obj.start_time);
+                fid = fopen(obj.output_path + string(filesep) + "TIME", "w");
+                fprintf(fid, "%s", string(num2str(obj.duration)));
+                fclose(fid);
+            end
         end
         
         function obj = setUpModule(obj)

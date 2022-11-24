@@ -989,54 +989,55 @@ classdef BatchRunTomo < Module
             end
             printVariable(merged_configurations);
         end
-        
-        function obj = cleanUp(obj)
-            if obj.configuration.keep_intermediates == false
-                if obj.configuration.ending_step >=13
-                    field_names = fieldnames(obj.configuration.tomograms);
-                    files = dir(obj.output_path);
-                    files(1) = [];
-                    files(1) = [];
-                    file_ali = endsWith({files(:).name}, ".ali");
-                    file_tlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".tlt");
-                    file_rawtlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".rawtlt");
-                    file_xf = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".xf");
-                    file_defocus = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".defocus");
-                    file_success = endsWith({files(:).name}, "SUCCESS");
-                    file_failure = endsWith({files(:).name}, "FAILURE");
-                    file_time = endsWith({files(:).name}, "TIME");
-                    json_output = endsWith({files(:).name}, "output.json");
-                    files = files(~(file_ali + file_tlt + file_xf + file_defocus + file_rawtlt + file_success + file_failure + file_time + json_output));
-                    obj.deleteFilesOrFolders(files);
-                    
-                    files = dir(obj.configuration.processing_path + string(filesep)...
-                        + obj.configuration.output_folder + string(filesep)...
-                        + "*_BatchRunTomo_*" + string(filesep) + field_names{obj.configuration.set_up.j});
-                    files = files(~contains({files(:).folder}, obj.configuration.set_up.i - 1 + "_BatchRunTomo_1"));
-                    files(1) = [];
-                    files(1) = [];
-                    file_ali = endsWith({files(:).name}, ".ali");
-                    file_tlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".tlt");
-                    file_rawtlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".rawtlt");
-                    file_xf = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".xf");
-                    file_defocus = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".defocus");
-                    file_success = endsWith({files(:).name}, "SUCCESS");
-                    file_failure = endsWith({files(:).name}, "FAILURE");
-                    file_time = endsWith({files(:).name}, "TIME");
-                    json_output = endsWith({files(:).name}, "output.json");
-                    files = files(~(file_ali + file_tlt + file_xf + file_rawtlt + file_defocus + file_success + file_time + file_failure + json_output));
-                    obj.deleteFilesOrFolders(files);
-                    
-                    %                     for i = 1:length(files)
-                    %                         if files(i).isdir == true
-                    %                             [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
-                    %                         else
-                    %                             delete(files(i).folder + string(filesep) + files(i).name)
-                    %                         end
-                    %                     end
-                end
-            end
-            obj = cleanUp@Module(obj);
-        end
+
+% TOREVIEW: deletion of data here may cause troubles on further steps
+%         function obj = cleanUp(obj)
+%             if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
+%                 if obj.configuration.ending_step >=13
+%                     field_names = fieldnames(obj.configuration.tomograms);
+%                     files = dir(obj.output_path);
+%                     files(1) = [];
+%                     files(1) = [];
+%                     file_ali = endsWith({files(:).name}, ".ali");
+%                     file_tlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".tlt");
+%                     file_rawtlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".rawtlt");
+%                     file_xf = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".xf");
+%                     file_defocus = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".defocus");
+%                     file_success = endsWith({files(:).name}, "SUCCESS");
+%                     file_failure = endsWith({files(:).name}, "FAILURE");
+%                     file_time = endsWith({files(:).name}, "TIME");
+%                     json_output = endsWith({files(:).name}, "output.json");
+%                     files = files(~(file_ali + file_tlt + file_xf + file_defocus + file_rawtlt + file_success + file_failure + file_time + json_output));
+%                     obj.deleteFilesOrFolders(files);
+%                     
+%                     files = dir(obj.configuration.processing_path + string(filesep)...
+%                         + obj.configuration.output_folder + string(filesep)...
+%                         + "*_BatchRunTomo_*" + string(filesep) + field_names{obj.configuration.set_up.j});
+%                     files = files(~contains({files(:).folder}, obj.configuration.set_up.i - 1 + "_BatchRunTomo_1"));
+%                     files(1) = [];
+%                     files(1) = [];
+%                     file_ali = endsWith({files(:).name}, ".ali");
+%                     file_tlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".tlt");
+%                     file_rawtlt = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".rawtlt");
+%                     file_xf = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".xf");
+%                     file_defocus = endsWith({files(:).name}, field_names{obj.configuration.set_up.j} + ".defocus");
+%                     file_success = endsWith({files(:).name}, "SUCCESS");
+%                     file_failure = endsWith({files(:).name}, "FAILURE");
+%                     file_time = endsWith({files(:).name}, "TIME");
+%                     json_output = endsWith({files(:).name}, "output.json");
+%                     files = files(~(file_ali + file_tlt + file_xf + file_rawtlt + file_defocus + file_success + file_time + file_failure + json_output));
+%                     obj.deleteFilesOrFolders(files);
+%                     
+%                     %                     for i = 1:length(files)
+%                     %                         if files(i).isdir == true
+%                     %                             [success, message,message_id] = rmdir(files(i).folder + string(filesep) + files(i).name, "s");
+%                     %                         else
+%                     %                             delete(files(i).folder + string(filesep) + files(i).name)
+%                     %                         end
+%                     %                     end
+%                 end
+%             end
+%             obj = cleanUp@Module(obj);
+%         end
     end
 end
