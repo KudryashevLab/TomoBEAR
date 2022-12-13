@@ -56,6 +56,8 @@ classdef DynamoCleanStacks < Module
                     end
                     motion_corrected_files_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + "*CreateStacks*" + string(filesep) + stack_file_name_splitted{1};
                     motion_corrected_files_path_query = motion_corrected_files_path + "/*_norm.mrc";
+                    %TODO: use commented below insetead of the line above
+                    %motion_corrected_files = dir(motion_corrected_files_path + string(filesep) + "*_" + obj.configuration.normalized_postfix + ".mrc");
                     motion_corrected_files = dir(motion_corrected_files_path_query);
                     tilts_to_be_removed = setdiff(1:length(motion_corrected_files), tilt_indices);
                     tilts_to_keep = intersect(1:length(motion_corrected_files), tilt_indices);
@@ -144,16 +146,68 @@ classdef DynamoCleanStacks < Module
         end
         
         function obj = cleanUp(obj)
-            if obj.configuration.keep_intermediates == false
+            if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
+                
                 field_names = fieldnames(obj.configuration.tomograms);
-                if contains(field_names, "modified_tilt_stack_path")
-                    delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
-                end
-                [success, message, message_id] = rmdir(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).dynamo_tilt_series_alignment_folder, "s");
-                delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).config_file_path);
-                for i = 1:length(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized)
-                    delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized{i});
-                end
+                
+                % WARNING: modified_tilt_stack_path was set to
+                % tilt_stack_destination above!!!
+                %if contains(field_names, "modified_tilt_stack_path")
+                %    delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
+                %end
+                %delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).config_file_path);
+
+                % Delete .AWF folder and its contents                
+                folder = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).dynamo_tilt_series_alignment_folder;
+                files = dir(folder + string(filesep) + "*");
+                filesNames = {files.name};
+                files = files(~ismember(filesNames,{'.','..'}));
+                obj.deleteFilesOrFolders(files);
+                obj.deleteFolderIfEmpty(folder);
+                                
+                % Delete normalized files from CreateStacks step
+                files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized;
+                obj.deleteFilesOrFolders(files);
+                
+                % Delete additional motion corrected data (even/odd frames, DW/DWS)   
+                % TODO: delete corresponding slinks directories
+                % Q: are those additional mcor data not used anywhere further in processing? 
+                % Q: (check BatchRunTomo module)
+%                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_files")                    
+%                     files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
+%                     obj.deleteFilesOrFolders(files);
+%                     [folder, ~, ~] = fileparts(files{1});
+%                     obj.deleteFolderIfEmpty(folder);
+%                     [parent_folder, ~, ~] = fileparts(folder);
+%                     obj.deleteFolderIfEmpty(parent_folder);
+%                 end
+%                 
+%                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_dose_weighted_sum_files")
+%                     files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files;
+%                     obj.deleteFilesOrFolders(files);
+%                     [folder, ~, ~] = fileparts(files{1});
+%                     obj.deleteFolderIfEmpty(folder);
+%                     [parent_folder, ~, ~] = fileparts(folder);
+%                     obj.deleteFolderIfEmpty(parent_folder);
+%                 end
+%                 
+%                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+%                     files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files;
+%                     obj.deleteFilesOrFolders(files);
+%                     [folder, ~, ~] = fileparts(files{1});
+%                     obj.deleteFolderIfEmpty(folder);
+%                     [parent_folder, ~, ~] = fileparts(folder);
+%                     obj.deleteFolderIfEmpty(parent_folder);
+%                 end
+%                 
+%                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
+%                     files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files;
+%                     obj.deleteFilesOrFolders(files);
+%                     [folder, ~, ~] = fileparts(files{1});
+%                     obj.deleteFolderIfEmpty(folder);
+%                     [parent_folder, ~, ~] = fileparts(folder);
+%                     obj.deleteFolderIfEmpty(parent_folder);
+%                 end
             end
             obj = cleanUp@Module(obj);
         end

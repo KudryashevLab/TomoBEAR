@@ -7,6 +7,7 @@ classdef MotionCor2 < Module
         function obj = setUp(obj)
             obj = setUp@Module(obj);
             createStandardFolder(obj.configuration, "motion_corrected_files_folder", false);
+            % TODO: create the following folders if only requested
             createStandardFolder(obj.configuration, "even_motion_corrected_files_folder", false);
             createStandardFolder(obj.configuration, "odd_motion_corrected_files_folder", false);
             createStandardFolder(obj.configuration, "dose_weighted_sum_motion_corrected_files_folder", false);
@@ -35,6 +36,7 @@ classdef MotionCor2 < Module
                 motion_corrected_dose_weighted_files = dir(obj.output_path + filesep + "*_DW.mrc");
                 for i = 1:length(motion_corrected_dose_weighted_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i} = "" + motion_corrected_dose_weighted_files(i).folder + filesep + motion_corrected_dose_weighted_files(i).name;
+                    % TODO: parametrize slink folders
                     [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files{i}, "dose_weighted_motion_corrected_files_folder", log_file_id_tmp);
                 end
 %                 obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_files;
@@ -44,6 +46,7 @@ classdef MotionCor2 < Module
                 motion_corrected_dose_weighted_sum_files = dir(obj.output_path + filesep + "*_DWS.mrc");
                 for i = 1:length(motion_corrected_dose_weighted_sum_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{i} = "" + motion_corrected_dose_weighted_sum_files(i).folder + filesep + motion_corrected_dose_weighted_sum_files(i).name;
+                    % TODO: parametrize slink folder
                     [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files{i}, "dose_weighted_sum_motion_corrected_files_folder", log_file_id_tmp);
                 end
 %                 obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files = obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_dose_weighted_sum_files;
@@ -61,6 +64,7 @@ classdef MotionCor2 < Module
                 for i = 1:length(motion_corrected_even_files)
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{i} = "" + motion_corrected_even_files(i).folder + filesep + motion_corrected_even_files(i).name;
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{i} = "" + motion_corrected_odd_files(i).folder + filesep + motion_corrected_odd_files(i).name;
+                    % TODO: parametrize slink folders
                     [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_even_files{i}, "even_motion_corrected_files_folder", log_file_id_tmp);
                     [output, destination] = createSymbolicLinkInStandardFolder(obj.configuration, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).motion_corrected_odd_files{i}, "odd_motion_corrected_files_folder", log_file_id_tmp);
                 end
@@ -561,36 +565,38 @@ classdef MotionCor2 < Module
         end
         
         function obj = cleanUp(obj)
-            if obj.configuration.keep_intermediates == false
+            if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
                 field_names = fieldnames(obj.configuration.tomograms);
-                for i = 1:length(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files)
-                    %                 [success, message,message_id] =
-                    delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files{i});
-                end
                 
-                for i = 1:length(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files_symbolic_links)
-                    %                 [success, message,message_id] =
-                    delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files_symbolic_links{i});
-                end
+                files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files;
+                obj.deleteFilesOrFolders(files);
                 
-                [folder, name, extension] = fileparts(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files_symbolic_links{1});
-                [success, message,message_id] = rmdir(folder, "s");
-                [folder, name, extension] = fileparts(folder);
-                if isempty(dir(folder))
-                    [success, message,message_id] = rmdir(folder, "s");
-                end
+                files = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files_symbolic_links;
+                obj.deleteFilesOrFolders(files);
+                [folder, ~, ~] = fileparts(files{1});
+                obj.deleteFolderIfEmpty(folder);
+                [parent_folder, ~, ~] = fileparts(folder);
+                obj.deleteFolderIfEmpty(parent_folder);
                 
-                gain_correction_output_path = obj.configuration.processing_path...
+                gain_correction_path = obj.configuration.processing_path...
                     + string(filesep) + obj.configuration.output_folder...
-                    + string(filesep) + "*"...
+                    + string(filesep) + obj.configuration.gain_correction_folder...
                     + string(filesep) + "gain_correction.mrc";
                 
-                gain_correction = dir(gain_correction_output_path);
-                if ~isempty(gain_correction)
-                    for i = 1:length(gain_correction)
-                        delete(gain_correction(i).folder + string(filesep) + gain_correction(i).name);
-                    end
+                gain_correction_list = dir(gain_correction_path);
+                if obj.configuration.gain ~= ""
+                    [~, name, ~] = fileparts(obj.configuration.gain);
+                    name_rep = strrep(name, " ", "\ ");
+                    gain_path = obj.configuration.processing_path...
+                    + string(filesep) + obj.configuration.output_folder...
+                    + string(filesep) + "*"...
+                    + string(filesep) + name_rep + ".mrc*";
+                    gain_correction_list = dir(gain_path);
+                    obj.deleteFilesOrFolders(gain_correction_list);
+                elseif ~isempty(gain_correction_list)
+                    obj.deleteFilesOrFolders(gain_correction_list);
                 end
+                
             end
             obj = cleanUp@Module(obj);
         end
