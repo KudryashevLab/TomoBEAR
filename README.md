@@ -1,14 +1,16 @@
 # TomoBEAR
-TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research group of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR).
+TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
+- (previous one) [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;
+- (current one) [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
 
 ## Documentation
 Information on the installation, setup and usage and can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
 
 ## Repository structure
 Branches:
-- `main` - more or less stable version (in a normal case use this one, please!);
-- `develop` - non-stable development version (use this one only if you know what you are doing!);
-- other branches - new features, bug-fixes, etc (those branches are under development, do not use them!).
+- `main` - more or less stable version (*in a normal case use this one, please!*);
+- `develop` - non-stable development version (*use this one only if you know what you are doing!*);
+- other branches - new features, bug-fixes, etc (*those branches are under development, do not use them!*).
 
 Time to time updates from `develop` are introduced in `main`, then the documentation (wiki) updates correspondingly! The list of major updates in `main` with corresponding dates is provided in the ["Updates" section on wiki](https://github.com/KudryashevLab/TomoBEAR/wiki/Updates).
 
