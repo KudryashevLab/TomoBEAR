@@ -908,7 +908,10 @@
         "use_symmetry": true,
         "use_SUSAN_averager": true,
         "show_figures": false,
-        "save_figures": true
+        "save_figures": true,
+        "susan_padding": -1,
+        "fsc_area_threshold": 0.1,
+        "tilts_step_to_plot_fscs": 5
     },
     "SPOC": {
         "execution_method": "once",
