@@ -914,7 +914,9 @@
         "tilts_step_to_plot_fscs": 5,
         "cc_floating_average_angular_step_deg": 3,
         "cc_floating_average_interp_order": 3,
-        "prtcls_cc_order_percentile_step": 10
+        "prtcls_cc_order_percentile_step": 10,
+        "set_cc_as_prtcls_weights": false,
+        "prtcls_weights_range": [0, 1]
     },
     "SPOC": {
         "execution_method": "once",

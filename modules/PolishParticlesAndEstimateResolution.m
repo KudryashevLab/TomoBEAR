@@ -36,12 +36,7 @@ classdef PolishParticlesAndEstimateResolution < Module
             
             % PART III: POLISHING FINAL MAP BY SELECTING OPTIMAL NUMBER OF 
             % THE BEST PARTICLES TO BE USED DURING MAP RECONSTRUCTION
-            set_cc_as_prtcls_weights = false;
-            obj.polishAverageMapByParticlesAmount(module_config, mask, set_cc_as_prtcls_weights);
-            
-            set_cc_as_prtcls_weights = true;
-            obj.polishAverageMapByParticlesAmount(module_config, mask, set_cc_as_prtcls_weights);
-            
+            obj.polishAverageMapByParticlesAmount(module_config, mask);
             
         end
         
@@ -248,6 +243,9 @@ classdef PolishParticlesAndEstimateResolution < Module
             else
                 error("ERROR: unknown tilt scheme");
             end
+            
+            module_config.set_cc_as_prtcls_weights = obj.configuration.set_cc_as_prtcls_weights;
+            module_config.prtcls_weights_range = obj.configuration.prtcls_weights_range;
         end
         
         function module_config = polishAverageMapByExposureCoordinate(obj, module_config, mask)
@@ -446,11 +444,11 @@ classdef PolishParticlesAndEstimateResolution < Module
             disp("INFO:FSC_AREA (optimal tlts num.): " + fsc.area + " Angstrom"); 
         end
         
-        function module_config = polishAverageMapByParticlesAmount(obj, module_config, mask, set_cc_as_prtcls_weights)
+        function module_config = polishAverageMapByParticlesAmount(obj, module_config, mask)
             
             % TODO: move folder creation to the module setup
             prtcls_ave_path = obj.output_path + filesep + "averages_by_particles";
-            if set_cc_as_prtcls_weights == true
+            if module_config.set_cc_as_prtcls_weights == true
                 prtcls_ave_path = prtcls_ave_path + "_weighted";
             end
             
@@ -550,7 +548,14 @@ classdef PolishParticlesAndEstimateResolution < Module
             cc_angle_table_sel = zeros(length(cc_percentile_range), size(cc_angle_table,1),2);
             
             cc = cc_angle_table(:,7);
-            cc_angle_table_corr_norm = (cc - min(cc)) / (max(cc) - min(cc));
+            
+            if module_config.set_cc_as_prtcls_weights == true
+                cc_angle_table_corr_norm = (cc - min(cc)) / (max(cc) - min(cc));
+                
+                new_min = module_config.prtcls_weights_range(1);
+                new_max = module_config.prtcls_weights_range(2);
+                cc_angle_table_corr_norm = cc_angle_table_corr_norm * (new_max - new_min) + new_min;
+            end
             
             % select particles from halves and perform reconstructions
             for idx=1:length(cc_percentile_range)
@@ -572,7 +577,7 @@ classdef PolishParticlesAndEstimateResolution < Module
                 
                 % TODO: save corrected CC values?
                 % (re-write corresp. row in combined_table_filtered?)
-                if set_cc_as_prtcls_weights == true
+                if module_config.set_cc_as_prtcls_weights == true
                     combined_corrected_cc_values_table = [cc_angle_table_corr_norm(logical(cc_angle_table_sel(idx,:,1))); cc_angle_table_corr_norm(logical(cc_angle_table_sel(idx,:,2)))];
                     ptcls.set_weights(combined_corrected_cc_values_table);
                 end
