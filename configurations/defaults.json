@@ -911,7 +911,10 @@
         "save_figures": true,
         "susan_padding": -1,
         "fsc_area_threshold": 0.1,
-        "tilts_step_to_plot_fscs": 5
+        "tilts_step_to_plot_fscs": 5,
+        "cc_floating_average_angular_step_deg": 3,
+        "cc_floating_average_interp_order": 3,
+        "prtcls_cc_order_percentile_step": 10
     },
     "SPOC": {
         "execution_method": "once",
