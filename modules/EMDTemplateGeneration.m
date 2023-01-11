@@ -10,33 +10,40 @@ classdef EMDTemplateGeneration < Module
         end
         
         function obj = process(obj)
-            % TODO: error handling when file is not downloadable
-            url = sprintf("http://www.ebi.ac.uk/pdbe/entry/download/EMD-%s/bundle", obj.configuration.template_emd_number);
-            file_name_without_extension = "EMD-" + obj.configuration.template_emd_number;
-            file_name =  file_name_without_extension + ".tar.gz";
+            % TODO: error handling when file (map/mask) is not downloadable
+
+            template_dir = sprintf("EMD-%s", obj.configuration.template_emd_number);
+            url = sprintf("ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s", template_dir);
             
-            template_destination = obj.output_path + string(filesep) + file_name;
+            template_dir_path = obj.output_path + string(filesep) + template_dir;
+            if ~exist(template_dir_path, 'dir')
+                mkdir(template_dir_path)
+            end
             
-            obj.temporary_files(end + 1) = template_destination;
+            map_filename_without_extension = lower(strrep(template_dir, "-", "_"));
+            map_filename = map_filename_without_extension + ".map";          
+            map_path = obj.output_path + string(filesep) + template_dir + string(filesep) + map_filename;
             
-            output = executeCommand("wget "...
-                + "-O " + template_destination...
-                + " " + url, obj.log_file_id);
+            fprintf("INFO: downloading emd structure %s...\n", obj.configuration.template_emd_number);
+            output = executeCommand("wget " + url...
+                + string(filesep) + "map"...
+                + string(filesep) + map_filename + ".gz"...
+                + " -P " + template_dir_path, obj.log_file_id);
             
-            fprintf("INFO: extracting emd structure %s...", obj.configuration.template_emd_number);
+            fprintf("INFO: extracting emd structure %s...\n", obj.configuration.template_emd_number);
+            output = executeCommand("gzip -dv " + map_path + ".gz");
             
-            %[status, message, message_id] = mkdir(output_);
+            if isfield(obj.configuration, "mask_emd_filename") && obj.configuration.mask_emd_filename ~= ""
+                fprintf("INFO: downloading emd mask %s...\n", obj.configuration.mask_emd_filename);
+                output = executeCommand("wget " + url...
+                    + string(filesep) + "masks"...
+                    + string(filesep) + obj.configuration.mask_emd_filename...
+                    + " -P " + template_dir_path, obj.log_file_id);
+                available_mask_path = obj.output_path + string(filesep) + template_dir + string(filesep) + obj.configuration.mask_emd_filename;
+            else
+                available_mask_path = '';
+            end
             
-            obj.temporary_files(end + 1) = obj.output_path + string(filesep) + file_name_without_extension;
-            
-            output = executeCommand("tar"...
-                + " xvfz " + template_destination...
-                + " -C " + obj.output_path);
-            
-            file_name_splitted = strsplit(file_name, ".");
-            file_name_splitted_replaced = strrep(file_name_splitted, "-", "_");
-            file_name_splitted_replaced_lowercased = lower(file_name_splitted_replaced);
-            map_path = obj.output_path + string(filesep) + file_name_without_extension + string(filesep) + "map" + string(filesep) + file_name_splitted_replaced_lowercased{1} + ".map";
             map_path_char = char(map_path);
             
             if obj.configuration.dark_density == true
@@ -90,6 +97,8 @@ classdef EMDTemplateGeneration < Module
             
             
             if obj.configuration.use_bandpassed_template == true
+                % TODO: what if template shapes are not equal?
+                % (e.g., EMD-1001 - [600 x 600 x 30])
                 band_passed_template = dbandpass(template, [obj.configuration.template_bandpass_cut_on_fourier_pixel obj.dynamic_configuration.fp obj.configuration.template_bandpass_smoothing_pixels]);
             else
                 band_passed_template = template;
@@ -104,9 +113,6 @@ classdef EMDTemplateGeneration < Module
             %             template_frequency_cut_off = scaling_ratio .* obj.configuration.template_cut_off;
             %             template_band_pass_filter = obj.BH_bandpass3d(size(template), 0, 0, 1/template_frequency_cut_off, "GPU", 1);
             %             band_passed_template = gather(real(ifftn(fftn(template) .* template_band_pass_filter)));
-            
-            available_mask = dir(obj.output_path + string(filesep) + "**" + string(filesep) + "*msk*.map");
-            
             
             if obj.configuration.type == "emClarity"
                 %                     try
@@ -206,8 +212,9 @@ classdef EMDTemplateGeneration < Module
                 createSymbolicLink(template_destination, template_link_destination, obj.log_file_id);
             end
             
-            
+            available_mask = dir(available_mask_path);
             if ~isempty(available_mask)
+                fprintf("INFO: writing chosen EMD mask (%s)...\n", obj.configuration.mask_emd_filename);
                 mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));                
                 rescaled_mask = obj.rescale_volume(mask, "", scaling_ratio, "CPU");
                 rescaled_mask = makeEvenVolumeDimensions(rescaled_mask);
@@ -227,7 +234,7 @@ classdef EMDTemplateGeneration < Module
                     createSymbolicLink(mask_binarized_destination, mask_link_destination, obj.log_file_id);
                 end
             else
-                
+                fprintf("INFO: writing template-derived mask ...\n");
                 dwrite(mask_binarized, mask_binarized_destination);
                 dwrite(mask_binarized_smoothed_cleaned, mask_smoothed_destination);
                 if obj.configuration.use_smoothed_mask == true
