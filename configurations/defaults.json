@@ -1015,9 +1015,10 @@
         "patch_size": 0
     },
     "AreTomo": {
-        "execution_method": "parallel",
+        "execution_method": "in_order",
+        "reconstruction": false,
         "weighted_back_projection": true,
-        "tilt_axis_determination": 0,
+        "tilt_axis_refine_flag": 1,
         "align_height_ratio": 0.75,
         "apply_dose_weighting": false,
         "sart": "20 5",
