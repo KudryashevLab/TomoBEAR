@@ -9,7 +9,8 @@ Information on the installation, setup and usage and can be found in the corresp
 ## Repository structure
 Branches:
 - `main` - more or less stable version (*in a normal case use this one, please!*);
-- `develop` - non-stable development version (*use this one only if you know what you are doing!*);
+- `develop` - non-stable development version (*updates frequently, use this one only if you know what you are doing!*);
+- `develop_live` - an experimental (non-stable) version with live data processing functionality (*warning! new functionality and bug fixes from main coming here slowly!*)
 - other branches - new features, bug-fixes, etc (*those branches are under development, do not use them!*).
 
 Time to time updates from `develop` are introduced in `main`, then the documentation (wiki) updates correspondingly! The list of major updates in `main` with corresponding dates is provided in the ["Updates" section on wiki](https://github.com/KudryashevLab/TomoBEAR/wiki/Updates).
@@ -17,7 +18,7 @@ Time to time updates from `develop` are introduced in `main`, then the documenta
 In the future we are planning to introduce wiki versioning as well, stay tuned!
 
 ## Pipeline structure
-In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports single nodes with GPUs and also copmuter clusters through a queue manager like SLURM or SGE (Sun Grid Engine) at the moment.
+In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports single nodes with GPUs and also some high-performance copmuter clusters.
 
 Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
 
