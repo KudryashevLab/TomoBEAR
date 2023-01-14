@@ -1,3 +1,7 @@
+**Currently we are at the stage of testing and experimental release preparation. We will be happy, if you would try it out and get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or writing an e-mail to [Artsemi Yushkevich](Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR).**
+
+**The standalone (binary) version is not released yet, but it will be available soon (in late January 2023). We are sorry for any inconveniences.**
+
 # TomoBEAR
 TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
 - (previous one) [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;
