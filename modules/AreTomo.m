@@ -25,9 +25,9 @@ classdef AreTomo < Module
 %                 dose_weighted_sum_tilt_stacks = getDoseWeightedSumTiltStacksFromStandardFolder(obj.configuration, true);
 %             end
 
-            if obj.configuration.weighted_back_projection == true
-                wbp = 1;
-            end
+            %if obj.configuration.weighted_back_projection == true
+            %    wbp = 1;
+            %end
             % TODO:NOTE: implement ROI reconstructions or is it not needed when
             % substacks or pseudo subtomograms are aligned?
 
@@ -37,7 +37,7 @@ classdef AreTomo < Module
 
             min_and_max_tilt_angles = getTiltAngles(obj.configuration);
             %             if false == true %length(min_and_max_tilt_angles) > 2
-            fid = fopen(obj.output_path + filesep + "tiltAngles.txt", "w+");
+            fid = fopen(obj.output_path + filesep + obj.name + ".rawtlt", "w+");
             for i = 1:length(min_and_max_tilt_angles)
                 if ~isempty(obj.configuration.dose_order)
                     if obj.configuration.dose > 0
@@ -50,7 +50,7 @@ classdef AreTomo < Module
                     fprintf(fid, "%s\n", num2str(min_and_max_tilt_angles(i)));
                 end
             end
-            angular_file_command_snippet = "-AngFile " + obj.output_path + filesep + "tiltAngles.txt";
+            angular_file_command_snippet = "-AngFile " + obj.output_path + filesep + obj.name + ".rawtlt";
             %             else
             %angle_command_snippet = "-TiltRange " + min_and_max_tilt_angles(1) + " " + min_and_max_tilt_angles(end);
             
@@ -60,11 +60,7 @@ classdef AreTomo < Module
                 patch_alignment_command_snippet = "";
             end
             
-            
             tilt_axis_command_snippet = "-TiltAxis " + num2str(obj.configuration.rotation_tilt_axis) + " " + num2str(obj.configuration.tilt_axis_refine_flag);
-            
-            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
-            stack_destination = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.aligned_stack_binning) + ".ali";
             
             if obj.configuration.set_up.gpu >  0
                 gpu_number = obj.configuration.set_up.gpu - 1;
@@ -72,6 +68,10 @@ classdef AreTomo < Module
                 error("ERROR: Gpus are needed to run this module!");
             end
             
+            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
+            
+            % Generate aligned stack of the requested binning level
+            stack_destination = obj.output_path + filesep + obj.name + ".ali";
             executeCommand(obj.configuration.aretomo_command...
                     + " -InMrc " + stack_source...
                     + " -OutMrc " + stack_destination...
@@ -81,55 +81,101 @@ classdef AreTomo < Module
                     + " "...
                     + tilt_axis_command_snippet...
                     + " "...
-                    + patch_alignment_command_snippet, false, obj.log_file_id);
+                    + patch_alignment_command_snippet...
+                    + "-OutImod 1", false, obj.log_file_id);
             
             [~,filename,fileext] = fileparts(stack_source);
             alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
-            alignment_file_destination = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.aligned_stack_binning) + ".aln";
+            alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
             movefile(alignment_file_out, alignment_file_destination);
             
-            path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name;
-            link_destination = path_destination + filesep + obj.name + ".ali";
+            % TODO: check linkage here
+            if obj.configuration.aligned_stack_binning == 1
+                folder_destination = obj.configuration.aligned_tilt_stacks_folder;
+                filename_link_destination = obj.name + ".ali";
+            else
+                folder_destination = obj.configuration.binned_aligned_tilt_stacks_folder;
+                filename_link_destination = obj.name + "_bin_" + num2str(obj.configuration.aligned_stack_binning) + ".ali";
+            end
+            
+            path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
+            link_destination = path_destination + filesep + filename_link_destination;
             if exist(path_destination, "dir")
                 rmdir(path_destination, "s");
             end
             mkdir(path_destination);
             createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
-
-            for i = 1:length(obj.configuration.binnings)
-                stack_destination = obj.output_path + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
-                if ~fileExists(stack_destination)
-                    executeCommand(obj.configuration.aretomo_command...
-                        + " -InMrc " + stack_source...
-                        + " -OutMrc " + stack_destination...
-                        + " -VolZ 0 -OutBin " + num2str(obj.configuration.binnings(i)) + " "...
-                        + angular_file_command_snippet...
-                        + " "...
-                        + tilt_axis_command_snippet...
-                        + " "...    
-                        + patch_alignment_command_snippet, false, obj.log_file_id);
-                    
-                    [~,filename,fileext] = fileparts(stack_source);
-                    alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
-                    alignment_file_destination = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.binnings(i)) + ".aln";
-                    movefile(alignment_file_out, alignment_file_destination);
             
-                    if obj.configuration.binnings(i) > 1
-                        path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name;
-                        if exist(path_destination, "dir")
-                            rmdir(path_destination, "s");
-                        end
-                        mkdir(path_destination);
-                        link_destination = path_destination + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
-                        createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
-                        %                 else
-                        %                     link_destination = obj.configuration.processing_path + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
-                        %                     createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
-                    end
-                end
-                
-                % TODO: refactor (squash to one function) the code below
-                % TODO: update & test the code below
+            % Move IMOD-compatible files one level up
+            imod_folder = obj.output_path + filesep + obj.name + ".ali_Imod";
+            if exist(imod_folder, 'dir')
+                movefile(imod_folder + filesep + "*", obj.output_path);
+            end
+            
+            % Generate aligned unbinned stack using alignment parameters
+            % previously detected at the requested binning level
+            xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
+            xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
+            
+            [~, size_to_output] = system("header -s " + stack_source);
+            size_to_output = str2num(size_to_output);
+            
+            stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
+            
+            status = system("newstack -InputFile " + stack_source...
+                + " -OutputFile " + stack_destination_unbinned...
+                + " -TransformFile " + xf_file_path...
+                + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin"...
+                + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
+                + " -TaperAtFill 1,0");
+            
+            folder_destination = obj.configuration.aligned_tilt_stacks_folder;
+            filename_link_destination = obj.name + "_bin_" + num2str(1) + ".ali";
+            
+            path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
+            link_destination = path_destination + filesep + filename_link_destination;
+            if exist(path_destination, "dir")
+                rmdir(path_destination, "s");
+            end
+            mkdir(path_destination);
+            createSymbolicLink(stack_destination_unbinned, link_destination, obj.log_file_id);
+            
+            %TODO: provide the same data as after fiducial-based alignment
+            %to make user experience smooth (check whether need code below)
+%             for i = 1:length(obj.configuration.binnings)
+%                 stack_destination = obj.output_path + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
+%                 if ~fileExists(stack_destination)
+%                     executeCommand(obj.configuration.aretomo_command...
+%                         + " -InMrc " + stack_source...
+%                         + " -OutMrc " + stack_destination...
+%                         + " -VolZ 0 -OutBin " + num2str(obj.configuration.binnings(i)) + " "...
+%                         + angular_file_command_snippet...
+%                         + " "...
+%                         + tilt_axis_command_snippet...
+%                         + " "...    
+%                         + patch_alignment_command_snippet, false, obj.log_file_id);
+%                     
+%                     [~,filename,fileext] = fileparts(stack_source);
+%                     alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
+%                     alignment_file_destination = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.binnings(i)) + ".aln";
+%                     movefile(alignment_file_out, alignment_file_destination);
+%             
+%                     if obj.configuration.binnings(i) > 1
+%                         path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name;
+%                         if exist(path_destination, "dir")
+%                             rmdir(path_destination, "s");
+%                         end
+%                         mkdir(path_destination);
+%                         link_destination = path_destination + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
+%                         createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
+%                         %                 else
+%                         %                     link_destination = obj.configuration.processing_path + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + ".ali";
+%                         %                     createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
+%                     end
+%                 end
+%                 
+%                 % TODO: refactor (squash to one function) the code below
+%                 % TODO: update & test the code below
 %                 if obj.configuration.apply_dose_weighting == true
 %                     stack_destination = obj.output_path + filesep + obj.name + "_bin_" + obj.configuration.binnings(i) + "_atdw.ali";
 %                     executeCommand(obj.configuration.aretomo_command + " -InMrc " + tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + tilt_stacks(obj.configuration.set_up.adjusted_j).name...
@@ -298,6 +344,19 @@ classdef AreTomo < Module
 %                         end
 %                     end
 %                 end
+%            end
+        end
+        
+        function obj = cleanUp(obj)
+            
+            % Delete contents of the IMOD-compatible files folder
+            field_names = fieldnames(obj.configuration.tomograms);
+            folder = obj.output_path + filesep + field_names{obj.configuration.set_up.j} + ".ali_Imod";
+            if exist(folder, 'dir')
+                %movefile(folder + filesep + "*", obj.output_path);
+                files = dir(folder + filesep + "*");
+                obj.deleteFilesOrFolders(files);
+                obj.deleteFolderIfEmpty(folder);
             end
         end
     end
