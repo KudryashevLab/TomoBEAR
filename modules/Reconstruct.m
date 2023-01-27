@@ -257,12 +257,24 @@ classdef Reconstruct < Module
                 error("ERROR: tomogram type unknown!");
             end
             if obj.configuration.use_rawtlt == true
-                tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
+                if ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt"))
+                    tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
+                elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","rawtlt","last"))
+                    tlt_file = getFilesFromLastModuleRun(obj.configuration,"AreTomo","rawtlt","last");
+                else
+                    error("ERROR: RAWTLT tilt files were requiested, but were not found!");
+                end
                 tlt_out_name_batch_run_tomo = tlt_file{1};
                 tlt_out_name = obj.output_path + string(filesep) + name + ".tlt";
                 createSymbolicLink(tlt_out_name_batch_run_tomo, tlt_out_name, obj.log_file_id);
             else
-                tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
+                if ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt"))
+                    tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
+                elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last"))
+                    tlt_file = getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last");
+                else
+                    error("ERROR: TLT tilt files are required, but were not found!");
+                end
                 tlt_in = fopen(tlt_file{1}, "r");
                 tlt_out_name = obj.output_path + string(filesep) + name + ".tlt";
                 tlt_out = fopen(tlt_out_name, "w");
@@ -405,11 +417,11 @@ classdef Reconstruct < Module
                     command = "tilt -InputProjections " + binned_aligned_tilt_stacks_tmp.folder + string(filesep) + binned_aligned_tilt_stacks_tmp.name...
                         + " -OutputFile " + tomogram_destination...
                         + " -TILTFILE " + tlt_out_name...
-                        + " -THICKNESS " +  obj.configuration.reconstruction_thickness / splitted_binning;
+                        + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');
                     
                     if isfield(obj.configuration, "exclude_lists") && isfield(obj.configuration.exclude_lists, field_names{obj.configuration.set_up.j})
                         command = command + " -EXCLUDELIST2 " + strjoin(strsplit(num2str(obj.configuration.exclude_lists.(field_names{obj.configuration.set_up.j})')), ",");
-                    else
+                    elseif ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "fid"))
                         fid_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "fid");
                         executeCommand("model2point " + fid_files{1} + " " + obj.output_path + filesep + "fiducial.point", false, obj.log_file_id);
                         fiducials = dlmread(obj.output_path + filesep + "fiducial.point");
@@ -426,6 +438,8 @@ classdef Reconstruct < Module
                         if ~isempty(strjoin(strsplit(num2str(final_projections)), ","))
                             command = command + " -EXCLUDELIST2 " + strjoin(strsplit(num2str(final_projections)), ",");
                         end
+                    else
+                        disp("WARNING: no views will be excluded, because no such information or fid file were found!");
                     end
                     
                     if obj.configuration.set_up.gpu > 0
@@ -450,7 +464,7 @@ classdef Reconstruct < Module
                         command = "tilt -InputProjections " + binned_aligned_tilt_stacks_tmp.folder + string(filesep) + binned_aligned_tilt_stacks_tmp.name...
                             + " -OutputFile " + exact_filtered_tomogram_destination...
                             + " -TILTFILE " + tlt_out_name...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / splitted_binning...
+                            + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f')...
                             + " -ExactFilterSize " + obj.configuration.exact_filter_size;
                         
                         if obj.configuration.set_up.gpu > 0
@@ -499,7 +513,7 @@ classdef Reconstruct < Module
                         command = "tilt -InputProjections " + binned_even_tilt_stacks_tmp.folder + string(filesep) + binned_even_tilt_stacks_tmp.name...
                             + " -OutputFile " + even_tomogram_destination...
                             + " -TILTFILE " + tlt_out_name...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / splitted_binning;%...
+                            + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');%...
                         %+ " -ExactFilterSize " + obj.configuration.exact_filter_size;
                         
                         if obj.configuration.set_up.gpu > 0
@@ -550,7 +564,7 @@ classdef Reconstruct < Module
                         command = "tilt -InputProjections " + binned_odd_tilt_stacks_tmp.folder + string(filesep) + binned_odd_tilt_stacks_tmp.name...
                             + " -OutputFile " + odd_tomogram_destination...
                             + " -TILTFILE " + tlt_out_name...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / splitted_binning;%...
+                            + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');%...
                         %+ " -ExactFilterSize " + obj.configuration.exact_filter_size;
                         
                         if obj.configuration.set_up.gpu > 0
@@ -601,7 +615,7 @@ classdef Reconstruct < Module
                         command = "tilt -InputProjections " + binned_dose_weighted_tilt_stacks_tmp.folder + string(filesep) + binned_dose_weighted_tilt_stacks_tmp.name...
                             + " -OutputFile " + dose_weighted_tomogram_destination...
                             + " -TILTFILE " + tlt_out_name...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / splitted_binning;
+                            + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');
                         %+ " -ExactFilterSize " + obj.configuration.exact_filter_size;
                         
                         if obj.configuration.set_up.gpu > 0
@@ -652,7 +666,7 @@ classdef Reconstruct < Module
                         command = "tilt -InputProjections " + binned_dose_weighted_sum_tilt_stacks_tmp.folder + string(filesep) + binned_dose_weighted_sum_tilt_stacks_tmp.name...
                             + " -OutputFile " + dose_weighted_sum_tomogram_destination...
                             + " -TILTFILE " + tlt_out_name...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / splitted_binning;
+                            + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');
                         %+ " -ExactFilterSize " + obj.configuration.exact_filter_size;
                         
                         if obj.configuration.set_up.gpu > 0
