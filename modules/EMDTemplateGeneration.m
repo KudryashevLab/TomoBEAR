@@ -13,7 +13,7 @@ classdef EMDTemplateGeneration < Module
             % TODO: error handling when file (map/mask) is not downloadable
 
             template_dir = sprintf("EMD-%s", obj.configuration.template_emd_number);
-            url = sprintf("ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s", template_dir);
+            url = sprintf("https://ftp.ebi.ac.uk/pub/databases/emdb/structures/%s", template_dir);
             
             template_dir_path = obj.output_path + string(filesep) + template_dir;
             if ~exist(template_dir_path, 'dir')
