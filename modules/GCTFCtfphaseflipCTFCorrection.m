@@ -3,8 +3,13 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
         function obj = GCTFCtfphaseflipCTFCorrection(configuration)
             obj = obj@Module(configuration);
         end
-        % TODO: add setUp method and move here creation of corresponding
-        % directories from BatchRunTomo class
+        
+        function obj = setUp(obj)
+            obj = setUp@Module(obj);
+            createStandardFolder(obj.configuration, "ctf_corrected_aligned_tilt_stacks_folder", false);
+            createStandardFolder(obj.configuration, "ctf_corrected_binned_aligned_tilt_stacks_folder", false);
+        end
+        
         function obj = process(obj)
             disp("INFO: **STARTING PARAMETERS**");
             disp("INFO: Input Folder: " + obj.input_path);
@@ -29,7 +34,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                 printVariable(apix);
             end
-            tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","_bin_1.ali.tlt","last");
+            tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last");
             if ~isempty(tilt_files)
                 tilt_files{1} = strrep(tilt_files{1}, "._", "_");
             elseif isempty(tilt_files)
@@ -39,26 +44,15 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
                 end
             end
-            if obj.configuration.use_aligned_stack && ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
-                tilt_stacks = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
-            else
-                xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","st.aln","last");
-                if isempty(xf_files)
-                    xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                    xf_files = xf_files{1};
+            if obj.configuration.use_aligned_stack == true
+                if ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
+                    tilt_stacks = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
+                elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last"))
+                    tilt_stacks = getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last");
                 else
-                    fid_in = fopen(xf_files{1});
-                    lines_in_cells = textscan(fid_in, "%s","Delimiter","\n");
-                    fclose(fid_in);
-                    fid_out = fopen(obj.output_path + filesep + obj.name + ".xf", "w+");
-                    for i = 4:length(lines_in_cells{1})
-                        numbers_in_line = textscan(lines_in_cells{1}{i}, "%f %f %f %f %f %f %f %f %f %f");
-                        rotation_matrix = rotz(numbers_in_line{2});
-                        fprintf(fid_out, "%f %f %f %f %f %f\n", rotation_matrix(1,1), rotation_matrix(1,2), rotation_matrix(2,1), rotation_matrix(2,2), numbers_in_line{4}, numbers_in_line{5});
-                    end
-                    fclose(fid_out);
-                    xf_files = obj.output_path + filesep + obj.name + ".xf";
+                    error("ERROR: Aligned stack was requested to use, but was not found!");
                 end
+            else
                 tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
                 tilt_stacks = tilt_stacks(contains({tilt_stacks(:).name}, sprintf("%s_%03d", obj.configuration.tomogram_output_prefix, obj.configuration.set_up.j)));
             end
@@ -67,9 +61,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
             for i = 1:length(tilt_stacks)
                 [path, name, extension] = fileparts(tilt_files{i});
                 if iscell(tilt_stacks)
-                    [folder, tilt_stack_name, extension] = fileparts(tilt_stacks{i});
+                    [folder, tilt_stack_name, tilt_stack_extension] = fileparts(tilt_stacks{i});
                 else
-                    [folder, tilt_stack_name, extension] = fileparts(tilt_stacks(i).folder + string(filesep) + tilt_stacks(i).name);
+                    [folder, tilt_stack_name, tilt_stack_extension] = fileparts(tilt_stacks(i).folder + string(filesep) + tilt_stacks(i).name);
                 end
                 destination_folder = obj.output_path;
                 slice_folder = destination_folder + string(filesep) + obj.configuration.slice_folder;
@@ -83,12 +77,12 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 if tilt_file_id == -1
                     obj.status = 0;
                 end
-                % NOTE: use the raw stack if aligned stack binning is
-                % higher than 1
-                if ((isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == false) || obj.configuration.aligned_stack_binning > 1) && isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","_bin_1.ali.tlt","last"))
-                    xf_file_destination = destination_folder + string(filesep) + obj.name + ".xf";
-                    output = createSymbolicLink(xf_files{i}, xf_file_destination, obj.log_file_id);
-                end
+%                 % NOTE: use the raw stack if aligned stack binning is
+%                 % higher than 1
+%                 if (isfield(obj.configuration, "use_aligned_stack") && obj.configuration.use_aligned_stack == false) || obj.configuration.aligned_stack_binning > 1%) && isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last"))
+%                     xf_file_destination = destination_folder + string(filesep) + obj.name + ".xf";
+%                     output = createSymbolicLink(xf_files{i}, xf_file_destination, obj.log_file_id);
+%                 end
                 disp("INFO: splitting " + tilt_stack_name + "...");
                 if iscell(tilt_stacks)
                     source = tilt_stacks{i};
@@ -97,8 +91,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 end
                 % TODO: introduce checks
                 [status_mkdir, message, message_id] = mkdir(destination_folder);
-                % TODO: add default "configuration.slice_folder" to simplify configuration, could also be done
-                % in default configuration, both ways are acceptable
                 destination = destination_folder + string(filesep) + tilt_stack_name;
                 output = createSymbolicLink(source, destination, obj.log_file_id);
                 output = executeCommand("newstack -split 1 -append mrc "...
@@ -172,14 +164,65 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     + " --defL " + lower_l...
                     + " --defH " + upper_l...
                     + " --astm " + obj.configuration.estimated_astigmatism;
-                if obj.configuration.do_phase_flip ==  true
+                if obj.configuration.do_phase_flip == true
+                    disp("INFO: tilt stacks will be CTF-corrected by GCTF.");
                     command = command + " --do_phase_flip";
                 end
-                if obj.configuration.do_EPA ==  true
+                if obj.configuration.do_EPA == true
                     command = command + " --do_EPA";
                 end
                 command = command + " " + obj.name + "*.mrc";
                 output = executeCommand(command, false, obj.log_file_id);
+                
+                if obj.configuration.do_phase_flip == true
+                    % NOTE: assembling CTF corrected stack
+                    if tilt_stack_extension == ""
+                        tilt_stack_extension = ".st";
+                    end
+                    ctf_corrected_stack_destination = obj.output_path...
+                        + string(filesep) + tilt_stack_name...
+                        + "_" + obj.configuration.ctf_corrected_stack_suffix...
+                        + tilt_stack_extension;
+                    tilt_views_ali_ctfc = dir(obj.name + "*_pf.mrc");
+                    tilt_views_ali_ctfc_list = string([]);
+                    for j=1:length(tilt_views_ali_ctfc)
+                        tilt_views_ali_ctfc_list(j) = tilt_views_ali_ctfc(j).folder + string(filesep) + tilt_views_ali_ctfc(j).name; 
+                    end    
+                    output = executeCommand("newstack "...
+                        + strjoin(tilt_views_ali_ctfc_list, " ") + " "...
+                        + ctf_corrected_stack_destination, false, obj.log_file_id);
+                    
+                    % NOTE: linking CTF corrected stack
+                    if contains(tilt_stack_name, "_bin_")
+                        tilt_stack_name_suffix = "";
+                        splitted_tilt_stack_name = split(tilt_stack_name, "_bin_");
+                        tilt_stack_ali_bin = str2double(splitted_tilt_stack_name(end));
+                    else
+                        if obj.configuration.use_aligned_stack == true
+                            tilt_stack_ali_bin = obj.configuration.aligned_stack_binning;
+                        else
+                            tilt_stack_ali_bin = 1;
+                        end
+                        tilt_stack_name_suffix = "_bin_" + num2str(tilt_stack_ali_bin);
+                    end
+                    filename_link_destination = tilt_stack_name + tilt_stack_name_suffix + ".ali";
+
+                    if tilt_stack_ali_bin == 1
+                        folder_destination = obj.configuration.ctf_corrected_aligned_tilt_stacks_folder;
+                    else
+                        folder_destination = obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder;
+                    end
+
+                    path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
+                    link_destination = path_destination + filesep + filename_link_destination;
+                    
+                    if exist(path_destination, "dir")
+                        rmdir(path_destination, "s");
+                    end
+                    mkdir(path_destination);
+                    createSymbolicLink(ctf_corrected_stack_destination, link_destination, obj.log_file_id);
+                end
+                
                 view_list = dir(slice_folder + string(filesep) + obj.name + "_*_" + "gctf.log");
                 if obj.configuration.defocus_file_version <= 2
                     j_length = length(view_list);
@@ -237,22 +280,73 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 fclose(defocus_file_id);
                 fclose(tilt_file_id);
                 cd(return_folder);
-                if obj.configuration.run_ctf_phase_flip
-                    splitted_tilt_stack_path_name = strsplit(destination, ".");
-                    ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
+            end
+            
+            if obj.configuration.run_ctf_phase_flip == true
+                disp("INFO: tilt stacks will be CTF-corrected by Ctfphaseflip.");
+                % NOTE: run Ctfphaseflip CTF-correction always on aligned stack
+                if ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
+                    tilt_stacks_ali = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
+                elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last"))
+                    tilt_stacks_ali = getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last");
+                else
+                    error("ERROR: Aligned stacks are required to perform CTF-correction using Ctfphaseflip, but were not found!");
+                end
+                for i = 1:length(tilt_stacks)
+                    if iscell(tilt_stacks_ali)
+                        tilt_stack_ali_full_path = tilt_stacks_ali{i};
+                    else
+                        tilt_stack_ali_full_path = tilt_stacks_ali(i).folder + string(filesep) + tilt_stacks_ali(i).name;
+                    end
+                    [~, tilt_stack_ali_name, tilt_stack_ali_ext] = fileparts(tilt_stack_ali_full_path);
+                    if tilt_stack_ali_ext == ""
+                        tilt_stack_ali_ext = ".st";
+                    end
+                    ctf_corrected_stack_destination = obj.output_path...
+                        + string(filesep) + tilt_stack_ali_name...
                         + "_" + obj.configuration.ctf_corrected_stack_suffix...
-                        + "." + splitted_tilt_stack_path_name(2);
-                    command = "ctfphaseflip -input " + destination...
+                        + tilt_stack_ali_ext;
+                    command = "ctfphaseflip -input " + tilt_stack_ali_full_path...
                         + " -output " + ctf_corrected_stack_destination...
                         + " -angleFn " + tilt_file_destination...
                         + " -defFn " + defocus_file_destination...
                         + " -defTol " + obj.configuration.defocus_tolerance...
                         + " -iWidth " + obj.configuration.iWidth...
+                        + " -maxWidth " + obj.configuration.maximum_strip_width...
                         + " -pixelSize " + apix...
                         + " -volt " + obj.configuration.keV...
                         + " -cs " + obj.configuration.spherical_aberation...
                         + " -ampContrast " + obj.configuration.ampContrast;
                     if obj.configuration.use_aligned_stack == false
+                        % NOTE: if CTF was estimated on raw stack, write
+                        % and use XF transform file while correcting CTF
+                        % TODO: find better way to make checks
+                        % (e.g. link xf files to separate folder)
+                        xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","xf","last");
+                        if ~isempty(xf_files)
+                            xf_files = xf_files{1};
+                        else
+                            xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","aln","last");
+                            if isempty(xf_files)
+                                xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
+                                xf_files = xf_files{1};
+                            else
+                                fid_in = fopen(xf_files{1});
+                                lines_in_cells = textscan(fid_in, "%s","Delimiter","\n");
+                                fclose(fid_in);
+                                fid_out = fopen(obj.output_path + filesep + obj.name + ".xf", "w+");
+                                for j = 4:length(lines_in_cells{1})
+                                    numbers_in_line = textscan(lines_in_cells{1}{j}, "%f %f %f %f %f %f %f %f %f %f");
+                                    rotation_matrix = rotz(numbers_in_line{2});
+                                    fprintf(fid_out, "%f %f %f %f %f %f\n", rotation_matrix(1,1), rotation_matrix(1,2), rotation_matrix(2,1), rotation_matrix(2,2), numbers_in_line{4}, numbers_in_line{5});
+                                end
+                                fclose(fid_out);
+                                xf_files = obj.output_path + filesep + obj.name + ".xf";
+                            end
+                        end
+                        xf_file_destination = destination_folder + string(filesep) + obj.name + ".xf";
+                        createSymbolicLink(xf_files, xf_file_destination, obj.log_file_id);
+
                         command = command + " -xform " + xf_file_destination;
                     end
                     % TODO: get number as numeric for better version check
@@ -260,60 +354,90 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         command = command + " -gpu " + obj.configuration.set_up.gpu;
                     end
                     executeCommand(command, false, obj.log_file_id);
-                    % TODO: link ctf corrected stack
-                end
-                if obj.configuration.reconstruct_tomograms == true
-                    disp("INFO: tomograms will be generated.");
-                    ctf_corrected_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
-                        + obj.configuration.ctf_corrected_stack_suffix + "_"...
-                        + obj.configuration.tomogram_suffix + "."...
-                        + splitted_tilt_stack_path_name(2);
-                    command = "tilt -InputProjections " + ctf_corrected_stack_destination...
-                        + " -OutputFile " + ctf_corrected_tomogram_destination...
-                        + " -TILTFILE " + tilt_file_destination...
-                        + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning;
-                    if obj.configuration.set_up.gpu > 0
-                            command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
+                    
+                    if contains(tilt_stack_ali_name, "bin_")
+                        filename_link_destination = tilt_stack_ali_name + ".ali";
+                        splitted_tilt_stack_ali_name = split(tilt_stack_ali_name, "_bin_");
+                        tilt_stack_ali_bin = str2double(splitted_tilt_stack_ali_name(end));
+                    else
+                        filename_link_destination = tilt_stack_ali_name + "_bin_" + num2str(obj.configuration.aligned_stack_binning) + ".ali";
+                        tilt_stack_ali_bin = obj.configuration.aligned_stack_binning;
                     end
-                    executeCommand(command, false, obj.log_file_id);
-                    % TODO: if time and motivation implement exclude views by
-                    % parametrization not by truncation
-                    %                + " -EXCLUDELIST2 $EXCLUDEVIEWS");
-                    ctf_corrected_rotated_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
-                        + obj.configuration.ctf_corrected_stack_suffix + "_"...
-                        + obj.configuration.tomogram_suffix + "."...
-                        + splitted_tilt_stack_path_name(2);
-                    executeCommand("trimvol -rx " + ctf_corrected_tomogram_destination...
-                        + " " + ctf_corrected_rotated_tomogram_destination, false, obj.log_file_id);
-                    if obj.configuration.generate_exact_filtered_tomograms == true
-                        disp("INFO: tomograms with exact filter (size: " + obj.configuration.exact_filter_size + ") will be generated.");
-                        ctf_corrected_exact_filtered_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
-                            + obj.configuration.ctf_corrected_stack_suffix + "_"...
-                            + obj.configuration.exact_filter_suffix + "_"...
-                            + obj.configuration.tomogram_suffix + "."...
-                            + splitted_tilt_stack_path_name(2);
-                        command = "tilt -InputProjections " + ctf_corrected_stack_destination...
-                            + " -OutputFile " + ctf_corrected_exact_filtered_tomogram_destination...
-                            + " -TILTFILE " + tilt_file_destination...
-                            + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning...
-                            + " -ExactFilterSize " + obj.configuration.exact_filter_size;
-                        if obj.configuration.set_up.gpu > 0
-                            command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
-                        end
-                        executeCommand(command, false, obj.log_file_id);
-                        % TODO: if time and motivation implement exclude views by
-                        % parametrization not by truncation
-                        %                + "-EXCLUDELIST2 $EXCLUDEVIEWS");
-                        ctf_corrected_exact_filtered_rotated_tomogram_destination = splitted_tilt_stack_path_name(1) + "_"...
-                            + obj.configuration.ctf_corrected_stack_suffix + "_"...
-                            + obj.configuration.exact_filter_suffix + "_"...
-                            + obj.configuration.tomogram_suffix + "."...
-                            + splitted_tilt_stack_path_name(2);
-                        executeCommand("trimvol -rx " + ctf_corrected_exact_filtered_tomogram_destination...
-                            + " " + ctf_corrected_exact_filtered_rotated_tomogram_destination, false, obj.log_file_id);
+                    
+                    if tilt_stack_ali_bin == 1
+                        folder_destination = obj.configuration.ctf_corrected_aligned_tilt_stacks_folder;
+                    else
+                        folder_destination = obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder;
                     end
+                    
+                    path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
+                    link_destination = path_destination + filesep + filename_link_destination;
+                    
+                    if exist(path_destination, "dir")
+                        rmdir(path_destination, "s");
+                    end
+                    mkdir(path_destination);
+                    createSymbolicLink(ctf_corrected_stack_destination, link_destination, obj.log_file_id);
                 end
             end
+            % NOTE: DISABLED RECONSTRUCTION HERE (USE RECONSTRUCT MODULE!)
+            % NOTE: run Tilt reconstruction always on CTF-corrected stack
+%             if obj.configuration.reconstruct_tomograms == true
+%                 disp("INFO: tomograms will be generated.");
+%                 ctf_corrected_tilt_stacks = ...
+%                 for i = 1:length(ctf_corrected_tilt_stacks)
+%                     ctf_corrected_stack_destination
+%                         ctf_corrected_tomogram_destination = tilt_stack_ali_path + "_"...
+%                             + obj.configuration.ctf_corrected_stack_suffix + "_"...
+%                             + obj.configuration.tomogram_suffix + "."...
+%                             + tilt_stack_ali_ext;
+%                         command = "tilt -InputProjections " + ctf_corrected_stack_destination...
+%                             + " -OutputFile " + ctf_corrected_tomogram_destination...
+%                             + " -TILTFILE " + tilt_file_destination...
+%                             + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning;
+%                         if obj.configuration.set_up.gpu > 0
+%                                 command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
+%                         end
+%                         executeCommand(command, false, obj.log_file_id);
+%                         % TODO: if time and motivation implement exclude views by
+%                         % parametrization not by truncation
+%                         %                + " -EXCLUDELIST2 $EXCLUDEVIEWS");
+%                         ctf_corrected_rotated_tomogram_destination = tilt_stack_ali_path + "_"...
+%                             + obj.configuration.ctf_corrected_stack_suffix + "_"...
+%                             + obj.configuration.tomogram_suffix + "."...
+%                             + tilt_stack_ali_ext;
+%                         executeCommand("trimvol -rx " + ctf_corrected_tomogram_destination...
+%                             + " " + ctf_corrected_rotated_tomogram_destination, false, obj.log_file_id);
+%                         if obj.configuration.generate_exact_filtered_tomograms == true
+%                             disp("INFO: tomograms with exact filter (size: " + obj.configuration.exact_filter_size + ") will be generated.");
+%                             ctf_corrected_exact_filtered_tomogram_destination = tilt_stack_ali_path + "_"...
+%                                 + obj.configuration.ctf_corrected_stack_suffix + "_"...
+%                                 + obj.configuration.exact_filter_suffix + "_"...
+%                                 + obj.configuration.tomogram_suffix + "."...
+%                                 + tilt_stack_ali_ext;
+%                             command = "tilt -InputProjections " + ctf_corrected_stack_destination...
+%                                 + " -OutputFile " + ctf_corrected_exact_filtered_tomogram_destination...
+%                                 + " -TILTFILE " + tilt_file_destination...
+%                                 + " -THICKNESS " + obj.configuration.reconstruction_thickness / obj.configuration.aligned_stack_binning...
+%                                 + " -ExactFilterSize " + obj.configuration.exact_filter_size;
+%                             if obj.configuration.set_up.gpu > 0
+%                                 command = command + " -UseGPU " + num2str(obj.configuration.set_up.gpu);
+%                             end
+%                             executeCommand(command, false, obj.log_file_id);
+%                             % TODO: if time and motivation implement exclude views by
+%                             % parametrization not by truncation
+%                             %                + "-EXCLUDELIST2 $EXCLUDEVIEWS");
+%                             ctf_corrected_exact_filtered_rotated_tomogram_destination = tilt_stack_ali_path + "_"...
+%                                 + obj.configuration.ctf_corrected_stack_suffix + "_"...
+%                                 + obj.configuration.exact_filter_suffix + "_"...
+%                                 + obj.configuration.tomogram_suffix + "."...
+%                                 + tilt_stack_ali_ext;
+%                             executeCommand("trimvol -rx " + ctf_corrected_exact_filtered_tomogram_destination...
+%                                 + " " + ctf_corrected_exact_filtered_rotated_tomogram_destination, false, obj.log_file_id);
+%                         end
+%                     end
+%                 end
+%             end
 %             dynamic_configuration.global_lower_defocus_average_in_angstrom = dynamic_configuration.global_lower_defocus_average_in_angstrom / length(tilt_stacks);
 %             dynamic_configuration.global_upper_defocus_average_in_angstrom = dynamic_configuration.global_upper_defocus_average_in_angstrom / length(tilt_stacks);
         end
