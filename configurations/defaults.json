@@ -1020,6 +1020,8 @@
         "reconstruction": false,
         "weighted_back_projection": true,
         "tilt_axis_refine_flag": 1,
+        "apply_tilt_axis_offset": 0,
+        "tilt_axis_offset": 0,
         "align_height_ratio": 0.75,
         "apply_dose_weighting": false,
         "sart": "20 5",
