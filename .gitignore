@@ -199,6 +199,7 @@ dynamo/matlab/src/+dpkproject/assemble_checkPeak.m
 dynamo/matlab/src/+dpkproject/+pipeline/+tables/gatherGPUforIteRef.m
 dynamo/matlab/src/dynamo_zaux_rescalings.m
 dynamo/matlab/src/+dpkproject/gatherTablesAfterProcess.m
+dynamo/matlab/src/dynamo_cc.m
 dynamo/matlab/src/dynamo_ccmatrix_assemble.m
 dynamo/matlab/src/dynamo_ccmatrix_compute.m
 dynamo/matlab/src/dynamo_iteration_check.m
