@@ -55,9 +55,11 @@ classdef BatchRunTomo < Module
                 createStandardFolder(obj.configuration, "ctf_corrected_binned_tomograms_folder", false);
             end
             
-            if isfield(obj.configuration.tomograms.tomogram_001, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_002, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_003, "motion_corrected_even_files")
-                createStandardFolder(obj.configuration, "aligned_even_tilt_stacks_folder", false);
-                createStandardFolder(obj.configuration, "aligned_odd_tilt_stacks_folder", false);
+            if length(fieldnames(obj.configuration.tomograms))>=3
+                if isfield(obj.configuration.tomograms.tomogram_001, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_002, "motion_corrected_even_files") || isfield(obj.configuration.tomograms.tomogram_003, "motion_corrected_even_files")
+                    createStandardFolder(obj.configuration, "aligned_even_tilt_stacks_folder", false);
+                    createStandardFolder(obj.configuration, "aligned_odd_tilt_stacks_folder", false);
+                end
             end
         end
         
