@@ -84,9 +84,12 @@ For some projects there are more sophisticted features available which can be sw
 
 ## Raw Tomography Data without Fiducials
 
-To process tomogrpahy data without fiducials (for example, focused ion-beam milling data) the following template should be used as configuration for the pipeline:
+To process tomogrpahy data without fiducials (for example, focused ion-beam milling data) user have the following options for fiducial-free alignment:
+- BatchRunTomo-based (IMOD) patch tracking and alignment;
+- AreTomo-based features tracking and alignment.
+
 <details>
-<summary><b> Example of full JSON file to process raw tomogrpahy data without fiducials (expand to see).</b></summary>
+<summary><b> BatchRunTomo-based (IMOD) template of JSON file to process raw tomogrpahy data without fiducials (expand to see).</b></summary>
 
 ```json
     {
@@ -157,6 +160,51 @@ To process tomogrpahy data without fiducials (for example, focused ion-beam mill
             "crop_particles": true
         }
     }
+```
+</details>
+</br>
+
+For AreTomo usage case there is global alignment implemented in the pipeline as of ```TomoBEAR-v0.1.2```. In the future releases we are planning to enable as well local alignment procedure as well as AreTomo-based reconstructions.
+
+<details>
+<summary><b> AreTomo-based template of JSON file to process raw tomogrpahy data without fiducials (expand to see).</b></summary>
+```json
+  {
+    "general": {
+        "project_name": "fibmil project",
+        "project_description": "fibmil project description",
+        "data_path": "/path/to/data/prefix*.tif",
+        "processing_path": "/path/to/processing/folder",
+        "gain": "/path/to/gain.mrc",
+        "dark": "/path/to/dark.mrc",
+        "expected_symmetrie": "Cx",
+        "template_matching_binning": xx,
+        "reconstruction_thickness": xxxx,
+        "rotation_tilt_axis": xx,
+        "aligned_stack_binning": x,
+        "binnings": [x, x, xx],
+        "tilt_angles": [-9, -6, -3, 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57, 60, -12, -15, -18, -21, -24, -27, -3033, -36, -39, -42, -45, -48, -51, -54, -57, -60]
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+    },
+    "CreateStacks": {
+    },
+    "AreTomo": {
+    },
+    "StopPipeline": {
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+        "run_ctf_phase_flip": true
+    },
+    "BinStacks": {
+    },
+    "Reconstruct": {
+    }
+  }
 ```
 </details>
 

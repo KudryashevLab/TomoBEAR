@@ -1,7 +1,7 @@
 Currently we are at the stage of testing, we will be happy if you try it, we will help you to get going. Please get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or write to
 [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR) if you have problems.
 
-:tada:**The first standalone executable release for GPU workstations is available now! tada You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**:tada:
+:tada:**The first standalone executable release for GPU workstations is available now! :tada: You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**
 
 # Prerequisites
 
@@ -71,7 +71,7 @@ The first time you start TomoBEAR after cloning it, initialization of necessary 
 
 ## Standalone
 
-TomoBEAR can also be used as a standalone application. For that you will need the standalone package itself which can be found on the [Releases page](https://github.com/KudryashevLab/tomoBEAR/releases). You have to download the zipped source code and the corresponding attached binary called `TomoBEAR`. Further you need to unzip archive with the source code and put in that folder downloaded `TomoBEAR` binary. 
+TomoBEAR can also be used as a standalone application. For that you will need the standalone package itself which can be found on the [Releases page](https://github.com/KudryashevLab/tomoBEAR/releases). You have to download the zipped source code and the corresponding attached binary called `TomoBEAR`. Further you need to unzip archive with the source code and put in that folder downloaded `TomoBEAR` binary.
 
 As well, you will need to install and setup the additional software which is [mentioned below](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
 
@@ -92,7 +92,7 @@ Change to the directory where the files were extracted and run the installation 
 
 * `./install`
 
-When the installation is finished, remember to include to the enviromental variable `LD_LIBRARY_PATH` the following paths of the installed MCR libraries: 
+When the installation is finished, remember to include to the enviromental variable `LD_LIBRARY_PATH` the following paths of the installed MCR libraries:
 
 ```bash
 /usr/local/MATLAB/MATLAB_Runtime/v910/runtime/glnxa64

@@ -967,7 +967,7 @@ or pick in them particles by hand.
 # EMDTemplateGeneration
 
 The EMDTemplateGeneration module is used to automatically download a
-template which is further down scaled to match your desired template
+EMDB template which is further down-scaled to match your desired template
 matching binning. Besides that an automated routine to generate the mask
 is also implemented. This module needs to be run before template
 matching is executed.
@@ -994,7 +994,7 @@ matching is executed.
 ```
 
 # TemplateGenerationFromFile
-
+The concept of this module is the same as in EMDTemplateMatching, with the only difference of taking the template from a user-defined path instead of fetching it directly from EMDB.
 ```json
     "TemplateGenerationFromFile": {
         "execution_method": "once",
@@ -1017,8 +1017,8 @@ matching is executed.
 
 # DynamoTemplateMatching
 
-The DynamoTemplateMatching module implements basically the template
-matching from dynamo but on a GPU. Because of the GPU usage the whole
+The DynamoTemplateMatching module re-implements the template
+matching from Dynamo but on a GPU. Because of the GPU usage the whole
 thing runs up to 15 times faster than the normal template matching
 implementation of dynamo.
 
@@ -1049,7 +1049,7 @@ implementation of dynamo.
 ```
 
 # TemplateMatchingPostProcessing
-
+This module creates Dynamo-like table of particles based on the results of the template matching procedure from the module DynamoTemplateMatching. As well, using this module you can extract subtomograms of the identified particles.
 ```json
     "TemplateMatchingPostProcessing": {
         "execution_method": "once",
@@ -1090,7 +1090,7 @@ implementation of dynamo.
 ```
 
 # DynamoAlignmentProject
-
+This module is basically a wrapper for performing Dynamo alignment projects.
 ```json
     "DynamoAlignmentProject": {
         "randomize_angles": false,
@@ -1197,5 +1197,46 @@ implementation of dynamo.
         "bandpass_method": "angles",
         "exclude_projections": 0,
         "citation": ""
+    }
+```
+
+# AreTomo
+This module performs AreTomo-based fiducial-free alignment.
+```json
+  "AreTomo": {
+        "execution_method": "in_order",
+        "reconstruction": false,
+        "weighted_back_projection": true,
+        "tilt_axis_refine_flag": 1,
+        "apply_tilt_axis_offset": 0,
+        "tilt_axis_offset": 0,
+        "align_height_ratio": 0.75,
+        "apply_dose_weighting": false,
+        "sart": "20 5",
+        "roi": "0 0",
+        "roi_file": "",
+        "patch": "0 0",
+        "flip_volume": 1,
+        "flip_intensity": 0,
+        "citation": ""
+    }
+```
+
+# GridEdgeEraser
+This module performs grid edge identification and erases it for Au grids data.
+```json
+    "GridEdgeEraser": {
+        "execution_method": "in_order",
+        "detection_binning": 4,
+        "grid_hole_diameter_in_um": 2,
+        "output_shift_user": [0, 0],
+        "output_shift_kernel_factor": [0, 0],
+        "binarize_threshold_in_std": 3,
+        "grid_detection_threshold_in_std": 3,
+        "smooth_mask_border": true,
+        "smooth_to_mean": true,
+        "smoothing_exp_decay": -40,
+        "cleaned_postfix": "gef",
+        "relink_as_previous_output": false
     }
 ```
