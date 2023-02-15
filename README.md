@@ -4,7 +4,7 @@ TomoBEAR is an automated, configurable and customizable full processing pipeline
 - (current one) [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
 
 ## Documentation
-Information on the installation, setup and usage and can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
+Information on the installation, setup and usage as well as tutorials and example results can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
 
 ## Repository structure
 Branches:
@@ -17,7 +17,7 @@ Time to time updates from `develop` are introduced in `main`, then the documenta
 In the future we are planning to introduce wiki versioning as well, stay tuned!
 
 ## Pipeline structure
-In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports single nodes with GPUs and also copmuter clusters through a queue manager like SLURM or SGE (Sun Grid Engine) at the moment.
+In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
 
 Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
 
@@ -29,23 +29,6 @@ Orange processing steps in the flow chart are mandatory and must be executed by 
 ## Feedback
 
 In case of any questions or errors do not hesitate to contact one of the provided persons mentioned in the `Contacts` section below. Alternatively, for bug reports or feature suggestions you may use our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues). Please, be polite and precise!
-
-## Results example (the tutorial case)
-
-The result shown here have been achieved in an automated manner. The only manual task which needed to be done is the choice of the classes for further processing in between the transition of different binning levels.
-
-### EMPIAR-10064
-
-On the EMPIAR-10064 dataset `TomoBEAR` achieved 11.25 Angstrom (with ~4k particles) as can be seen below on the FSC curve plot:
-<p align="center">
-<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.jpg" alt="Ribosome EMPIAR-10064 FSC"/>
-</p>
-
-As well, below is provided ribosome final map view:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_map.png" alt="Ribosome EMPIAR-10064 Map"/>
-</p>
 
 # Acknowledgements
 
