@@ -1,22 +1,27 @@
+**We are mainly at the stage of testing, debugging and maitenance work. However, new features may still appear and refactorings may still take place. We will be happy, if you would try it out the current version and get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or writing an e-mail to [Artsemi Yushkevich](Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR).**
+
+:tada:**The first standalone executable release for GPU workstations is available now! :tada: You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**
+
 # TomoBEAR
 TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
 - (previous one) [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;
 - (current one) [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
 
 ## Documentation
+
 Information on the installation, setup and usage as well as tutorials and example results can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
 
 ## Repository structure
-Branches:
+User branches:
 - `main` - more or less stable version (*in a normal case use this one, please!*);
-- `develop` - non-stable development version (*use this one only if you know what you are doing!*);
-- other branches - new features, bug-fixes, etc (*those branches are under development, do not use them!*).
+- `develop_live` - an experimental (non-stable) version with live data processing functionality (*warning! new functionality and bug fixes from main coming here slowly!*)
 
-Time to time updates from `develop` are introduced in `main`, then the documentation (wiki) updates correspondingly! The list of major updates in `main` with corresponding dates is provided in the ["Updates" section on wiki](https://github.com/KudryashevLab/TomoBEAR/wiki/Updates).
+All the other branches are not intended for user usage! They hold non-stable development versions (with new features, bug-fixes and refactorings).
 
 In the future we are planning to introduce wiki versioning as well, stay tuned!
 
 ## Pipeline structure
+
 In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
 
 Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
