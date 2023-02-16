@@ -218,25 +218,6 @@
         "reference_image_in_degreese": 0,
         "reconstruct": false
     },
-    "EMAN2Tomogram":{
-        "execution_method": "parallel",
-        "tltstep": 2.0,
-        "npk": 20,
-        "tltkeep": 0.9,
-        "outsize": "1k",
-        "niter": "2,1,1,1",
-        "bytile": true,
-        "pkkeep": 0.9,
-        "clipz": 500,
-        "bxsz": 32,
-        "correctrot": true,
-        "filterto": 0.45,
-        "rmbeadthr": -1.0,
-        "threads": 12,
-        "maxshift": 0.35,
-        "skip": false,
-        "citation": ""
-    },
     "Reconstruct": {
         "execution_method": "in_order",
         "reconstruct": "binned",
@@ -339,7 +320,8 @@
         "run_ctf_phase_flip": false,
         "reconstruct_tomograms": false,
         "defocus_tolerance": 20,
-        "iWidth": 2,
+        "iWidth": 15,
+        "maximum_strip_width": 1000,
         "ampContrast": 0.1,
         "defocus_file_version": 3,
         "defocus_file_version_3_flag": 1,
@@ -350,12 +332,6 @@
         "doi": "",
         "do_EPA": true,
         "estimated_astigmatism": 1000
-    },
-    "ViewStacks": {
-        "execution_method": "sequential",
-        "show_truncated_stacks": true,
-        "skip": false,
-        "citation": ""
     },
     "RefineFiducialModel": {
         "execution_method": "sequential",
@@ -599,11 +575,6 @@
         "skip": false,
         "citation": ""
     },
-    "BinarizeStacks": {
-        "execution_method": "parallel",
-        "skip": false,
-        "citation": ""
-    },
     "DynamoTiltSeriesAlignment": {
         "execution_method": "parallel",
         "use_newstack_for_binning": false,
@@ -721,52 +692,6 @@
         "citation": "",
         "citation_link": "",
         "doi": ""
-    },
-    "CalculateBinarizationThreshold": {
-        "execution_method": "once",
-        "skip": false,
-        "citation": ""
-    },
-    "SUSANCTFCorrection": {
-        "execution_method": "once",
-        "ctf_estimation_box_size": 512,
-        "ctf_estimation_def_min": 20000,
-        "ctf_estimation_def_max": 50000
-    },
-    "SUSAN": {
-        "index": 0,
-        "execution_method": "once",
-        "do_ctf_correction": false,
-        "ctf_estimation_box_size": 512,
-        "ctf_estimation_def_min": 20000,
-        "ctf_estimation_def_max": 50000,
-        "extra_padding": 12,
-        "rec_halves": false,
-        "ssnr_s": 1,
-        "reconstruction_box_size": 512,
-        "bandpass_cut_off_resolution_in_angstrom": 20,
-        "bandpass_cut_on_fourier_pixel": 2,
-        "iterations": 10,
-        "alignment_type": 3,
-        "cc_threshold": 0.9,
-        "ellipsoid_size": [10, 10, 10],
-        "classes": 0,
-        "class_distribution": [0.25, 0.25, 0.25, 0.25],
-        "use_symmetry": false,
-        "weight_projections": true,
-        "checkpoint_module": false,
-        "last_classification_binning": 4,
-        "discretization_bias": 1.5,
-        "noise_scaling_factor": 0.2,
-        "use_mask_from_template_matching": false,
-        "mask_radii_ratio": [1, 1, 0.5],
-        "classification_convergence_iterations": 3,
-        "allow_drift": true,
-        "determenistic_class_assignment": true,
-        "refine_factor": 2,
-        "refine_level": 0,
-        "refine_factor_susan": 1,
-        "skip_if_no_class_changes_since_iterations": 3
     },
     "DynamoAlignmentProject": {
         "randomize_angles": false,
@@ -910,33 +835,6 @@
         "show_figures": false,
         "save_figures": true
     },
-    "SPOC": {
-        "execution_method": "once",
-        "repository_path": "",
-        "spoc_env": "spoc",
-        "numAsymUnits": 1,
-        "mask_path": ""
-    },
-    "GenerateParticles": {
-        "execution_method": "once",
-        "use_SUSAN": true,
-        "ctf_correction_method": "SUSAN",
-        "SUSAN_ctf_box_size": 400,
-        "SUSAN_binning": 0,
-        "SUSAN_defocus_min": 10000,
-        "SUSAN_defocus_max": 50000,
-        "binning": 0,
-        "susan_lowpass": 65,
-        "susan_padding": 200,
-        "per_particle_ctf_correction": "phase_flip",
-        "padding_policy": "noise",
-        "normalization": "zm",
-        "use_symmetry": true,
-        "average_particles": false,
-        "table": "",
-        "table": "",
-        "all_in_one_folder": true
-    },
     "CryoCARE": {
         "execution_method": "once",
         "repository_path": "",
@@ -954,43 +852,6 @@
         "learning_rate": 0.0004,
         "patch_shape": 512,
         "tomograms_to_train_on": 0
-    },
-    "EstimateTomogramResolution": {
-        "execution_method": "once",
-        "binning": 0,
-        "use_SUSAN": true,
-        "ctf_correction_method": "SUSAN",
-        "SUSAN_ctf_box_size": 400,
-        "SUSAN_binning": 0,
-        "SUSAN_defocus_min": 10000,
-        "SUSAN_defocus_max": 50000,
-        "susan_padding": 200,
-        "per_particle_ctf_correction": "phase_flip",
-        "padding_policy": "noise",
-        "normalization": "zm",
-        "save_figures": true,
-        "show_figures": false,
-        "box_size": 150,
-        "overlap": 1,
-        "offset": 0
-    },
-    "GumNet": {
-        "execution_method": "once",
-        "repository_path": "",
-        "gum_net_env": "",
-        "binning": 0,
-        "use_SUSAN": true,
-        "ctf_correction_method": "SUSAN",
-        "SUSAN_ctf_box_size": 400,
-        "SUSAN_binning": 0,
-        "SUSAN_defocus_min": 10000,
-        "SUSAN_defocus_max": 50000,
-        "susan_padding": 0,
-        "per_particle_ctf_correction": "phase_flip",
-        "padding_policy": "noise",
-        "normalization": "zm",
-        "use_delta_shifts": false,
-        "box_size": 0
     },
     "DeepFinder": {
         "execution_method": "once",
@@ -1019,6 +880,8 @@
         "reconstruction": false,
         "weighted_back_projection": true,
         "tilt_axis_refine_flag": 1,
+        "apply_tilt_axis_offset": 0,
+        "tilt_axis_offset": 0,
         "align_height_ratio": 0.75,
         "apply_dose_weighting": false,
         "sart": "20 5",
@@ -1033,5 +896,19 @@
         "execution_method": "once",
         "checkpoint_module": true,
         "binning": 0
+    },
+    "GridEdgeEraser": {
+        "execution_method": "in_order",
+        "detection_binning": 4,
+        "grid_hole_diameter_in_um": 2,
+        "output_shift_user": [0, 0],
+        "output_shift_kernel_factor": [0, 0],
+        "binarize_threshold_in_std": 3,
+        "grid_detection_threshold_in_std": 3,
+        "smooth_mask_border": true,
+        "smooth_to_mean": true,
+        "smoothing_exp_decay": -40,
+        "cleaned_postfix": "gef",
+        "relink_as_previous_output": false
     }
 }
