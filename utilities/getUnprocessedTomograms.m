@@ -538,7 +538,9 @@ else
     end
 end
 
-%dynamic_configuration.starting_tomogram = current_tomogram;
+if ~isfield(configuration, "live_data_mode") || configuration.live_data_mode == false
+    dynamic_configuration.starting_tomogram = current_tomogram;
+end
 
 end
 
