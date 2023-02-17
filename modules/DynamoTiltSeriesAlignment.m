@@ -46,7 +46,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     file = char(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).config_file_path = config_file_path;
                     if obj.configuration.use_newstack_for_binning == true
-                        [folder, name, extension] = fileparts(file);
+                        %[folder, name, extension] = fileparts(file);
                         system("newstack -in " + file + " -ou binned_stack.st -bin " + obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin);
                         file = 'binned_stack.st';
                     end
