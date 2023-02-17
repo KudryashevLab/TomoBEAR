@@ -431,6 +431,13 @@ classdef MotionCor2 < Module
                 [output_symbolic_link_standard_folder, symbolic_link_standard_folder(i)] = createSymbolicLinkInStandardFolder(configuration, mrc_output, "motion_corrected_files_folder", log_file_id);
                 motion_corrected_files{i} = mrc_output;
             end
+            
+            if obj.configuration.ft_bin ~= 1
+                ft_bin = obj.configuration.ft_bin;
+                parfor i = 1:length(motion_corrected_files)
+                    system("newstack -in " + motion_corrected_files{i} + " -ou " + motion_corrected_files{i} + " -bin " + ft_bin);
+                end
+            end
         end
         
         function [motion_corrected_files, symbolic_link_standard_folder] = correctWithAlignFrames(obj, mrc_list)
