@@ -101,7 +101,7 @@ classdef DynamoCleanStacks < Module
                         obj.dynamic_configuration.tilt_index_angle_mapping.(name)(4,:) = cumsum(obj.dynamic_configuration.tilt_index_angle_mapping.(name)(3,:));
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_tilt_stack_path = tilt_stack_destination;
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_tilt_stack_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
-                        if obj.configuration.keep_intermediates == false
+                        if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
                             delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
                         end
                         if obj.configuration.show_truncated_stacks
