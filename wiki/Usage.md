@@ -721,7 +721,7 @@ To reduce processing time in the live mode we have additionally implemented opti
 ```json
 {
     "general": {
-        "project_name": "your project name",
+        "project_name": "your_project_name",
         "project_description": "your project name description",
         "data_path": "/path/to/live/data/folder/prefix*.tif",
         "processing_path": "/path/to/processing/folder",
@@ -731,7 +731,9 @@ To reduce processing time in the live mode we have additionally implemented opti
         "aligned_stack_binning": 8,
         "pre_aligned_stack_binning": 8,
         "reconstruction_thickness": xxxx,
+        "as_boxes": false,
         "minimum_files": 41,
+        "ft_bin": 2,
         "listening_time_threshold_in_minutes": 10
     },
     "MetaData": {
@@ -745,6 +747,7 @@ To reduce processing time in the live mode we have additionally implemented opti
     "CreateStacks": {
     },
     "DynamoTiltSeriesAlignment": {
+        "use_newstack_for_binning": true
     },
     "DynamoCleanStacks": {
     },
@@ -755,10 +758,18 @@ To reduce processing time in the live mode we have additionally implemented opti
     "BinStacks": {
     },
     "Reconstruct": {
+        "generate_exact_filtered_tomograms": true,
+        "exact_filter_size": xxxx
     }
 }
 ```
-Since live data processing mainly serves for sample quality check, in order to additionally reduce processing times we would advice to use low binning values for `"pre_aligned_stack_binning"` and `"aligned_stack_binning"` parameters (e.g. 16 or 8, as in the example provided above).
+Since live data processing mainly serves for sample quality check, in order to additionally reduce processing times we would advice to use the following setup (as in the example provided above):
+- set `"ft_bin"` to at least 2 to pre-bin views (summarized/motion-corrected dose-fractionated movies) of pre-processed stack for all subsequent modules;
+- use high binning values for `"pre_aligned_stack_binning"` and `"aligned_stack_binning"` parameters (e.g. 8 as above) and enabling `"use_newstack_for_binning"`.
+
+In order to improve contrast in reconstructions we would recommend to enable `"generate_exact_filtered_tomograms"` and setup `"exact_filter_size"` to define filter to be used to produce contrast-enhanced reconstructions.
+
+If you start collection from zero-tilt, to avoid problems of files perception and sorting caused by `-0.0`/`+0.0` appearing as the angle for untilted views (due to small initial tilting offset being present) instead of expected `0.0` it is also recommended to add `"first_tilt_angle": 0` to `general` section of your input JSON file.   
 
 # Executing the Workflow
 
