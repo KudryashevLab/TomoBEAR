@@ -309,24 +309,28 @@ classdef LocalLivePipeline < Pipeline
                     disp("INFO: No new fully collected tilt series to process!");
                     disp("INFO: Continue listening...");
                     continue;
-                else
-                    disp("INFO: Starting processing of the newly collected tilt series...");
-                    previous_tomogram_status = tomogram_mask;
-                    dynamic_configuration.tomogram_indices = tomogram_indices_to_check;
-                    dynamic_configuration.tomogram_indices_original = tomogram_indices;
-                    
-                    % add tomograms to be processed to the list of
-                    % already processed tomograms
-                    tomogram_indices_to_be_processed = tomogram_indices_to_check(tomogram_mask(tomogram_indices_to_check)==1);
-                    if ~isempty(tomogram_indices_processed)
-                        tomogram_indices_processed_extention_mask = ~ismember(tomogram_indices_to_be_processed, tomogram_indices_processed);
-                        tomogram_indices_processed_extention = tomogram_indices_to_be_processed(tomogram_indices_processed_extention_mask);
-                        dynamic_configuration.tomogram_indices_processed = [tomogram_indices_processed; tomogram_indices_processed_extention'];
-                    else
-                        dynamic_configuration.tomogram_indices_processed = tomogram_indices_to_be_processed';
-                    end
-                    tomogram_indices_processed = dynamic_configuration.tomogram_indices_processed;
                 end
+                
+                disp("INFO: Starting processing of the newly collected tilt series...");
+                previous_tomogram_status = tomogram_mask;
+                dynamic_configuration.tomogram_indices = tomogram_indices_to_check;
+                dynamic_configuration.tomogram_indices_original = tomogram_indices;
+
+                
+                
+                % add tomograms to be processed to the list of
+                % already processed tomograms
+                tomogram_indices_to_be_processed = tomogram_indices_to_check(tomogram_mask(tomogram_indices_to_check)==1);
+%                 if ~isempty(tomogram_indices_processed)
+%                     tomogram_indices_processed_extention_mask = ~ismember(tomogram_indices_to_be_processed, tomogram_indices_processed);
+%                     tomogram_indices_processed_extention = tomogram_indices_to_be_processed(tomogram_indices_processed_extention_mask);
+%                     dynamic_configuration.tomogram_indices_processed = [tomogram_indices_processed; tomogram_indices_processed_extention'];
+%                 else
+%                     dynamic_configuration.tomogram_indices_processed = tomogram_indices_to_be_processed';
+%                 end
+%                 tomogram_indices_processed = dynamic_configuration.tomogram_indices_processed;
+                
+                
                 
                 if isfield(configuration_history, "general")
                     configuration_history.general = obj.mergeConfigurations(configuration_history.general, dynamic_configuration, 0, "dynamic");
@@ -558,6 +562,17 @@ classdef LocalLivePipeline < Pipeline
                         return;
                     end
                 end
+                
+                % update list of the already processed tomograms
+                if ~isempty(tomogram_indices_processed)
+                    tomogram_indices_processed_extention_mask = ~ismember(tomogram_indices_to_be_processed, tomogram_indices_processed);
+                    tomogram_indices_processed_extention = tomogram_indices_to_be_processed(tomogram_indices_processed_extention_mask);
+                    dynamic_configuration.tomogram_indices_processed = [tomogram_indices_processed; tomogram_indices_processed_extention'];
+                else
+                    dynamic_configuration.tomogram_indices_processed = tomogram_indices_to_be_processed';
+                end
+                tomogram_indices_processed = dynamic_configuration.tomogram_indices_processed;
+                
             end
             disp("INFO: Execution finished!");
         end
