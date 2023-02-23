@@ -17,7 +17,10 @@ elseif isfield(configuration, "tomogram_input_prefix") && configuration.tomogram
     mrc_path = configuration.data_path + string(filesep)...
         + configuration.tomogram_input_prefix + "*.mrc";
 else
-    mrc_path = configuration.data_path + string(filesep) + "*.mrc";
+    mrc_path = configuration.data_path;
+    if ~contains(mrc_path, ".mrc")
+        mrc_path = mrc_path + string(filesep) + "*.mrc";
+    end
 end
 
 counter = 1;
