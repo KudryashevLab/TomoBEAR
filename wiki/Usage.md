@@ -168,6 +168,7 @@ For AreTomo usage case there is global alignment implemented in the pipeline as 
 
 <details>
 <summary><b> AreTomo-based template of JSON file to process raw tomogrpahy data without fiducials (expand to see).</b></summary>
+
 ```json
   {
     "general": {
