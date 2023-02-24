@@ -11,8 +11,7 @@ Implementation details and benchmarks you can find in our preprint:
 </br> [Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: 10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
 > **Note**
-> <br/> **We are happy to support you to try out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases)**.
-> <br/> **We are also would be happy to receive from you [any kind of feedback](#feedback)!**
+> <br/> **We are happy to support you to try out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases). We are also would be happy to receive from you [any kind of feedback](#feedback)!**
 
 ![TomoBEAR Social Media Logo Image](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/TomoBEAR_gitlogo.png)
 
