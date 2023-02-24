@@ -1,16 +1,20 @@
 # TomoBEAR
 
 > **Warning**
-> <br/> We are mainly at the stage of testing, debugging and maintenance work. However, new features may still appear and refactoring may still take place.
+> <br/> **We are mainly at the stage of testing, debugging and maintenance work. However, new features may still appear and refactoring may still take place between all current and future 0.x.y versions until 1.0.0 will be ready to be released.**
 
-TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
+TomoBEAR is a configurable and customizable modular pipeline for streamlined processing of cryo-electron tomographic data and preliminary subtomogram averaging based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
 - (previous one) [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;
 - (current one) [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
 
-> **Note**
-> <br/> We will be happy, if you would try out one of the latest available versions from [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases) and get back to us by one of the ways mentioned in [Feedback](#feedback).
+Implementation details and benchmarks you can find in our preprint:
+</br> [Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: 10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
-![TomoBEAR Social Media Logo Image](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/TomoBEAR_gitlogo.png)
+> **Note**
+> <br/> We are happy to support you for trying out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
+> <br/> We are also would be happy to receive from you [any kind of feedback](#feedback)!
+
+![TomoBEAR Social Media Logo Image](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/develop/images/TomoBEAR_gitlogo.png)
 
 ## Contents
 
@@ -31,7 +35,7 @@ In the following picture you can see a flow chart which visualizes which steps `
 
 Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
 
-![Schematic Pipeline Image](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/pipeline_simplified.png)
+![Schematic Pipeline Image](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/develop/images/pipeline_simplified.png)
 
 A picture above represents the flow diagram of the data processing with TomoBEAR. Blue boxes outline the steps that are performed fully automatically, green boxes may require human intervention. The steps encapsulated in the red frame represent the functionality of live data processing. More detailed diagram is located on [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
 
