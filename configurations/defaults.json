@@ -101,7 +101,7 @@
         "number_regex": "[_]*([\\d]+[_[\\d]*]*)_",
         "name_number_regex": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)",
         "name_number_regex_backup": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)_",
-        "month_date_time_regex": "[_]+([{A-Z}1][{a-z}2]+[\\d]+)_([{\\d}2]+.[{\\d}2]+.[{\\d}2]+)[.]+",
+        "month_date_time_regex": "_([A-Z][a-z]{2}[\\d]{2})_([\\d]{2}.[\\d]{2}.[\\d]{2})[._]",
         "tomogram_acquisition_time_in_minutes": 70,
         "keep_intermediates": true,
         "reconstruct": "binned",
