@@ -37,6 +37,10 @@ if counter == 1
 end
 
 if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
+    [original_files, ~] = getOriginalEERs(configuration);
+end
+
+if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
     if ~isfield(configuration, "live_data_mode") || ~configuration.live_data_mode
         error("ERROR: No micrographs found at location " + mrc_path);
     else

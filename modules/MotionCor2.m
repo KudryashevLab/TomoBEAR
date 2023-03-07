@@ -174,10 +174,17 @@ classdef MotionCor2 < Module
                 [folder, name, extension] = fileparts(obj.configuration.gain);
                 name_rep = strrep(name, " ", "\ ");
                 gain_path =  folder + string(filesep) + name_rep + extension;
-                if ~fileExists(output_folder + string(filesep) + name + ".mrc") && extension == ".dm4"
-                    gain_path = output_folder + string(filesep) + name_rep + ".mrc";
-                    executeCommand("dm2mrc -u " + folder + string(filesep) + name_rep + extension + " " + gain_path);
-                elseif fileExists(output_folder + string(filesep) + name + ".mrc") && extension == ".dm4"
+                if ~fileExists(output_folder + string(filesep) + name + ".mrc") 
+                    if extension == ".dm4"
+                        gain_path_new = output_folder + string(filesep) + name_rep + ".mrc";
+                        executeCommand("dm2mrc -u " + gain_path + " " + gain_path_new);
+                        gain_path = gain_path_new;
+                    elseif extension == ".gain"
+                        gain_path_new = output_folder + string(filesep) + name_rep + ".mrc";
+                        executeCommand("newstack -in " + gain_path + " -ou " + gain_path_new);
+                        gain_path = gain_path_new;
+                    end
+                elseif extension == ".dm4" || extension == ".gain"
                     gain_path = output_folder + string(filesep) + name_rep + ".mrc";
                 end
                 
