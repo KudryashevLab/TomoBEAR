@@ -235,6 +235,29 @@ if configuration.automatic_filename_parts_recognition == true
             dynamic_configuration.original_files(i).tilt_stack = true;
             dynamic_configuration.tilt_stacks = true;
         end
+        
+        % re-write with the user-enforced parameters values if present
+        % NOTE:TODO: dirty, subject for later refactoring!
+        if isfield(configuration, "tomogram_number_position") && configuration.tomogram_number_position ~= -1
+            dynamic_configuration.original_files(i).tomogram_number_position = configuration.tomogram_number_position;
+        end
+        
+        if isfield(configuration, "tilt_number_position") && configuration.tilt_number_position ~= -1
+            dynamic_configuration.original_files(i).tilt_number_position = configuration.tilt_number_position;
+        end
+        
+        if isfield(configuration, "angle_position") && configuration.angle_position ~= -1
+            dynamic_configuration.original_files(i).angle_position = configuration.angle_position;
+        end
+        
+        if isfield(configuration, "date_position") && configuration.date_position ~= -1
+            dynamic_configuration.original_files(i).date_position = configuration.date_position;
+        end
+        
+        if isfield(configuration, "time_position") && configuration.time_position ~= -1
+            dynamic_configuration.original_files(i).time_position = configuration.time_position;
+        end
+        
     end
     
     %[values, indices] = sort({dynamic_configuration.original_files.name});
