@@ -878,6 +878,7 @@
     },
     "AreTomo": {
         "execution_method": "in_order",
+        "input_stack_binning": 1,
         "reconstruction": false,
         "weighted_back_projection": true,
         "tilt_axis_refine_flag": 1,
