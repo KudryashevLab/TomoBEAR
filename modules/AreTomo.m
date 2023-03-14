@@ -10,8 +10,14 @@ classdef AreTomo < Module
         end
 
         function obj = process(obj)
-            tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
-
+            
+            if obj.configuration.input_stack_binning > 1
+                tilt_stacks = getBinnedTiltStacksFromStandardFolder(obj.configuration, true);
+                tilt_stacks = tilt_stacks(contains({tilt_stacks.name}, "bin_" + num2str(obj.configuration.input_stack_binning)));
+            else
+                tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
+            end
+            
 %             if isfield(obj.configuration.tomograms.(obj.field_names{obj.configuration.set_up.j}), "motion_corrected_odd_files")
 %                 even_tilt_stacks = getEvenTiltStacksFromStandardFolder(obj.configuration, true);
 %                 odd_tilt_stacks = getOddTiltStacksFromStandardFolder(obj.configuration, true);
@@ -68,6 +74,11 @@ classdef AreTomo < Module
                 error("ERROR: Gpus are needed to run this module!");
             end
             
+            if obj.configuration.aligned_stack_binning < obj.configuration.input_stack_binning
+                error("ERROR: Requested aligned_stack_binning (=" + num2str(obj.configuration.aligned_stack_binning)...
+                    + ") is lower than required input_stack_binning (=" + num2str(obj.configuration.input_stack_binning) + ") !");
+            end
+            
             stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
             
             % Generate aligned stack of the requested binning level
@@ -75,7 +86,7 @@ classdef AreTomo < Module
             executeCommand(obj.configuration.aretomo_command...
                     + " -InMrc " + stack_source...
                     + " -OutMrc " + stack_destination...
-                    + " -VolZ 0 -OutBin " + num2str(obj.configuration.aligned_stack_binning)...
+                    + " -VolZ 0 -OutBin " + num2str(obj.configuration.aligned_stack_binning / obj.configuration.input_stack_binning)...
                     + " -Gpu " + num2str(gpu_number) + " "...
                     + angular_file_command_snippet + " "...
                     + tilt_axis_command_snippet + " "...
@@ -108,13 +119,22 @@ classdef AreTomo < Module
             % Move IMOD-compatible files one level up
             imod_folder = obj.output_path + filesep + obj.name + ".ali_Imod";
             if exist(imod_folder, 'dir')
-                movefile(imod_folder + filesep + "*", obj.output_path);
+                imod_files = dir(imod_folder + string(filesep) + obj.name + "*.*");
+                for file_id = 1:length(imod_files) 
+                    imod_file_out = imod_files(file_id).folder + string(filesep) + imod_files(file_id).name;
+                    [~, ~, imod_file_ext] = fileparts(imod_file_out);
+                    imod_file_destination = obj.output_path + filesep + obj.name + imod_file_ext;
+                    movefile(imod_file_out, imod_file_destination);
+                end
             end
             
             % Generate aligned unbinned stack using alignment parameters
             % previously detected at the requested binning level
             xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
             xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
+            
+            tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
+            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
             
             [~, size_to_output] = system("header -s " + stack_source);
             size_to_output = str2num(size_to_output);
@@ -127,6 +147,25 @@ classdef AreTomo < Module
                 + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin"...
                 + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
                 + " -TaperAtFill 1,0");
+            
+            % Exclude views according to aligned stack
+            fid = fopen(xf_file_path, 'rt');
+            txt = textscan(fid, '%s', 'Delimiter', '\n');
+            fclose(fid);
+
+            txt = txt{1}(~cellfun(@isempty, txt{1}));
+            % NOTE: dirty! rewrite using regexp or other search patterns
+            exclude_mask = contains(txt, '1.000     0.000     0.000     1.000      0.00      0.00');
+            exclude_views = find(exclude_mask);
+            exclude_views = exclude_views'; 
+            
+            if ~isempty(exclude_views)
+                status = system("excludeviews -StackName " + stack_destination_unbinned...
+                    + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
+            end
+            
+            xf_file = dir(obj.output_path + filesep + obj.name + ".tlt");
+            xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
             
             folder_destination = obj.configuration.aligned_tilt_stacks_folder;
             filename_link_destination = obj.name + "_bin_" + num2str(1) + ".ali";

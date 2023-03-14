@@ -116,16 +116,22 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         + " "...
                         + obj.name + "_" + obj.configuration.slice_suffix + "_";
                     if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, obj.name)
-                        if max(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)) < 10
-                            file = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == 0));
+                        view_index_max = max(abs(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)));
+                        angle_min_abs = min(abs(tilt_index_angle_mapping));
+                        angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
+                        if view_index_max < 10
+                            file = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
                         else
-                            file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == 0));
+                            file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
                         end
                     else
-                        if max(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)) < 10
-                            file = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
+                        view_index_max = max(abs(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)));
+                        angle_min_abs = min(abs(tilt_index_angle_mapping));
+                        angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
+                        if view_index_max < 10
+                            file = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
                         else
-                            file = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == 0));
+                            file = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
                         end
                     end
                     command = command + file + ".mrc";
@@ -322,28 +328,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         % and use XF transform file while correcting CTF
                         % TODO: find better way to make checks
                         % (e.g. link xf files to separate folder)
-                        xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","xf","last");
-                        if ~isempty(xf_files)
-                            xf_files = xf_files{1};
-                        else
-                            xf_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","aln","last");
-                            if isempty(xf_files)
-                                xf_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                                xf_files = xf_files{1};
-                            else
-                                fid_in = fopen(xf_files{1});
-                                lines_in_cells = textscan(fid_in, "%s","Delimiter","\n");
-                                fclose(fid_in);
-                                fid_out = fopen(obj.output_path + filesep + obj.name + ".xf", "w+");
-                                for j = 4:length(lines_in_cells{1})
-                                    numbers_in_line = textscan(lines_in_cells{1}{j}, "%f %f %f %f %f %f %f %f %f %f");
-                                    rotation_matrix = rotz(numbers_in_line{2});
-                                    fprintf(fid_out, "%f %f %f %f %f %f\n", rotation_matrix(1,1), rotation_matrix(1,2), rotation_matrix(2,1), rotation_matrix(2,2), numbers_in_line{4}, numbers_in_line{5});
-                                end
-                                fclose(fid_out);
-                                xf_files = obj.output_path + filesep + obj.name + ".xf";
-                            end
-                        end
+                        xf_files = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = destination_folder + string(filesep) + obj.name + ".xf";
                         createSymbolicLink(xf_files, xf_file_destination, obj.log_file_id);
 

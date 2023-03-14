@@ -665,8 +665,10 @@ classdef BatchRunTomo < Module
                         %                             fprintf(fileID, "%0.2f\n", angles(i));
                         %                         end
                         %                         fclose(fileID);
-                    elseif obj.configuration.starting_step == 0 && obj.configuration.ending_step == 3 && ~fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid")
-                        obj.configuration.ending_step = 5;
+                    % NOTE: commented out lines below because otherwise
+                    % patch tracking-based alignment is impossible
+                    %elseif obj.configuration.starting_step == 0 && obj.configuration.ending_step == 3 && ~fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid")
+                    %    obj.configuration.ending_step = 5;
                         %obj.dynamic_configuration.ending_step = obj.configuration.ending_step;
                         %disp("INFO: updated ending step to step " + obj.dynamic_configuration.ending_step + " due to incorrect DynamoTiltSeriesAlignment!");
                     end

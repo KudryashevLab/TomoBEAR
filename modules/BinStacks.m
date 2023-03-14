@@ -64,11 +64,9 @@ classdef BinStacks < Module
                         return;
                     end
                    
-                    xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                   
                     [path, name, extension] = fileparts(tilt_stacks.name);
                    
-                    xf_file_source = xf_file_paths{1};
+                    xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                    
                     xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                    
@@ -167,8 +165,7 @@ classdef BinStacks < Module
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                        xf_file_source = xf_file_paths{1};
+                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         xform_command_snippet = " -xform " + xf_file_destination;
@@ -202,9 +199,19 @@ classdef BinStacks < Module
                     executeCommand("alterheader -del " + apix + "," + apix + "," + apix + "," + " " + stack_output_path, false, obj.log_file_id);
                     
                     if obj.configuration.binnings(i) > 1
-                        [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "binned_aligned_tilt_stacks_folder", obj.log_file_id);
+                        if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
+                            slink_dir = "binned_aligned_tilt_stacks_folder";
+                        else
+                            slink_dir = "binned_tilt_stacks_folder";
+                        end
+                        [output_binned_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, slink_dir, obj.log_file_id);
                     else
-                        [output_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, "aligned_tilt_stacks_folder", obj.log_file_id);
+                        if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
+                            slink_dir = "aligned_tilt_stacks_folder";
+                        else
+                            slink_dir = "tilt_stacks_folder";
+                        end
+                        [output_stacks_symbolic_links, obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).stacks_symbolic_links{i}] = createSymbolicLinkInStandardFolder(obj.configuration, stack_output_path, slink_dir, obj.log_file_id);
                     end
                    
                     if obj.configuration.run_ctf_phaseflip == true
@@ -292,8 +299,7 @@ classdef BinStacks < Module
                     
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                        xf_file_source = xf_file_paths{1};
+                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         xform_command_snippet = " -xform " + xf_file_destination;
@@ -401,8 +407,7 @@ classdef BinStacks < Module
                     
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                        xf_file_source = xf_file_paths{1};
+                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         xform_command_snippet = " -xform " + xf_file_destination;
@@ -507,8 +512,7 @@ classdef BinStacks < Module
                    
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                        xf_file_source = xf_file_paths{1};
+                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         xform_command_snippet = " -xform " + xf_file_destination;
@@ -596,8 +600,7 @@ classdef BinStacks < Module
                     
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_paths = getFilePathsFromLastBatchruntomoRun(obj.configuration, "xf");
-                        xf_file_source = xf_file_paths{1};
+                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         xform_command_snippet = " -xform " + xf_file_destination;
