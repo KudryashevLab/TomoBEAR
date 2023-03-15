@@ -510,6 +510,49 @@ classdef Reconstruct < Module
                         end
                     end
                     
+                    if obj.configuration.generate_nad_filtered_tomograms == true
+                        nad_filter_output_iterations_list = string(obj.configuration.nad_filter_output_iterations_list);
+                        disp("INFO: tomograms with NAD filter (at iterations: " + strjoin(nad_filter_output_iterations_list, ",") + ") will be generated.");
+                        
+                        nad_filtered_tomogram_destination = obj.output_path + string(filesep) + name + "_nadf.rec";
+                        
+                        if isfield(obj.configuration, "nad_filter_number_of_iterations") && obj.configuration.nad_filter_number_of_iterations ~= -1
+                            iter_num_command_snippet = " -n " + num2str(obj.configuration.nad_filter_number_of_iterations);
+                        else
+                            iter_num_command_snippet = "";
+                        end
+                        
+                        if isfield(obj.configuration, "nad_filter_sigma_for_smoothing") && obj.configuration.nad_filter_sigma_for_smoothing ~= -1
+                            smoothing_sigma_command_snippet = " -s " + num2str(obj.configuration.nad_filter_sigma_for_smoothing);
+                        else
+                            smoothing_sigma_command_snippet = "";
+                        end
+                        
+                        if isfield(obj.configuration, "nad_filter_threshold_for_gradients") && obj.configuration.nad_filter_threshold_for_gradients ~= -1
+                            gradients_threshold_command_snippet = " -k " + num2str(obj.configuration.nad_filter_threshold_for_gradients);
+                        else
+                            gradients_threshold_command_snippet = "";
+                        end
+                        
+                        command = "nad_eed_3d"...
+                            + " -i " + strjoin(nad_filter_output_iterations_list, ",")...
+                            + iter_num_command_snippet...
+                            + smoothing_sigma_command_snippet...
+                            + gradients_threshold_command_snippet...
+                            + " " + rotated_tomogram_destination...
+                            + " " + nad_filtered_tomogram_destination;
+                        executeCommand(command, false, obj.log_file_id);
+                        
+                        nad_filtered_tomograms = dir(nad_filtered_tomogram_destination + '*');
+                        for file_id = 1:length(nad_filtered_tomograms)
+                            nad_filtered_tomogram_destination_iter = nad_filtered_tomograms(file_id).folder + string(filesep) + nad_filtered_tomograms(file_id).name;
+                            filename_split = strsplit(nad_filtered_tomogram_destination_iter, '-');
+                            iter_num_str = filename_split(end);
+                            nad_filtered_tomogram_destination_iter_new = obj.output_path + string(filesep) + name + "_nadf_" + iter_num_str + ".rec";
+                            movefile(nad_filtered_tomogram_destination_iter, nad_filtered_tomogram_destination_iter_new);
+                        end
+                    end
+                    
                     if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files") && ~isempty(binned_even_tilt_stacks)
                         binned_even_tilt_stacks_tmp = binned_even_tilt_stacks(find(contains({binned_even_tilt_stacks.name}, name)));
                         disp("INFO: even tomograms will be generated.");
