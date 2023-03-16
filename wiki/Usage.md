@@ -1,10 +1,68 @@
 # TomoBEAR Configuration
 
 If you followed the instructions thoroughly then you should have a
-working copy of TomoBEAR. Now you need to generate a json file for your
-project to start to process your acquired cryo EM data automated.
+working copy of the TomoBEAR. Now you need to generate a JSON file for your
+project to start to process your acquired cryo-ET data.
 
-## Raw Tomography Data with Fiducials
+## Data entry
+
+### Input Data File Formats
+
+Generally, TomoBEAR supports the ```TIF(F)```, ```MRC``` and ```EER``` input data file formats. As well, for all of the formats TomoBEAR supports perception of the raw filenames for the data collected by different modes including:
+- single-shot (conventional) - with a single-level TS numbering pattern;
+- multi-shot (e.g. [PACEtomo](https://github.com/eisfabian/PACEtomo)) - with a two-level TS numbering pattern, including IDs of square and TS.
+
+**Table: Example cases of available input filenames recognition schemes**
+
+| Scenario  | File Naming Patterns and Examples |
+| -------------  | ------------- |
+| Single-shot (conventional) frames (**TIF[F]/MRC**) | ```<TS-PREFIX>_<TS-ID>{_<VIEW>}{_<ANGLE>}{_<DATE>_<TIME>}.<EXT>``` </br> with the parts denoted in ```{}``` being optional </br> e.g. [EMPIAR-10164](https://www.ebi.ac.uk/empiar/EMPIAR-10164/): ```TS_05_008_-12.0.mrc``` |
+| Falcon4 frames (**EER**) | ```<TS-PREFIX>_<TS-ID>{_<VIEW>}[<ANGLE>].<EXT>``` </br> e.g. [EMPIAR-11306](https://www.ebi.ac.uk/empiar/EMPIAR-11306/): ```Position_02_001[-10.00]_EER.eer```|
+| Multi-shot frames (**TIF[F]** by [PACEtomo](https://github.com/eisfabian/PACEtomo)) | ```Square<SQUARE-ID>_<TS-PREFIX>_<TS-ID>_<VIEW>_<ANGLE>{_<DATE>_<TIME>}.<EXT>``` </br> e.g. from our internal data: ```Square3_ts_001_000_Feb24_10.12.16.tif``` |
+| Assembled stacks (**MRC**) | ```<TS-PREFIX-1>..._<TS-PREFIX-N>.<EXT>``` </br> e.g. [EMPIAR-10064](https://www.ebi.ac.uk/empiar/EMPIAR-10064/) with arbitrary unique names: ```CTEM_tomo2.mrc``` |
+
+> **Warning**
+> (ordering frames)
+> <br/> Withing a tilt-serie the frames are ordered according to ```<DATE>_<TIME>``` marker. If that was not present, then ```<VIEW>``` marker is used. If the latest is not present as well, then filename [date/time]stamp is used. Be aware that while copying in parallel (e.g. using ```cp```) or opening data you could modify that original timestamp!
+
+> **Warning**
+> (multi-shot data)
+> <br/> In the case of multi-shot (e.g. [PACEtomo](https://github.com/eisfabian/PACEtomo)) input data it is important to make sure your data has described in the table above file format with leading keyword ```Square``` followed by the corresponding square number w/o any separators.
+
+### Overcoming Input Data Perception Issues
+
+The possible naming schemes for input data coming from SerialEM and defined above EER naming pattern should be all well-covered by our default regular expressions. Nevertheless, you may fine-tune your data perception by using the following parameters, if necessary:
+- ```<KEY>_position``` where ```<KEY>``` could be ```prefix```, ```tomogram_number```, ```tilt_number```, ```angle```, ```date``` or ```time``` - this set of parameters directly controls recognition of the corresponding information by counting positions between underscores ```_``` in filenames and associating the extracted sub-strings with the corresponding keys;
+- ```<KEY>_regex``` where ```<KEY>``` could be ```angle```, ```name```, ```number```, ```name_number``` or ```month_date``` - this set of parameters is more general and better tunable, it controls recognition of the corresponding information by regular expressions.
+
+**In case your input data have more than one TS prefix**, separated by an underscore '_', and you experience issues with TomoBEAR filenames perception, we would recommend you to make symbolic links to the original raw data with a single TS prefix.
+An example bash script ```softlink_files.sh``` to change prefix for all files of a single tilt serie in ```TIF``` data format is provided below:
+```bash
+prefix_to_cut=${1}
+prefix_to_put=${2}
+dir_data_raw=$(readlink -f ./${3})
+dir_data_links=$(readlink -f ./${4})
+
+for file_tif_old in ${dir_data_raw}/${prefix_to_cut}*.tif ; do
+        file_tif_trunc=${file_tif_old#*${prefix_to_cut}}
+        file_mdoc_old=${file_tif_old}.mdoc
+        file_tif_new=${dir_data_links}/${prefix_to_put}$file_tif_trunc
+        file_mdoc_new=${file_tif_new}.mdoc
+        echo 'Linking ' $file_tif_old ' to ' $file_tif_new
+        ln -s $file_tif_old $file_tif_new
+        echo 'Linking ' $file_mdoc_old ' to ' $file_mdoc_new
+        ln -s $file_mdoc_old $file_mdoc_new
+done
+```
+You may use the script above ```softlink_files.sh``` to rename input data as softlinks to original files as the following:
+```bash
+softlink_files.sh PREFIX1_PREFIX2_PREFIX3_ PREFIXNEW_ original/dir/path renamed/dir/path
+```
+where for each ```TIF``` file in the location ```original/dir/path``` a set of prefixes ```PREFIX1_PREFIX2_PREFIX3_``` will be substituted with a single prefix ```PREFIXNEW_``` and softlinks with the new filenames to the corresponding original files will be saved in the ```renamed/dir/path``` directory.  
+
+## JSON Configuration Templates
+
+### Raw Tomography Data with Fiducials
 
 To process tomogrpahy data with fiducials the following template should
 be used as configuration for the pipeline:
@@ -82,7 +140,7 @@ be used as configuration for the pipeline:
 
 For some projects there are more sophisticted features available which can be switched on or fine tuned if needed.
 
-## Raw Tomography Data without Fiducials
+### Raw Tomography Data without Fiducials
 
 To process tomogrpahy data without fiducials (for example, focused ion-beam milling data) user have the following options for fiducial-free alignment:
 - BatchRunTomo-based (IMOD) patch tracking and alignment;
@@ -209,7 +267,7 @@ For AreTomo usage case there is global alignment implemented in the pipeline as 
 ```
 </details>
 
-## Tilt Stacks with Fiducials
+### Tilt Stacks with Fiducials
 
 If you want to process already assembled tilt stacks with `TomoBEAR` you
 need to provide the tilt angles in the order in which they apear in the
