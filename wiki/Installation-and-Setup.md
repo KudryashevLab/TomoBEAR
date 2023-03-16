@@ -1,7 +1,7 @@
 > **Note**
 > <br/> We are happy to support you to try out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
 > </br> We are glad to
-> * receive your opinion on [Discussions page]()
+> * receive your opinion on [Discussions page](https://github.com/KudryashevLab/TomoBEAR/discussions)
 > * respond to your feedback on bugs, execution issues and configuration complications by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues)
 > * have a discussion with you via e-mail:
 >   * Artsemi Yushkevich - contributing developer: Artsemi.Yushkevich@mdc-berlin.de
@@ -34,7 +34,7 @@ There are two ways to operate TomoBEAR.
 * The first way is to [[ use it directly from MATLAB | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#matlab ]]
 * The second way is to [[ use a standalone executable which is available precompiled | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#standalone ]]
 
-For both methods of operation, you will need to get TomoBEAR source code and to get and install its dependencies.
+For both methods of operation, you will need to [[ get TomoBEAR source code | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#get-source-code-and-binary ]] and to get and install its dependencies.
 You have to install essential TomoBEAR dependencies (Dynamo, IMOD, MotionCor2 and GCTF) and may additionally install optional ones (SUSAN, AreTomo, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
 
 ## Get source code and binary
