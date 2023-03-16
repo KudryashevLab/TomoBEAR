@@ -60,6 +60,45 @@ softlink_files.sh PREFIX1_PREFIX2_PREFIX3_ PREFIXNEW_ original/dir/path renamed/
 ```
 where for each ```TIF``` file in the location ```original/dir/path``` a set of prefixes ```PREFIX1_PREFIX2_PREFIX3_``` will be substituted with a single prefix ```PREFIXNEW_``` and softlinks with the new filenames to the corresponding original files will be saved in the ```renamed/dir/path``` directory.  
 
+### EER input file format pre-processing
+
+In order to be able to input and process ```EER``` files you have to setup MotionCor2 parameters of ```EER``` data integration into frame movies to be motion-corrected and integrated again to tilt images. Below you can find beginning of an example JSON configuration file for TomoBEAR:
+```json
+{
+    "general": {
+        "project_name": "your project name",
+        "project_description": "your project name description",
+        "data_path": "/path/to/data/prefix*.eer",
+        "processing_path": "/path/to/processing/folder",
+        "expected_symmetrie": "Cx",
+        "reconstruction_thickness": xxxx,
+        "rotation_tilt_axis": xx,
+        "aligned_stack_binning": x,
+        "pre_aligned_stack_binning": x,
+        "binnings": [x, x, xx]
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+        "gain": "/path/to/gain/ref/EER_GainReference.gain",
+        "eer_sampling": x,
+        "eer_total_number_of_fractions": xxx,
+        "eer_fraction_grouping": xx,
+        "eer_exposure_per_fraction": x.x,
+        "ft_bin": x
+    },
+    ...
+}
+```
+where the parameters are the following:
+* ```eer_sampling```: EER upsampling rate after fractions integration (1 - don't upsample, 2 - upsample x2, etc.);
+* ```eer_total_number_of_fractions```: total number of fractions (data slices) present in raw EER data;
+* ```eer_fraction_grouping```: number of fractions (data slices) to group and integrate into a frame;
+* ```eer_exposure_per_fraction```: total electron dose accumulated per frame (group of fractions).
+These parameters relate to the corresponding MotionCor2 parameters such as ```–EerSampling``` and three parameter values denoted in the file passed to ```–FmIntFile``` option, namely - total number of fractions (1st column), number of fractions in group (2nd column) and total accumulated dose per group (3rd column). 
+
 ## JSON Configuration Templates
 
 ### Raw Tomography Data with Fiducials
