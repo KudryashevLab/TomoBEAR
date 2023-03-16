@@ -40,7 +40,7 @@ A picture above represents the flow diagram of the data processing with TomoBEAR
 
 ## Feedback
 
-In case of any questions or errors you may interact with us by one of the following ways:
+In case of any questions, issues or suggestions you may interact with us by one of the following ways:
 * write an e-mail to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com) or [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de);
 * open an issue/bug report, feature request or post a question using [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues);
 * start a discussion in [Discussions](https://github.com/KudryashevLab/TomoBEAR/discussions);
