@@ -1,7 +1,11 @@
-Currently we are at the stage of testing, we will be happy if you try it, we will help you to get going. Please get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or write to
-[Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR) if you have problems.
-
-:tada:**The first standalone executable release for GPU workstations is available now! :tada: You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**
+> **Note**
+> <br/> We are happy to support you to try out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
+> </br> We are glad to
+> * receive your opinion on [Discussions page]()
+> * respond to your feedback on bugs, execution issues and configuration complications by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues)
+> * have a discussion with you via e-mail:
+>   * Artsemi Yushkevich - contributing developer: Artsemi.Yushkevich@mdc-berlin.de
+>   * Misha Kudryashev - project lead: misha.kudryashev@gmail.com.
 
 # Prerequisites
 
@@ -30,7 +34,46 @@ There are two ways to operate TomoBEAR.
 * The first way is to [[ use it directly from MATLAB | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#matlab ]]
 * The second way is to [[ use a standalone executable which is available precompiled | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#standalone ]]
 
-For both methods of operation, you will need to get TomoBEAR source code and to get and install its dependencies. Thus, you have to install essential dependencies (Dynamo, IMOD, MotionCor2 and GCTF) and may additionally install optional ones (SUSAN, AreTomo, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
+For both methods of operation, you will need to get TomoBEAR source code and to get and install its dependencies.
+You have to install essential TomoBEAR dependencies (Dynamo, IMOD, MotionCor2 and GCTF) and may additionally install optional ones (SUSAN, AreTomo, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
+
+## Get source code and binary
+To get the TomoBEAR source code along with its binary on your machine you need to create the following ```install_TomoBEAR.sh``` installation bash script:
+```bash
+VER=${1}
+INSTALL_DIR=$(readlink -f ./${2})
+echo "Installing TomoBEAR-v"${VER} "in the directory " ${INSTALL_DIR}
+
+echo "Fetching and unpacking source code from GitHub..."
+mkdir -p ${INSTALL_DIR}
+cd ${INSTALL_DIR}
+wget https://github.com/KudryashevLab/TomoBEAR/archive/refs/tags/v${VER}.tar.gz
+tar zxvf v${VER}.tar.gz
+ln -s TomoBEAR-${VER} ${VER}
+
+echo "Fetching and activating binary..."
+cd ${VER}
+wget https://github.com/KudryashevLab/TomoBEAR/releases/download/v${VER}/TomoBEAR-${VER}
+chmod +x TomoBEAR-${VER}
+ln -s TomoBEAR-${VER} TomoBEAR
+rm -f ../v${VER}.tar.gz
+
+echo "Done!"
+```
+activate it by
+```bash
+chmod +x install_TomoBEAR.sh
+```
+and use it as following
+```bash
+./install_TomoBEAR.sh 0.3.0 /path/to/dir
+```
+where 0.3.0 is an example of the latest version release and /path/to/dir is the path to the folder where to get the TomoBEAR source code.
+The list of available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
+
+> **Note**
+> </br> Many thanks to **Dr. Wolfgang Lugmayr (CSSB, Hamburg)** for the installation script suggestion!
+
 
 ## MATLAB
 
@@ -38,15 +81,7 @@ If you want to run on a local machine then it is advised to run TomoBEAR from wi
 
 It is adviced to use the following MATLAB release under which the software was tested: MATLAB R2021a.
 
-Everything you need to get TomoBEAR on your machine is to change to some folder where you want to have TomoBEAR and execute the following command
-
-* `git clone https://github.com/KudryashevLab/tomoBEAR.git`.
-
-After that change to the folder TomoBEAR with
-
-* `cd tomoBEAR`
-
-Inside of the tomoBEAR folder you will find a configurations folder in which the file `defaults.json` can be found. Open the file `defaults.json` and adjust the following variables inside the general section
+Inside of the TomoBEAR folder you will find a configurations folder in which the file `defaults.json` can be found. Open the file `defaults.json` and adjust the following variables inside the general section
 
 * `"pipeline_location": ""` put in the double quotes the location of cloned TomoBEAR
 * `"motion_correction_command": ""` put in the double quotes the executable name of MotionCor2 or the full path (with the executable name)
@@ -71,9 +106,10 @@ The first time you start TomoBEAR after cloning it, initialization of necessary 
 
 ## Standalone
 
-TomoBEAR can also be used as a standalone application. For that you will need the standalone package itself which can be found on the [Releases page](https://github.com/KudryashevLab/tomoBEAR/releases). You have to download the zipped source code and the corresponding attached binary called `TomoBEAR`. Further you need to unzip archive with the source code and put in that folder downloaded `TomoBEAR` binary.
+TomoBEAR can also be used as a standalone application. For that you will need to run the [installation script (see section above)](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#get-source-code-and-binary).
+The available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
 
-As well, you will need to install and setup the additional software which is [mentioned below](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
+As well, you will need to install and setup the external software which is [mentioned below](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
 
 Additionally you will need the MCR (MATLAB Compiled Runtime) from [here](https://www.mathworks.com/products/compiler/matlab-runtime.html). There you need to get the newest **MCR 2021a** to be able to run TomoBEAR. When the download of the MCR is finished you will need to give it execution rights.
 For that change to the folder where the file was downloaded to and execute the following command

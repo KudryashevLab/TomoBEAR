@@ -1,16 +1,25 @@
-Following you can find descriptions of the functionality of the modules
-and their parameters which can be setup in the json file in their
-corresponding block.
+In this section you can find descriptions of the implemented modules, their functionality
+and their parameters which can be setup in the JSON configuration file in their
+corresponding blocks.
 
-# General
+# Global parameters configuration
 
-The general section is not a module but a section where all the general
+## general
+**Description**
+</br>
+The general section is not a module but a configuration section where all the general
 parameters regarding the processing and the environment can be found.
 
-**Note:** Parameters which are input in this section are visible to all
+**Parameters**
+</br>
+> **Note**
+> <br/> Parameters which are input in this section are visible to all
 modules during the execution. If parameters with the same key are found
-in a modules block then they override parameters from the general
+in a modules block then they override parameters from the "general"
 section.
+
+<details>
+<summary> Parameters table <i> (click to expand) </i> </summary>
 
 | Key                                                  | Default Value                                                                                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Examples           |
 |------------------------------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------|
@@ -133,6 +142,11 @@ section.
 | first_tilt_angle                                     | ""                                                                                            | this variable controls at which tilt angle the first projection is taken, if the value is "" it is deduced from the data else you need to set it to some integer value when your files do not contain angular information                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |                    |
 | execute                                              | true                                                                                          | this flag controls if the process function of an module is executed, this is set automatically to false for the cleanup functionality, normally you should not touch this flag                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |                    |
 | citation                                             | ""                                                                                            | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |                    |
+
+</details>
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "general": {
@@ -257,13 +271,21 @@ section.
         "citation": ""
     }
 ```
+</details>
 
-# StopPipeline
+# Pipeline behavior control modules
+
+## StopPipeline
+**Description**
+</br>
 
 The StopPipeline module is a module which controls the behavior of
 tomoBEAR. It allows to stop tomoBEAR after some processing step to
 inspect the output and not waste computational resources if parameters
 need to be optimized.
+
+**Parameters**
+</br>
 
 | Key              | Default Value | Description                                                                                                   | Examples |
 |------------------|---------------|---------------------------------------------------------------------------------------------------------------|----------|
@@ -275,10 +297,16 @@ need to be optimized.
     }
 ```
 
-# MetaData
+# CryoET data processing modules
+## MetaData
 
+**Description**
+</br>
 The MetaData module collects descriptive statistics such as min, max,
 mean, std from the raw data.
+
+**Parameters**
+</br>
 
 | Key                | Default Value | Description                                                                                                                                                                                                                                                                                     | Examples |
 |--------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -300,10 +328,15 @@ mean, std from the raw data.
     }
 ```
 
-# SortFiles
+## SortFiles
 
+**Description**
+</br>
 The SortFiles module sorts the raw files on a tomogram basis and links
 them to their corresponding folders for further processing.
+
+**Parameters**
+</br>
 
 | Key               | Default Value | Description                                                                                                                                                                                                                                           | Examples |
 |-------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -322,9 +355,13 @@ them to their corresponding folders for further processing.
         "fixed_number": 0,
         "skip": false,
         "citation": ""
+      }
 ```
 
-# MotionCor2
+## MotionCor2
+
+**Description**
+</br>
 
 The MotionCor2 module uses as the module's name suggests MotionCor2 to
 correct for the sample movement in a given projection which is basically
@@ -337,6 +374,10 @@ find
 or [here](https://emcore.ucsf.edu/ucsf-software) when you download the
 archive of MotionCor2.
 
+**Parameters**
+</br>
+<details>
+<summary> Parameters table <i> (click to expand) </i> </summary>
 | Key                                           | Default Value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Examples |
 |-----------------------------------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
 | method                                        | "MotionCor2"  | this variable defines the method to be used for frame based motion correction, **note** for this module it needs to be left as is, only MotionCor2 is supported at the moment                                                                                                                                                                                                                                                                                                                                                                                                                                                         |          |
@@ -374,6 +415,10 @@ archive of MotionCor2.
 | citation                                      | ""            | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |          |
 | citation_link                                 | ""            | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |          |
 | doi                                           | ""            | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |          |
+</details>
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "MotionCor2": {
@@ -414,8 +459,36 @@ archive of MotionCor2.
         "doi": ""
     }
 ```
+</details>
 
-# CreateStacks
+## GridEdgeEraser
+**Description**
+</br>
+This module performs grid edge identification and erases it for Au grids data.
+
+**Parameters**
+</br>
+```json
+    "GridEdgeEraser": {
+        "execution_method": "in_order",
+        "detection_binning": 4,
+        "grid_hole_diameter_in_um": 2,
+        "output_shift_user": [0, 0],
+        "output_shift_kernel_factor": [0, 0],
+        "binarize_threshold_in_std": 3,
+        "grid_detection_threshold_in_std": 3,
+        "smooth_mask_border": true,
+        "smooth_to_mean": true,
+        "smoothing_exp_decay": -40,
+        "cleaned_postfix": "gef",
+        "relink_as_previous_output": false
+    }
+```
+
+## CreateStacks
+
+**Description**
+</br>
 
 The CreateStacks module creates the stacks and normalizes them. There
 are two options for normalization. The default normalization scheme is
@@ -423,6 +496,9 @@ to divide the projections by their frame count. TomoBEAR detects
 automatically if you are using high-dose images and divides them by
 their corresponding frame count in contrast to low-dose images where the
 frame-count is different.
+
+**Parameters**
+</br>
 
 | Key                                | Default Value | Description                                                                                                                                                                                                                                                                                                                              | Examples |
 |------------------------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -456,7 +532,10 @@ frame-count is different.
     }
 ```
 
-# DynamoTiltSeriesAlignment
+## DynamoTiltSeriesAlignment
+
+**Description**
+</br>
 
 The DynamoTiltSeriesAlignment module is using the tilt stacks alignment
 algorithm from dynamo which is the best available algorithm for
@@ -464,6 +543,12 @@ fiducial-based alignment. As default reasonable parameters for many cryo
 ET projects are set. Some of them are dynamically derived. The option to
 override non-dynamically derived parameters is still available and can
 be done in the json configuration file.
+
+**Parameters**
+</br>
+
+<details>
+<summary> Parameters table <i> (click to expand) </i> </summary>
 
 | Key                                       | Default Value               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Examples |
 |-------------------------------------------|-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -487,6 +572,11 @@ be done in the json configuration file.
 | citation                                  | ""                          | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                              |          |
 | citation_link                             | ""                          | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                              |          |
 | doi                                       | ""                          | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                              |          |
+
+</details>
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "DynamoTiltSeriesAlignment": {
@@ -599,14 +689,20 @@ be done in the json configuration file.
         "doi": ""
     }
 ```
+</details>
 
-# DynamoCleanStacks
+## DynamoCleanStacks
 
+**Description**
+</br>
 The DynamoCleanStacks module can be run after the
 DynamoTiltSeriesAlignment to automatically clean up the tilt stacks. For
 that **DynamoCleanStacks** uses the output from dynamo tilt stacks
 alignment which states on which projections the fiducials could be fit.
 The others are then removed from the tilt stacks for further processing.
+
+**Parameters**
+</br>
 
 | Key                   | Default Value | Description                                                                                                                                                                                                                                                                                                                                | Examples |
 |-----------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -628,7 +724,39 @@ The others are then removed from the tilt stacks for further processing.
     }
 ```
 
-# BatchRunTomo
+## AreTomo
+**Description**
+</br>
+This module performs AreTomo-based fiducial-free alignment.
+
+**Parameters**
+</br>
+
+```json
+  "AreTomo": {
+        "execution_method": "in_order",
+        "input_stack_binning": 1,
+        "reconstruction": false,
+        "weighted_back_projection": true,
+        "tilt_axis_refine_flag": 1,
+        "apply_tilt_axis_offset": 0,
+        "tilt_axis_offset": 0,
+        "align_height_ratio": 0.75,
+        "apply_dose_weighting": false,
+        "sart": "20 5",
+        "roi": "0 0",
+        "roi_file": "",
+        "patch": "0 0",
+        "flip_volume": 1,
+        "flip_intensity": 0,
+        "citation": ""
+    }
+```
+
+## BatchRunTomo
+
+**Description**
+</br>
 
 The BatchRunTomo module is the most versatile one as it can be setup to
 fulfill all the steps batchruntomo normally can do:
@@ -658,6 +786,11 @@ fulfill all the steps batchruntomo normally can do:
 -   20: Post Processing with Trimvol
 -   21: NAD (Nonlinear anisotropic diffusion)
 
+**Parameters**
+</br>
+
+<details>
+<summary> Parameters table <i> (click to expand) </i> </summary>
 | Key                                                | Default Value                               | Description                                                                                                                                                                                                                                                                                                                                                                                                                     | Examples |
 |----------------------------------------------------|---------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
 | execution_method                                   | "parallel"                                  | this variable defines the execution method for the module, if set to "parallel" out of memory errors can occur if you don't have enough memory, **note** for this module it needs to be left as is, except for debugging reasons you need to set it to "sequential" because MATLAB does only allow debugging of code in non parallel loops                                                                                      |          |
@@ -683,6 +816,10 @@ fulfill all the steps batchruntomo normally can do:
 
 The value "<REPLACE>" means it will be automatically replaced by
 tomoBEAR and should not be replaced or changed by the user.
+</details>
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "BatchRunTomo": {
@@ -797,12 +934,21 @@ tomoBEAR and should not be replaced or changed by the user.
         "doi": ""
     }
 ```
+</details>
 
-# GCTFCtfphaseflipCTFCorrection
+## GCTFCtfphaseflipCTFCorrection
 
+**Description**
+</br>
 The GCTFCtfphaseflipCTFCorrection module is detecting the CTF for the
 tomograms which are reconstructed for template matching or particle
 cropping.
+
+**Parameters**
+</br>
+
+<details>
+<summary> Parameters table <i> (click to expand) </i> </summary>
 
 | Key                               | Default Value        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Examples |
 |-----------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -832,6 +978,12 @@ cropping.
 | citation                          | ""                   | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |          |
 | citation_link                     | ""                   | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |          |
 | doi                               | ""                   | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |          |
+
+</details>
+
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "GCTFCtfphaseflipCTFCorrection": {
@@ -863,12 +1015,17 @@ cropping.
         "doi": ""
     }
 ```
+</details>
 
-# BinStacks
-
+## BinStacks
+**Description**
+</br>
 The BinStacks module is used for binning the stacks to be able to
 reconstruct them with the Reconstruct module which should be used after
 your stacks are binned.
+
+**Parameters**
+</br>
 
 | Key                             | Default Value | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Examples |
 |---------------------------------|---------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -902,13 +1059,19 @@ your stacks are binned.
     }
 ```
 
-# Reconstruct
+## Reconstruct
+
+**Description**
+</br>
 
 The Reconstruct module should be used after you binned the tilt stacks
 with the BinStacks module or used aligned tilt stack binning option
 greater than one. The module is set up by default to reconstruct binned
 stacks. If you otherwise want to reconstruct unbinned stacks you need to
 set up the Reconstruct module properly.
+
+**Parameters**
+</br>
 
 | Key                               | Default Value | Description                                                                                                                                                                                                                                                                                                                                | Examples |
 |-----------------------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -929,6 +1092,11 @@ set up the Reconstruct module properly.
         "use_ctf_corrected_stack": true,
         "generate_exact_filtered_tomograms": false,
         "exact_filter_size": 1500,
+        "generate_nad_filtered_tomograms": false,
+        "nad_filter_output_iterations_list": [3],
+        "nad_filter_number_of_iterations": -1,
+        "nad_filter_sigma_for_smoothing": -1,
+        "nad_filter_threshold_for_gradients": -1,
         "use_rawtlt": true,
         "correct_angles": "center",
         "skip": false,
@@ -938,12 +1106,17 @@ set up the Reconstruct module properly.
     }
 ```
 
-# DynamoImportTomograms
+## DynamoImportTomograms
 
+**Description**
+</br>
 The DynamoImportTomograms module generates a dynamo catalogue for you
 and inputs the tomograms to that catalogue. After that you can call the
 dynamo catalogue manager (dcm) to generate the models for the tomograms
 or pick in them particles by hand.
+
+**Parameters**
+</br>
 
 | Key              | Default Value | Description                                                                                                                                                                                                                                                                                                                                | Examples |
 |------------------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -964,13 +1137,19 @@ or pick in them particles by hand.
         "doi": ""
     }
 ```
-# EMDTemplateGeneration
 
+# Template matching-associated modules
+## EMDTemplateGeneration
+**Description**
+</br>
 The EMDTemplateGeneration module is used to automatically download a
 EMDB template which is further down-scaled to match your desired template
 matching binning. Besides that an automated routine to generate the mask
 is also implemented. This module needs to be run before template
 matching is executed.
+
+**Parameters**
+</br>
 
 ```json
     "EMDTemplateGeneration": {
@@ -993,8 +1172,14 @@ matching is executed.
     }
 ```
 
-# TemplateGenerationFromFile
+## TemplateGenerationFromFile
+**Description**
+</br>
 The concept of this module is the same as in EMDTemplateMatching, with the only difference of taking the template from a user-defined path instead of fetching it directly from EMDB.
+
+**Parameters**
+</br>
+
 ```json
     "TemplateGenerationFromFile": {
         "execution_method": "once",
@@ -1015,12 +1200,20 @@ The concept of this module is the same as in EMDTemplateMatching, with the only 
     }
 ```
 
-# DynamoTemplateMatching
+## DynamoTemplateMatching
 
+**Description**
+</br>
 The DynamoTemplateMatching module re-implements the template
 matching from Dynamo but on a GPU. Because of the GPU usage the whole
 thing runs up to 15 times faster than the normal template matching
 implementation of dynamo.
+
+**Parameters**
+</br>
+
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
     "DynamoTemplateMatching": {
@@ -1047,9 +1240,19 @@ implementation of dynamo.
         "citation": ""
     }
 ```
+</details>
 
-# TemplateMatchingPostProcessing
+## TemplateMatchingPostProcessing
+**Description**
+</br>
 This module creates Dynamo-like table of particles based on the results of the template matching procedure from the module DynamoTemplateMatching. As well, using this module you can extract subtomograms of the identified particles.
+
+**Parameters**
+</br>
+
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
+
 ```json
     "TemplateMatchingPostProcessing": {
         "execution_method": "once",
@@ -1088,9 +1291,19 @@ This module creates Dynamo-like table of particles based on the results of the t
         "citation": ""
     }
 ```
+</details>
 
-# DynamoAlignmentProject
+# Subtomogram Averaging (StA) modules
+## DynamoAlignmentProject
+**Description**
+</br>
 This module is basically a wrapper for performing Dynamo alignment projects.
+
+**Parameters**
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
+
 ```json
     "DynamoAlignmentProject": {
         "randomize_angles": false,
@@ -1199,44 +1412,4 @@ This module is basically a wrapper for performing Dynamo alignment projects.
         "citation": ""
     }
 ```
-
-# AreTomo
-This module performs AreTomo-based fiducial-free alignment.
-```json
-  "AreTomo": {
-        "execution_method": "in_order",
-        "reconstruction": false,
-        "weighted_back_projection": true,
-        "tilt_axis_refine_flag": 1,
-        "apply_tilt_axis_offset": 0,
-        "tilt_axis_offset": 0,
-        "align_height_ratio": 0.75,
-        "apply_dose_weighting": false,
-        "sart": "20 5",
-        "roi": "0 0",
-        "roi_file": "",
-        "patch": "0 0",
-        "flip_volume": 1,
-        "flip_intensity": 0,
-        "citation": ""
-    }
-```
-
-# GridEdgeEraser
-This module performs grid edge identification and erases it for Au grids data.
-```json
-    "GridEdgeEraser": {
-        "execution_method": "in_order",
-        "detection_binning": 4,
-        "grid_hole_diameter_in_um": 2,
-        "output_shift_user": [0, 0],
-        "output_shift_kernel_factor": [0, 0],
-        "binarize_threshold_in_std": 3,
-        "grid_detection_threshold_in_std": 3,
-        "smooth_mask_border": true,
-        "smooth_to_mean": true,
-        "smoothing_exp_decay": -40,
-        "cleaned_postfix": "gef",
-        "relink_as_previous_output": false
-    }
-```
+</details>
