@@ -68,7 +68,7 @@ and use it as following
 ```bash
 ./install_TomoBEAR.sh 0.3.0 /path/to/dir
 ```
-where 0.3.0 is an example of the latest version release and /path/to/dir is the path to the folder where to get the TomoBEAR source code.
+where ```0.3.0``` is an example of the latest version release and ```/path/to/dir``` is the path to the folder where to get the TomoBEAR source code.
 The list of available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
 
 > **Note**
@@ -197,11 +197,11 @@ To get the newest CUDA on an Ubuntu system the easiest way is to install it via 
 
 #### Dynamo
 
-For the non standalone version of tomoBEAR you need a Dynamo version with tilt stack alignment capabilities. The newest version can be downloaded from here.
+For the non standalone version of TomoBEAR you need a Dynamo version with tilt stack alignment capabilities. The newest version can be [downloaded from here](https://wiki.dynamo.biozentrum.unibas.ch/w/index.php/Downloads).
 
 To minimize the dependencies on different CUDA versions it is advised to recompile the CUDA kernel for averaging with the newest CUDA version which is at best already available on your machine. If not please revise the chapter CUDA on this page.
 
-To recompile the kernel you just need to the location where dynamo was extracted and access the folder ´cuda´ inside. There you will find a file called ´makefile´ which you need to open and modify the second line containing the variable ´CUDA_ROOT=´. Please put in there the path to your most recent CUDA release available on the system.
+To recompile the kernel you just need to the location where dynamo was extracted and access the folder ```cuda``` inside. There you will find a file called ```makefile``` which you need to open and modify the second line containing the variable ```CUDA_ROOT=```. Please put in there the path to your most recent CUDA release available on the system.
 
 To recompile just execute the following two commands:
 
@@ -217,12 +217,18 @@ MotionCor2 version greater than 1.4.0 is desired.
 
 -   Alternative download [link](https://emcore.ucsf.edu/ucsf-software).
 
-#### Gctf
+#### AreTomo
 
 Head to the
-[Gctf](https://www2.mrc-lmb.cam.ac.uk/research/locally-developed-software/zhang-software/)
-downlaod page and download Gctf version 1.06. Gctf version 1.18 could
-also work but is not tested.
+[AreTomo](https://drive.google.com/drive/folders/1Z7pKVEdgMoNaUmd_cOFhlt-QCcfcwF3_)
+download page. There you can find different AreTomo versions along with the documentation.
+
+#### Gctf
+
+You can download and try one of the following GCTF versions:
+-   [Gctf v1.06](https://www2.mrc-lmb.cam.ac.uk/download/gctf_v1-06-and-examples/) - the main version, tested to be working under TomoBEAR;
+-   [Gctf v1.18](https://www2.mrc-lmb.cam.ac.uk/download/special-version-for-phase-plate-gctf_v1-18/) - special version for phase plate (should work under TomoBEAR, but was not tested);
+-   [Gctf Gautomatch cu10.1](https://www2.mrc-lmb.cam.ac.uk/download/gctf_gautomatch_cu10-1-tar-gz/) - version for CUDA-10 (should work under TomoBEAR, but was not tested).
 
 #### IMOD
 
