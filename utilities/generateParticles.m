@@ -116,6 +116,11 @@ table = dread(table_path);
 
 if binning > 1
     aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(configuration, true, binning);
+    aligned_tilt_stacks = aligned_tilt_stacks(contains({aligned_tilt_stacks.name}, "bin_" + binning));
+    if isempty(aligned_tilt_stacks) == true
+        error("ERROR: No binned aligned non-CTF-corrected stacks at the requested binning level bin_" + binning);
+        %aligned_tilt_stacks = getCtfCorrectedBinnedAlignedTiltStacksFromStandardFolder(configuration, true);
+    end
 else
     aligned_tilt_stacks_raw = getAlignedTiltStacksFromStandardFolder(configuration, true);
     
@@ -138,8 +143,9 @@ end
 %tlt_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt", "last");
 tlt_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".tlt");
 
-%defocus_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "defocus", "last");
-defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".defocus");
+%defocus_files = getFilesFromLastModuleRun(configuration, "GCTFCtfphaseflipCTFCorrection", "defocus", "last");
+%defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".defocus");
+defocus_files = getDefocusFiles(configuration, ".defocus");
 
 tomos_id = unique(table(:,20));
 
