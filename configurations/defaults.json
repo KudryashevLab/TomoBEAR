@@ -917,5 +917,18 @@
         "smoothing_exp_decay": -40,
         "cleaned_postfix": "gef",
         "relink_as_previous_output": false
+    },
+    "GenerateParticles": {
+        "execution_method": "once",
+        "generate_particles_method": "",
+        "particles_table_path": "",
+        "box_size": 1.0,
+        "particles_binning": -1,
+        "use_SUSAN": false,
+        "ctf_correction_method": "defocus_file",
+        "susan_padding": 200,
+        "per_particle_ctf_correction": "phase_flip",
+        "padding_policy": "zero",
+        "normalization": "zm"
     }
 }
