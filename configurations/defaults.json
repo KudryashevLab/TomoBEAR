@@ -35,6 +35,8 @@
         "wipe_cache": false,
         "motion_correction_command": "", 
         "ctf_correction_command": "",
+        "ctffind_path": "",
+        "ctffind_heredoc_path": "configurations/ctffind_heredoc.sh",
         "double_numbering": true,
         "prefix_position": 0,
         "tomogram_number_position": -1,
@@ -337,7 +339,16 @@
         "citation_link": "",
         "doi": "",
         "do_EPA": true,
-        "estimated_astigmatism": 1000
+        "estimated_astigmatism": 1000,
+        "ctf_estimation_method": "gctf",
+        "fourier_spectrum_size": 1024,
+        "resL": 50,
+        "resH": 4,
+        "defL": 5000,
+        "defH": 90000,
+        "ctf_preestim_defS": 500,
+        "ctf_estim_defS": 100,
+        "ctffind_output_suffix": "ctfestim"
     },
     "RefineFiducialModel": {
         "execution_method": "sequential",

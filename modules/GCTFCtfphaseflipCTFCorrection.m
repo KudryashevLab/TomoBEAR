@@ -56,6 +56,11 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
                 tilt_stacks = tilt_stacks(contains({tilt_stacks(:).name}, sprintf("%s_%03d", obj.configuration.tomogram_output_prefix, obj.configuration.set_up.j)));
             end
+            
+            if obj.configuration.ctf_estimation_method ~= "gctf" && obj.configuration.ctf_estimation_method ~= "ctffind"
+                error("ERROR: Unknown CTF-estimation method: " + obj.configuration.ctf_estimation_method);
+            end
+            
             [path, name, extension] = fileparts(tilt_files{1});
             tilt_index_angle_mapping = sort(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(2,:));
             for i = 1:length(tilt_stacks)
@@ -98,13 +103,16 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     + slice_folder + string(filesep) + obj.name...
                     + "_" + obj.configuration.slice_suffix + "_", false, obj.log_file_id);
                 return_folder = cd(slice_folder);
-                disp("INFO: **GCTF ESTIMATION**");
+                
+                disp("INFO: **CTF ESTIMATION**");
+                
+                % NOTE: code block for CTF pre-estimation
                 if isfield(obj.configuration, "nominal_defocus_in_nm") && obj.configuration.nominal_defocus_in_nm ~= 0
                     % TODO: could be also 2 numbers for lower and upper
                     % limit or factors in different variable names
                     lower_l = round(obj.configuration.nominal_defocus_in_nm / obj.configuration.defocus_limit_factor) * 10^4;
                     upper_l = round(obj.configuration.nominal_defocus_in_nm * obj.configuration.defocus_limit_factor) * 10^4;
-                else
+                elseif obj.configuration.ctf_estimation_method == "gctf"
                     if isfield(obj.configuration, "apix")
                         apix = obj.configuration.apix * obj.configuration.ft_bin;
                     else
@@ -164,107 +172,192 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = obj.dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l / 2;
                         obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = obj.dynamic_configuration.global_uppper_defocus_average_in_angstrom + upper_l / 2;
                     end
+                else %if obj.configuration.ctf_estimation_method == "ctffind"
+                    if isfield(obj.configuration, "apix")
+                        apix = obj.configuration.apix * obj.configuration.ft_bin;
+                    else
+                        apix = obj.configuration.greatest_apix * obj.configuration.ft_bin;
+                    end
+                    disp("INFO: Starting CTFFIND estimation on " + obj.name + "!");
+                    
+                    if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, obj.name)
+                        view_index_max = max(abs(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)));
+                        angle_min_abs = min(abs(tilt_index_angle_mapping));
+                        angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
+                        if view_index_max < 10
+                            view = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
+                        else
+                            view = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
+                        end
+                    else
+                        view_index_max = max(abs(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)));
+                        angle_min_abs = min(abs(tilt_index_angle_mapping));
+                        angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
+                        if view_index_max < 10
+                            view = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
+                        else
+                            view = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
+                        end
+                    end
+                    input_filename = obj.name + "_" + obj.configuration.slice_suffix + "_" + view;
+                    output_filename = input_filename + "_" + obj.configuration.ctffind_output_suffix;
+                    
+                    command = obj.configuration.pipeline_location + string(filesep) + obj.configuration.ctffind_heredoc_path...
+                        + " " + obj.configuration.ctffind_path...
+                        + " " + input_filename + ".mrc"...
+                        + " " + output_filename + ".mrc"...
+                        + " " + apix...
+                        + " " + obj.configuration.keV...
+                        + " " + obj.configuration.spherical_aberation...
+                        + " " + obj.configuration.ampContrast...
+                        + " " + obj.configuration.fourier_spectrum_size...
+                        + " " + obj.configuration.resL...
+                        + " " + obj.configuration.resH...
+                        + " " + obj.configuration.defL...
+                        + " " + obj.configuration.defH...
+                        + " " + obj.configuration.ctf_preestim_defS;                    
+                    
+                    executeCommand(command, false, obj.log_file_id);
+                    
+                    output_fid = fopen(output_filename + ".txt");
+                    final_values = textscan(output_fid, '%f%f%f%f%f%f%f', 'CommentStyle', '#');
+                    fclose(output_fid);
+                    
+                    global_defocus_1_in_angstrom = final_values{2};
+                    global_defocus_2_in_angstrom = final_values{3};
+                    global_defocus_average_in_angstrom = (global_defocus_1_in_angstrom + global_defocus_2_in_angstrom) / 2;
+                    % TODO: use cosine for defocus interval to be used for
+                    % optimization
+                    lower_l = global_defocus_average_in_angstrom / 2;
+                    upper_l = global_defocus_average_in_angstrom * 1.5;
+                    if ~isfield(obj.dynamic_configuration, "global_lower_defocus_average_in_angstrom")
+                        obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = lower_l;
+                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = upper_l;
+                    else
+                        obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = obj.dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l / 2;
+                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = obj.dynamic_configuration.global_uppper_defocus_average_in_angstrom + upper_l / 2;
+                    end
+                    
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + output_filename + "_avrot.txt");
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + output_filename + ".txt");
+                    delete(obj.output_path + string(filesep) + obj.configuration.slice_folder + string(filesep) + output_filename + ".mrc");
                 end
                 disp("INFO: CALCULATED LIMITS: Lower Limit: " + lower_l + " Upper Limit: " + upper_l);
-                command = string(obj.configuration.ctf_correction_command)...
-                    + " --gid " + (obj.configuration.set_up.gpu - 1) ...
-                    + " --apix " + apix...
-                    + " --defL " + lower_l...
-                    + " --defH " + upper_l...
-                    + " --astm " + obj.configuration.estimated_astigmatism;
-                if obj.configuration.do_phase_flip == true
-                    disp("INFO: tilt stacks will be CTF-corrected by GCTF.");
-                    command = command + " --do_phase_flip";
-                end
-                if obj.configuration.do_EPA == true
-                    command = command + " --do_EPA";
-                end
-                command = command + " " + obj.name + "*.mrc";
-                output = executeCommand(command, false, obj.log_file_id);
                 
-                if obj.configuration.do_phase_flip == true
-                    % NOTE: assembling CTF corrected stack
-                    if tilt_stack_extension == ""
-                        tilt_stack_extension = ".st";
+                % NOTE: code block for CTF estimation
+                if obj.configuration.ctf_estimation_method == "gctf"
+                    command = string(obj.configuration.ctf_correction_command)...
+                        + " --gid " + (obj.configuration.set_up.gpu - 1) ...
+                        + " --apix " + apix...
+                        + " --defL " + lower_l...
+                        + " --defH " + upper_l...
+                        + " --astm " + obj.configuration.estimated_astigmatism;
+                    if obj.configuration.do_phase_flip == true
+                        disp("INFO: tilt stacks will be CTF-corrected by GCTF.");
+                        command = command + " --do_phase_flip";
                     end
-                    ctf_corrected_stack_destination = obj.output_path...
-                        + string(filesep) + tilt_stack_name...
-                        + "_" + obj.configuration.ctf_corrected_stack_suffix...
-                        + tilt_stack_extension;
-                    tilt_views_ali_ctfc = dir(obj.name + "*_pf.mrc");
-                    tilt_views_ali_ctfc_list = string([]);
-                    for j=1:length(tilt_views_ali_ctfc)
-                        tilt_views_ali_ctfc_list(j) = tilt_views_ali_ctfc(j).folder + string(filesep) + tilt_views_ali_ctfc(j).name; 
-                    end    
-                    output = executeCommand("newstack "...
-                        + strjoin(tilt_views_ali_ctfc_list, " ") + " "...
-                        + ctf_corrected_stack_destination, false, obj.log_file_id);
-                    
-                    % NOTE: linking CTF corrected stack
-                    if contains(tilt_stack_name, "_bin_")
-                        tilt_stack_name_suffix = "";
-                        splitted_tilt_stack_name = split(tilt_stack_name, "_bin_");
-                        tilt_stack_ali_bin = str2double(splitted_tilt_stack_name(end));
-                    else
-                        if obj.configuration.use_aligned_stack == true
-                            tilt_stack_ali_bin = obj.configuration.aligned_stack_binning;
-                        else
-                            tilt_stack_ali_bin = 1;
+                    if obj.configuration.do_EPA == true
+                        command = command + " --do_EPA";
+                    end
+                    command = command + " " + obj.name + "*.mrc";
+                    output = executeCommand(command, false, obj.log_file_id);
+
+                    if obj.configuration.do_phase_flip == true
+                        % NOTE: assembling CTF corrected stack
+                        if tilt_stack_extension == ""
+                            tilt_stack_extension = ".st";
                         end
-                        tilt_stack_name_suffix = "_bin_" + num2str(tilt_stack_ali_bin);
-                    end
-                    filename_link_destination = tilt_stack_name + tilt_stack_name_suffix + ".ali";
+                        ctf_corrected_stack_destination = obj.output_path...
+                            + string(filesep) + tilt_stack_name...
+                            + "_" + obj.configuration.ctf_corrected_stack_suffix...
+                            + tilt_stack_extension;
+                        tilt_views_ali_ctfc = dir(obj.name + "*_pf.mrc");
+                        tilt_views_ali_ctfc_list = string([]);
+                        for j=1:length(tilt_views_ali_ctfc)
+                            tilt_views_ali_ctfc_list(j) = tilt_views_ali_ctfc(j).folder + string(filesep) + tilt_views_ali_ctfc(j).name; 
+                        end    
+                        output = executeCommand("newstack "...
+                            + strjoin(tilt_views_ali_ctfc_list, " ") + " "...
+                            + ctf_corrected_stack_destination, false, obj.log_file_id);
 
-                    if tilt_stack_ali_bin == 1
-                        folder_destination = obj.configuration.ctf_corrected_aligned_tilt_stacks_folder;
-                    else
-                        folder_destination = obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder;
-                    end
+                        % NOTE: linking CTF corrected stack
+                        if contains(tilt_stack_name, "_bin_")
+                            tilt_stack_name_suffix = "";
+                            splitted_tilt_stack_name = split(tilt_stack_name, "_bin_");
+                            tilt_stack_ali_bin = str2double(splitted_tilt_stack_name(end));
+                        else
+                            if obj.configuration.use_aligned_stack == true
+                                tilt_stack_ali_bin = obj.configuration.aligned_stack_binning;
+                            else
+                                tilt_stack_ali_bin = 1;
+                            end
+                            tilt_stack_name_suffix = "_bin_" + num2str(tilt_stack_ali_bin);
+                        end
+                        filename_link_destination = tilt_stack_name + tilt_stack_name_suffix + ".ali";
 
-                    path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
-                    link_destination = path_destination + filesep + filename_link_destination;
+                        if tilt_stack_ali_bin == 1
+                            folder_destination = obj.configuration.ctf_corrected_aligned_tilt_stacks_folder;
+                        else
+                            folder_destination = obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder;
+                        end
+
+                        path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
+                        link_destination = path_destination + filesep + filename_link_destination;
+
+                        if exist(path_destination, "dir")
+                            rmdir(path_destination, "s");
+                        end
+                        mkdir(path_destination);
+                        createSymbolicLink(ctf_corrected_stack_destination, link_destination, obj.log_file_id);
+                    end
+                else %if obj.configuration.ctf_estimation_method == "ctffind"
                     
-                    if exist(path_destination, "dir")
-                        rmdir(path_destination, "s");
+                    command_head = obj.configuration.pipeline_location + string(filesep) + obj.configuration.ctffind_heredoc_path...
+                        + " " + obj.configuration.ctffind_path;
+
+                    command_tail = apix...
+                        + " " + obj.configuration.keV...
+                        + " " + obj.configuration.spherical_aberation...
+                        + " " + obj.configuration.ampContrast...
+                        + " " + obj.configuration.fourier_spectrum_size...
+                        + " " + obj.configuration.resL...
+                        + " " + obj.configuration.resH...
+                        + " " + lower_l...
+                        + " " + upper_l...
+                        + " " + obj.configuration.ctf_estim_defS;
+                    
+                    view_list = dir(slice_folder + string(filesep) + obj.name + "_*.mrc");
+                    
+                    %view_indices = obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:);
+                    %if view_index_max < 10
+                    %    view_indices_str = sprintfc('%d',view_indices);
+                    %else
+                    %    view_indices_str = sprintfc('%02d',view_indices);
+                    %end
+                    
+                    for idx=1:length(view_list)
+                        [~, input_filename, ~] = fileparts(view_list(idx).name);
+                        %input_filename = obj.name + "_" + obj.configuration.slice_suffix + "_" + view_index_str;
+                        output_filename = input_filename + "_" + obj.configuration.ctffind_output_suffix;
+                        command = command_head...
+                            + " " + input_filename + ".mrc"...
+                            + " " + output_filename + ".mrc"...
+                            + " " + command_tail;
+                        executeCommand(command, false, obj.log_file_id);
                     end
-                    mkdir(path_destination);
-                    createSymbolicLink(ctf_corrected_stack_destination, link_destination, obj.log_file_id);
                 end
                 
-                view_list = dir(slice_folder + string(filesep) + obj.name + "_*_" + "gctf.log");
-                if obj.configuration.defocus_file_version <= 2
-                    j_length = length(view_list);
-                else
-                    j_length = length(view_list) + 1;
-                end
-                for j = 1:j_length
+                % NOTE: code block for writing defocus file
+                if obj.configuration.ctf_estimation_method == "gctf"
+                    view_list = dir(slice_folder + string(filesep) + obj.name + "_*_" + "gctf.log");
                     if obj.configuration.defocus_file_version <= 2
-                        gctf_obj.log_file_id = fopen(view_list(j).folder + string(filesep) + view_list(j).name, "r");
-                        line_divided_text = textscan(gctf_obj.log_file_id, "%s", "delimiter", "\n");
-                        final_values = line_divided_text{1}{contains(line_divided_text{1}, "Final Values")};
-                        final_values_splitted = strsplit(final_values);
-                        local_defocus_1_in_angstrom = str2double(final_values_splitted{1});
-                        local_defocus_2_in_angstrom = str2double(final_values_splitted{2});
-                        astigmatism_angle = str2double(final_values_splitted{3});
-                        local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
-                        local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
-                        if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
-                            local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
-                            local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
-                            local_defocus_1_in_nanometers = local_defocus_in_nanometers_temporary;
-                            astigmatism_angle = astigmatism_angle - 90;
-                        end
-                        tilt_angle = fgetl(tilt_file_id);
-                        if j == 1
-                            fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle), num2str(configuration.defocus_file_version)));
-                        else
-                            fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
-                        end
+                        j_length = length(view_list);
                     else
-                        if j == 1
-                            fwrite(defocus_file_id, sprintf("%s 0 0. 0. 0 %s\n", num2str(obj.configuration.defocus_file_version_3_flag), num2str(obj.configuration.defocus_file_version)));
-                        else
-                            gctf_obj.log_file_id = fopen(view_list(j-1).folder + string(filesep) + view_list(j-1).name, "r");
+                        j_length = length(view_list) + 1;
+                    end
+                    for j = 1:j_length
+                        if obj.configuration.defocus_file_version <= 2
+                            gctf_obj.log_file_id = fopen(view_list(j).folder + string(filesep) + view_list(j).name, "r");
                             line_divided_text = textscan(gctf_obj.log_file_id, "%s", "delimiter", "\n");
                             final_values = line_divided_text{1}{contains(line_divided_text{1}, "Final Values")};
                             final_values_splitted = strsplit(final_values);
@@ -273,7 +366,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                             astigmatism_angle = str2double(final_values_splitted{3});
                             local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
                             local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
-                            
                             if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
                                 local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
                                 local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
@@ -281,7 +373,89 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                                 astigmatism_angle = astigmatism_angle - 90;
                             end
                             tilt_angle = fgetl(tilt_file_id);
-                            fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j-1), num2str(j-1), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
+                            if j == 1
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle), num2str(configuration.defocus_file_version)));
+                            else
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
+                            end
+                        else
+                            if j == 1
+                                fwrite(defocus_file_id, sprintf("%s 0 0. 0. 0 %s\n", num2str(obj.configuration.defocus_file_version_3_flag), num2str(obj.configuration.defocus_file_version)));
+                            else
+                                gctf_obj.log_file_id = fopen(view_list(j-1).folder + string(filesep) + view_list(j-1).name, "r");
+                                line_divided_text = textscan(gctf_obj.log_file_id, "%s", "delimiter", "\n");
+                                final_values = line_divided_text{1}{contains(line_divided_text{1}, "Final Values")};
+                                final_values_splitted = strsplit(final_values);
+                                local_defocus_1_in_angstrom = str2double(final_values_splitted{1});
+                                local_defocus_2_in_angstrom = str2double(final_values_splitted{2});
+                                astigmatism_angle = str2double(final_values_splitted{3});
+                                local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
+                                local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
+
+                                if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
+                                    local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
+                                    local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
+                                    local_defocus_1_in_nanometers = local_defocus_in_nanometers_temporary;
+                                    astigmatism_angle = astigmatism_angle - 90;
+                                end
+                                tilt_angle = fgetl(tilt_file_id);
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j-1), num2str(j-1), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
+                            end
+                        end
+                    end
+                else
+                    defocus_file_list = dir(slice_folder + string(filesep) + obj.name + "*" + obj.configuration.ctffind_output_suffix + ".txt");
+                    j_length = length(defocus_file_list);
+                    if obj.configuration.defocus_file_version <= 2
+                        j_start = 1;
+                    else
+                        j_start = 0;
+                    end
+                    for j = j_start:j_length
+                        if obj.configuration.defocus_file_version <= 2
+                            output_file_id = fopen(defocus_file_list(j).folder + string(filesep) + defocus_file_list(j).name, "r");
+                            final_values = textscan(output_file_id, '%f%f%f%f%f%f%f', 'CommentStyle', '#');
+                            fclose(output_file_id);
+
+                            local_defocus_1_in_angstrom = final_values{2};
+                            local_defocus_2_in_angstrom = final_values{3};
+                            astigmatism_angle = final_values{4};
+                            local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
+                            local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
+                            if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
+                                local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
+                                local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
+                                local_defocus_1_in_nanometers = local_defocus_in_nanometers_temporary;
+                                astigmatism_angle = astigmatism_angle - 90;
+                            end
+                            tilt_angle = fgetl(tilt_file_id);
+                            if j == 1
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle), num2str(configuration.defocus_file_version)));
+                            else
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
+                            end
+                        else
+                            if j == 0
+                                fwrite(defocus_file_id, sprintf("%s 0 0. 0. 0 %s\n", num2str(obj.configuration.defocus_file_version_3_flag), num2str(obj.configuration.defocus_file_version)));
+                            else
+                                output_file_id = fopen(defocus_file_list(j).folder + string(filesep) + defocus_file_list(j).name, "r");
+                                final_values = textscan(output_file_id, '%f%f%f%f%f%f%f', 'CommentStyle', '#');
+                                fclose(output_file_id);
+                                local_defocus_1_in_angstrom = final_values{2};
+                                local_defocus_2_in_angstrom = final_values{3};
+                                astigmatism_angle = final_values{4};
+                                local_defocus_1_in_nanometers = local_defocus_1_in_angstrom / 10;
+                                local_defocus_2_in_nanometers = local_defocus_2_in_angstrom / 10;
+
+                                if local_defocus_1_in_nanometers > local_defocus_2_in_nanometers
+                                    local_defocus_in_nanometers_temporary = local_defocus_2_in_nanometers;
+                                    local_defocus_2_in_nanometers = local_defocus_1_in_nanometers;
+                                    local_defocus_1_in_nanometers = local_defocus_in_nanometers_temporary;
+                                    astigmatism_angle = astigmatism_angle - 90;
+                                end
+                                tilt_angle = fgetl(tilt_file_id);
+                                fwrite(defocus_file_id, sprintf("%s %s %s %s %s %s %s\n", num2str(j), num2str(j), num2str(tilt_angle), num2str(tilt_angle), num2str(local_defocus_1_in_nanometers), num2str(local_defocus_2_in_nanometers), num2str(astigmatism_angle)));
+                            end
                         end
                     end
                 end
@@ -289,7 +463,6 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 fclose(tilt_file_id);
                 cd(return_folder);
             end
-            
             if obj.configuration.run_ctf_phase_flip == true
                 disp("INFO: tilt stacks will be CTF-corrected by Ctfphaseflip.");
                 % NOTE: run Ctfphaseflip CTF-correction always on aligned stack
