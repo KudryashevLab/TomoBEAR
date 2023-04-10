@@ -35,7 +35,6 @@
         "wipe_cache": false,
         "motion_correction_command": "", 
         "ctf_correction_command": "",
-        "ctffind_path": "",
         "ctffind_heredoc_path": "configurations/ctffind_heredoc.sh",
         "double_numbering": true,
         "prefix_position": 0,
