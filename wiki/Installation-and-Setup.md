@@ -72,7 +72,7 @@ where ```0.3.0``` is an example of the latest version release and ```/path/to/di
 The list of available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
 
 > **Note**
-> </br> Many thanks to **Dr. Wolfgang Lugmayr (CSSB, Hamburg)** for the installation script suggestion!
+> </br> Many thanks to **Dr. Wolfgang Lugmayr (CSSB, Hamburg)** for the installation script idea!
 
 
 ## MATLAB
@@ -179,7 +179,7 @@ As for the other software packages you can add the required CUDA versions also t
 
 The easiest way for the manual installation is to add the repositories with CUDA to your specific OS package manager. That is yum in CentOS and apt or apt-get in Ubuntu. The other way is a manual installation from the executables which are available from the [NVIDIA homepage](https://developer.nvidia.com/cuda-toolkit-archive).
 
-#### CUDA
+##### CUDA
 
 For all the additional software packages the proper CUDA toolkits with the newest driver for your graphics card need to be installed.
 
@@ -227,8 +227,15 @@ download page. There you can find different AreTomo versions along with the docu
 
 You can download and try one of the following GCTF versions:
 -   [Gctf v1.06](https://www2.mrc-lmb.cam.ac.uk/download/gctf_v1-06-and-examples/) - the main version, tested to be working under TomoBEAR;
--   [Gctf v1.18](https://www2.mrc-lmb.cam.ac.uk/download/special-version-for-phase-plate-gctf_v1-18/) - special version for phase plate (should work under TomoBEAR, but was not tested);
+-   [Gctf v1.18](https://www2.mrc-lmb.cam.ac.uk/download/special-version-for-phase-plate-gctf_v1-18/) - special version for phase plate data;
 -   [Gctf Gautomatch cu10.1](https://www2.mrc-lmb.cam.ac.uk/download/gctf_gautomatch_cu10-1-tar-gz/) - version for CUDA-10 (should work under TomoBEAR, but was not tested).
+
+#### CTFFIND4
+
+Head to the [CTFFIND4](https://grigoriefflab.umassmed.edu/ctf_estimation_ctffind_ctftilt) or [cisTEM](https://cistem.org/) download page. There you can find CTFFIND4/cisTEM source code and/or binaries.
+
+> **Note**
+> <br/> In the following releases we are also planning to include CTFFIND4 updated version with tilted images support from the development version of the cisTEM package (https://cistem.org/development).
 
 #### IMOD
 
@@ -247,7 +254,6 @@ TomoBEAR can use various python based techniques to extend its functionality lik
 #### CryoCARE
 
 CryoCARE is a neural net-based denoising framework based on convolutional neural nets and the u-net architecture which can learn to denoise cryo images. With TomoBEAR it is possible to denoise tomograms with the help of CryoCARE. To be able to do so it needs to be installed. For that please clone the [CryoCARE](https://github.com/juglab/cryoCARE_pip) implementation from [juglab](https://github.com/juglab) and follow the instructions on their page.
-
 
 
 #### Software Installation
