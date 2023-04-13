@@ -48,11 +48,11 @@ In case of any questions, issues or suggestions you may interact with us by one 
 
 ## Changes
 
-The [CHANGELOG file](https://github.com/KudryashevLab/TomoBEAR/CHANGELOG.md) contains all notable changes corresponding to the different `TomoBEAR` releases, which are available at the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases) along with the additional notes.
+The [CHANGELOG file](https://github.com/KudryashevLab/TomoBEAR/blob/main/CHANGELOG.md) contains all notable changes corresponding to the different `TomoBEAR` releases, which are available at the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases) along with the additional notes.
 
 ## License
 
-Please, see the [LICENSE file](https://github.com/KudryashevLab/TomoBEAR/LICENSE.md) for the information about how the content of this repository is licensed.
+Please, see the [LICENSE file](https://github.com/KudryashevLab/TomoBEAR/blob/main/LICENSE.md) for the information about how the content of this repository is licensed.
 
 ## Citation
 
