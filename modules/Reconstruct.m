@@ -525,7 +525,7 @@ classdef Reconstruct < Module
                         if contains(name, obj.configuration.ctf_corrected_stack_suffix) || obj.configuration.use_ctf_corrected_stack == true
                             createSymbolicLinkInStandardFolder(obj.configuration, exact_filtered_rotated_tomogram_destination, "exact_filtered_ctf_corrected_binned_tomograms_folder", obj.log_file_id);
                         else
-                            createSymbolicLinkInStandardFolder(obj.configuration, exact_filtered_rotated_tomogram_destination, "exact_filtered_binned_tomograms_folder", obj.log_file_id);
+                            createSymbolicLinkInStandardFolder(obj.configuration, exact_filtered_rotated_tomogram_destination, "binned_exact_filtered_tomograms_folder", obj.log_file_id);
                         end
                     end
                     
