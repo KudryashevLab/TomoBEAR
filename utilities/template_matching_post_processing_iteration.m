@@ -120,7 +120,13 @@ if ~fileExists(output_path + string(filesep) + "SUCCESS_" + number)
     counter = 0;
     while true
         [a, b] = dynamo_peak_subpixel(cc);
-       
+        
+        if isreal(a) == false
+            % NOTE: dynamo_peak_subpixel returns complex values
+            % when interpolation in that function somehow failed
+            break;
+        end
+        
         if configuration.particle_count == counter && configuration.particle_count > 0
             break;
         end
