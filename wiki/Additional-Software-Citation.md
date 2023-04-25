@@ -1,18 +1,22 @@
 # Additional Software Citations
 
-As TomoBEAR wraps different third-party software packages for different processing stages, these need to be properly cited, once used under TomoBEAR. Please, note that by using these software packages you are assumed to read the corresponding license files and fully accept them.
+As ```TomoBEAR``` wraps different third-party software packages for different processing stages, these need to be properly cited, once used under ```TomoBEAR```. Please, note that by using these software packages you are assumed to read the corresponding license files and fully accept them.
 
 #### IMOD
 
+General usage:
 - Mastronarde DN & Held SR (2017) Automated tilt series alignment and tomographic
 reconstruction in IMOD. *J Struct Biol* 197: 102–113. DOI: [10.1016/j.jsb.2016.07.011](https://www.sciencedirect.com/science/article/pii/S1047847716301526?via%3Dihub)
+
+Non-linear Anisotropic Diffusion filter:
+- Frangakis A & Hegerl R (2001) Noise reduction in electron tomographic reconstructions using nonlinear anisotropic diffusion. *J Struct Biol* 135: 239-205. DOI: [10.1006/jsbi.2001.4406](https://www.sciencedirect.com/science/article/pii/S1047847701944065?via%3Dihub).
 
 #### Dynamo
 
 Main reference for its usage under TomoBEAR:
 - Castaño-Díez D, Kudryashev M, Arheit M & Stahlberg H (2012) Dynamo: A flexible, user-friendly development tool for subtomogram averaging of cryo-EM data in high-performance computing environments. *J Struct Biol* 186:139-151. DOI: [10.1016/j.jsb.2011.12.017](https://www.sciencedirect.com/science/article/pii/S1047847711003650?via%3Dihub)
 
-If you pick particles using Dynamo as well, please cite also the following publication:
+If you pick particles manually using Dynamo Catalogue as well, please cite also the following publication:
 - Castaño-Díez D, Kudryashev M & Stahlberg H (2016) Dynamo Catalogue: Geometrical tools
 and data management for particle picking in subtomogram averaging of cryo-electron
 tomograms. *J Struct Biol* 197(2):135-144. DOI: [10.1016/j.jsb.2016.06.005](https://www.sciencedirect.com/science/article/pii/S1047847716301113?via%3Dihub)
@@ -41,6 +45,10 @@ CTFFIND4:
 
 CTFFIND4 from cisTEM package:
 - Grant T, Rohou A & Grigorieff N (2018) cisTEM, user-friendly software for single-particle image processing. *Elife* 7: e35383. DOI: [10.7554/eLife.35383](https://elifesciences.org/articles/35383)
+
+#### IsoNet
+
+- Liu YT, Zhang H, Wang H et al. (2022) Isotropic reconstruction for electron tomography with deep learning. *Nat Commun* 13: 6482. DOI: [10.1038/s41467-022-33957-8](https://www.nature.com/articles/s41467-022-33957-8)
 
 #### CryoCARE
 
