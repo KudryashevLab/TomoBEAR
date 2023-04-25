@@ -940,5 +940,83 @@
         "per_particle_ctf_correction": "phase_flip",
         "padding_policy": "zero",
         "normalization": "zm"
+    },
+    "IsoNet": {
+        "execution_method": "once",
+        "isonet_env": "",
+        "repository_path": "",
+        "tomograms_to_use": [],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "prepare_star": {
+                "use_ctf_corrected_tomograms": false,
+                "add_defocus_to_star": true,
+                "tomograms_binning": -1,
+                "folder_name": "tomograms",
+                "output_star": "tomograms.star",
+                "number_subtomos": -1
+            },
+            "deconv": {
+                "star_file": "tomograms.star",
+                "deconv_folder": "deconv",
+                "snrfalloff": 0.7,
+                "deconvstrength": -1,
+                "highpassnyquist": -1,
+                "chunk_size": -1,
+                "overlap_rate": -1,
+                "ncpu": -1
+            },
+            "make_mask": {
+                "star_file": "tomograms.star",
+                "mask_folder": "mask",
+                "patch_size": -1,
+                "mask_boundary": "",
+                "density_percentage": 50,
+                "std_percentage": 50,
+                "z_crop": -1,
+                "use_deconv_tomo": true
+            },
+            "extract": {
+                "star_file": "tomograms.star",
+                "subtomo_folder": "subtomo",
+                "subtomo_star": "subtomo.star",
+                "cube_size": -1,
+                "crop_size": -1,
+                "use_deconv_tomo": true
+            },
+            "refine": {
+                "subtomo_star": "subtomo.star",
+                "iterations": 30,
+                "data_dir": "",
+                "pretrained_model": "",
+                "result_dir": "results",
+                "preprocessing_ncpus": -1,
+                "continue_from": "",
+                "epochs": -1,
+                "batch_size": -1,
+                "steps_per_epoch": -1,
+                "noise_level": [0.05,0.1,0.15,0.2],
+                "noise_start_iter": [10,15,20,25],
+                "noise_mode": "",
+                "noise_dir": "",
+                "learning_rate": -1,
+                "drop_out": -1,
+                "convs_per_depth": -1,
+                "kernel": [],
+                "unet_depth": -1,
+                "filter_base": -1,
+                "batch_normalization": -1,
+                "normalize_percentile": -1
+            },
+            "predict": {
+                "star_file": "tomograms.star",
+                "model": "results/model_iter30.h5",
+                "output_dir": "corrected_tomos",
+                "cube_size": -1,
+                "crop_size": -1,
+                "batch_size": -1,
+                "normalize_percentile": -1
+            }
+        }
     }
 }
