@@ -17,7 +17,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-function generatePool(cores, force, path, debug)
+function poolobj = generatePool(cores, force, path, debug)
 persistent previous_cores;
 if isempty(previous_cores)
 	previous_cores = 0;
@@ -29,7 +29,7 @@ if string(path) ~= ""
     pc.JobStorageLocation = char(path);
 end
 
-if force || previous_cores == 0 || previous_cores ~= cores
+if force || previous_cores == 0 || previous_cores ~= cores || isempty(poolobj)
     
     poolsize = getCpuPoolSize(cores);
     
