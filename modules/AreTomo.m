@@ -78,14 +78,20 @@ classdef AreTomo < Module
             %angle_command_snippet = "-TiltRange " + min_and_max_tilt_angles(1) + " " + min_and_max_tilt_angles(end);
             
             if obj.configuration.patch ~= "0 0"
+                local_ali = true;
                 patch_alignment_command_snippet = "-Patch " + strjoin(obj.configuration.patch," ");
             else
+                local_ali = false;
                 patch_alignment_command_snippet = "";
             end
             
             tilt_axis_command_snippet = "-TiltAxis " + num2str(obj.configuration.rotation_tilt_axis) + " " + num2str(obj.configuration.tilt_axis_refine_flag);
             
-            tilt_axis_offset_command_snippet = "-TiltCor " + num2str(obj.configuration.apply_tilt_axis_offset) + " " + num2str(obj.configuration.tilt_axis_offset);
+            if obj.configuration.apply_given_tilt_axis_offset == true
+                tilt_axis_offset_command_snippet = "-TiltCor " + num2str(obj.configuration.correct_tilt_axis_offset) + " " + num2str(obj.configuration.tilt_axis_offset);
+            else
+                tilt_axis_offset_command_snippet = "";
+            end
             
             if obj.configuration.set_up.gpu >  0
                 gpu_number = obj.configuration.set_up.gpu - 1;
@@ -111,8 +117,9 @@ classdef AreTomo < Module
                     + tilt_axis_command_snippet + " "...
                     + tilt_axis_offset_command_snippet + " "...
                     + patch_alignment_command_snippet...
-                    + "-OutImod 1", false, obj.log_file_id);
+                    + " -OutImod 1", false, obj.log_file_id);
             
+            % NOTE: rename ALN file
             [~,filename,fileext] = fileparts(stack_source);
             alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
             alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
@@ -135,9 +142,9 @@ classdef AreTomo < Module
             mkdir(path_destination);
             createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
             
-            % Move IMOD-compatible files one level up
+            % NOTE: Move IMOD-compatible files one level up
             imod_folder = obj.output_path + filesep + obj.name + ".ali_Imod";
-            if exist(imod_folder, 'dir')
+            if isfolder(imod_folder)
                 imod_files = dir(imod_folder + string(filesep) + obj.name + "*.*");
                 for file_id = 1:length(imod_files) 
                     imod_file_out = imod_files(file_id).folder + string(filesep) + imod_files(file_id).name;
@@ -147,48 +154,59 @@ classdef AreTomo < Module
                 end
             end
             
-            % Generate aligned unbinned stack using alignment parameters
-            % previously detected at the requested binning level
+            % NOTE: GENERATE UNBINNED ALIGNED STACK
+            
+            % Get list of views to exclude according to aligned stack
             xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
             xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
             
-            tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
-            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
-            
-            [~, size_to_output] = system("header -s " + stack_source);
-            size_to_output = str2num(size_to_output);
-            
-            stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
-            
-            status = system("newstack -InputFile " + stack_source...
-                + " -OutputFile " + stack_destination_unbinned...
-                + " -TransformFile " + xf_file_path...
-                + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin"...
-                + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
-                + " -TaperAtFill 1,0");
-            
-            % Exclude views according to aligned stack
             fid = fopen(xf_file_path, 'rt');
             txt = textscan(fid, '%s', 'Delimiter', '\n');
             fclose(fid);
 
             txt = txt{1}(~cellfun(@isempty, txt{1}));
             % NOTE: dirty! rewrite using regexp or other search patterns
-            exclude_mask = contains(txt, '1.000     0.000     0.000     1.000      0.00      0.00');
+            unit_transform_string = '1.000     0.000     0.000     1.000      0.00      0.00';
+            exclude_mask = contains(txt, unit_transform_string);
             exclude_views = find(exclude_mask);
             exclude_views = exclude_views'; 
+
+            % Generate aligned unbinned stack using alignment parameters
+            % previously detected at the requested binning level
+            tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
+            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
+            stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
             
+            aln_file = dir(obj.output_path + filesep + obj.name + ".aln");
+            aln_file_path = aln_file(1).folder + string(filesep) + aln_file(1).name;
+
+            executeCommand(obj.configuration.aretomo_command...
+                + " -InMrc " + stack_source...
+                + " -OutMrc " + stack_destination_unbinned...
+                + " -VolZ 0 -OutBin 1"...
+                + " -Gpu " + num2str(gpu_number) + " "...
+                + " -AlnFile " + aln_file_path...
+                + " -OutImod 0", false, obj.log_file_id);
+
+%                 [~, size_to_output] = system("header -s " + stack_source);
+%                 size_to_output = str2num(size_to_output);
+% 
+%                 status = system("newstack -InputFile " + stack_source...
+%                     + " -OutputFile " + stack_destination_unbinned...
+%                     + " -TransformFile " + xf_file_path...
+%                     + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin"...
+%                     + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
+%                     + " -TaperAtFill 1,0");
+
+            % Exclude views from generated unbinned stack
             if ~isempty(exclude_views)
                 status = system("excludeviews -StackName " + stack_destination_unbinned...
                     + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
             end
             
-            xf_file = dir(obj.output_path + filesep + obj.name + ".tlt");
-            xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
-            
             folder_destination = obj.configuration.aligned_tilt_stacks_folder;
             filename_link_destination = obj.name + "_bin_" + num2str(1) + ".ali";
-            
+
             path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
             link_destination = path_destination + filesep + filename_link_destination;
             if exist(path_destination, "dir")
@@ -196,6 +214,26 @@ classdef AreTomo < Module
             end
             mkdir(path_destination);
             createSymbolicLink(stack_destination_unbinned, link_destination, obj.log_file_id);
+            
+            % Write unit transform matrix if local ali was applied
+            if local_ali == true
+                xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
+                xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
+
+                if isfile(xf_file_path)
+                    delete(xf_file_path);
+                end
+                
+                fid = fopen(xf_file_path, 'w');
+                
+                [~, size_to_output] = system("header -s " + stack_source);
+                num_views_keep = str2num(size_to_output);
+                num_views_keep = num_views_keep(3);
+                for i=1:num_views_keep
+                    fprintf(fid, "%s\n", unit_transform_string);
+                end
+                fclose(fid);
+            end
             
             %TODO: provide the same data as after fiducial-based alignment
             %to make user experience smooth (check whether need code below)
