@@ -705,7 +705,7 @@ classdef LocalLivePipeline < Pipeline
                 [status_mkdir, message, message_id] = mkdir(pool_folder);
             end
 
-            generatePool(workers, false, pool_folder);
+            poolobj = generatePool(workers, false, pool_folder);
             
             cumulative_sum_previous_tomogram_status = cumsum(previous_tomogram_status);
             indices = find(previous_tomogram_status);
@@ -726,7 +726,7 @@ classdef LocalLivePipeline < Pipeline
                 % TODO intermediate configurations need to be saved to be
                 % consistent
                 f(mod(j - 1, workers) + 1) = ...
-                    parfeval(@iteration, 2, merged_configurations{j}, pipeline_definition, tomogram_names{indices(j)}, previous_tomogram_status(indices(j)));
+                    parfeval(poolobj, @iteration, 2, merged_configurations{j}, pipeline_definition, tomogram_names{indices(j)}, previous_tomogram_status(indices(j)));
             end
             
             if exist("f", "var") && ~isempty(f)
