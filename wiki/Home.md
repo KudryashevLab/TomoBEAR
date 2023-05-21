@@ -1,49 +1,51 @@
 # Welcome to the TomoBEAR wiki!
 
-*Currently we are at the experimental release stage, we will be happy if you try it. Please report to [Issue Tracker system](https://github.com/KudryashevLab/TomoBEAR/issues) or write to us in you have problems:*
+![TomoBEAR Social Media Logo Image](/images/TomoBEAR_gitlogo.png)
 
-- [Artsemi Yushkevich (Contributing Developer)](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR) - Ph.D. student in the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDC Berlin (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany and/or
+<u>**B**</u>asics for cryo-<u>**E**</u>lectron <u>**tomo**</u>graphy and <u>**A**</u>utomated <u>**R**</u>econstruction (**TomoBEAR**) is a configurable and customizable open-source MATLAB software package developed for automated large-scale parallelized cryo-electron tomography (cryo-ET) data processing.
 
-- [Misha Kudryashev (Project Leader)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR) - Principal Investigator, head of the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDC Berlin (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
+> **Note**
+> <br/> Implementation details and benchmarks you can find in our preprint:
+</br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: [10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
-### Wiki contents
+## Contents
 
-This wiki contains...
-1. general description (below on this page)
-2. description on how to [install and setup](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup) TomoBEAR
-3. list of [Frequently Asked Questions](https://github.com/KudryashevLab/TomoBEAR/wiki/Frequently-Asked-Questions)
-4. [tutorial](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials) as the example of TomoBEAR project preparation and execution 
-5. description on [all the available modules, their parameters and default values](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules)
-6. TomoBEAR [usage tips](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage)
+- [General description of the pipeline](#general-description) 
+- [Installation and setup notes](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup)
+- [Frequently Asked Questions](https://github.com/KudryashevLab/TomoBEAR/wiki/Frequently-Asked-Questions)
+- [Tutorials on TomoBEAR setup and usage](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials)
+- [Available modules description, their parameters and default values](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules)
+- [Usage cases and tips](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage)
 
 
 ## Gerenal description
 
-TomoBEAR is a configurable and customizable software package specialized for cryo-electron tomography and subtomogram averaging completely written in the MATLAB scripting language. TomoBEAR implements **B**asics for **E**lectron tomography and **A**utomated **R**econstruction of cryo electron tomography data. With TomoBEAR you can easily process tomographic data acquired by an electron microscope starting from the raw tilt series, possibly dose fractionated, or already assembled tilt stacks to the biological structure of interest.
+**TomoBEAR** can assist you in large-scale processing of the tomographic data acquired on the electron microscope starting from the raw tilt series, possibly dose fractionated, or already assembled tilt stacks up to sample volume 3D reconstruction and even to biological structure of interest. More on input formats you [can read here](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage.md#input-data-file-formats).
 
-TomoBEAR is designed to operate on a data set in parallel where it is possible and that the user has minimal intervention and doesn't need to learn all the different software packages (MotionCor2, IMOD, Gctf, Dynamo) to be able to process cryo-electron tomography data. We tried to come up with a set of predefined defaults which should fit many projects in the cryo-electron tomography regime. However if some parameters need to be tweaked for specific projects to achieve best results you are free to do so.
+**TomoBEAR** is designed to operate in automated manner minimizing user intervention where that is possible. The pipeline wraps popular cryo-ET tools (such as IMOD, Dynamo, MotionCor2, GCTF/CTFFIN4, etc.). Since number of TomoBEAR parameters is huge,to help users cope with that we have carefully designed a predefined set of defaults which were chosen based on several different cryo-ET datasets.
+
+> **Note**
+> <br/> `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
 
 <details><summary><b>List of reasons to use TomoBEAR</b></summary>
 <p>
 
-* TomoBEAR is based on best practices in processing tomographic data
 * Uses default presets which work on a variety of tested datasets
 * Standalone and MATLAB versions are available
 * Parallel execution is possible
 * Computing resources are configurable
-* Supports SLURM cluster scheduler
 * Standardized folder structure
 * Can deal with
   * misnumbered tilt images due to SerialEM crashes, based on timestamps
   * different naming conventions
-  * EERs, MRCs and TIFs from K2 and K3
+  * EERs, MRCs and TIFs from K2, K3, Falcon4
   * duplicated projections due to tracking issues (first, last, keep)
 * Restarting / resuming is possible (e.g. in case of errors, wrong configuration)
   * Checkpoints are created after every processing step of a tilt series or tomogram
-* TomoBEAR is based on JSON configuration files which can be easily shared between others so that they can validate or improve your results
-* TomoBEAR was developed and tested on standard datasets to achieve same or better results as with manual processing
+* Based on JSON configuration files which can be easily shared between others so that they can validate or improve your results
+* Developed and tested on standard benchmarking datasets (such as EMPIAR-10064) to achieve same or better results as with manual processing
 * You are able to look at the intermediates optimize parameters and rerun the steps to achieve optimal results
-* You are never locked to the tomoBEAR processing pipeline and can easily breakout at various steps to other software tools you prefer
+* You are never locked to the TomoBEAR processing pipeline and can easily breakout at various steps to other software tools you prefer
 * Uses links where possible
 * Clean up functionality to save storage
 * Tomograms to be processed can be limited to a subset
@@ -69,28 +71,8 @@ TomoBEAR is designed to operate on a data set in parallel where it is possible a
 </details>
 
 ## Pipeline structure
-In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
+In the following picture you can see a flow chart which visualizes pipeline steps which `TomoBEAR` can execute in an automated and parallel manner. 
 
-Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
-
-![Schematic Pipeline Image Light Mode](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/pipeline_light_mode.svg#gh-light-mode-only)
-![Schematic Pipeline Image Dark Mode](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
+![Schematic Pipeline Image](/images/pipeline_light_mode.svg)
 
 Orange processing steps in the flow chart are mandatory and must be executed by TomoBEAR. Yellow boxes are optional and can be activated if desired.
-
-## Results example (the tutorial case)
-
-The result shown here have been achieved in an automated manner. The only manual task which needed to be done is the choice of the classes for further processing in between the transition of different binning levels.
-
-### EMPIAR-10064
-
-On the EMPIAR-10064 dataset `TomoBEAR` achieved 11.25 Angstrom (with ~4k particles) as can be seen below on the FSC curve plot:
-<p align="center">
-<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.jpg" alt="Ribosome EMPIAR-10064 FSC"/>
-</p>
-
-As well, below is provided ribosome final map view:
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_map.png" alt="Ribosome EMPIAR-10064 Map"/>
-</p>

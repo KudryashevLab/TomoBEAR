@@ -1,11 +1,7 @@
+# Installation and setup
+
 > **Note**
-> <br/> We are happy to support you to try out one of the latest available TomoBEAR versions from the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
-> </br> We are glad to
-> * receive your opinion on [Discussions page](https://github.com/KudryashevLab/TomoBEAR/discussions)
-> * respond to your feedback on bugs, execution issues and configuration complications by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues)
-> * have a discussion with you via e-mail:
->   * Artsemi Yushkevich - contributing developer: Artsemi.Yushkevich@mdc-berlin.de
->   * Misha Kudryashev - project lead: misha.kudryashev@gmail.com.
+> <br/> If you experience problems with TomoBEAR installation, do not hestitate to communicate with us by one of mentioned ways in [Feedback and Contribution](https://github.com/KudryashevLab/TomoBEAR#feedback-and-contribution) section.
 
 # Prerequisites
 
@@ -35,7 +31,15 @@ There are two ways to operate TomoBEAR.
 * The second way is to [[ use a standalone executable which is available precompiled | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#standalone ]]
 
 For both methods of operation, you will need to [[ get TomoBEAR source code | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#get-source-code-and-binary ]] and to get and install its dependencies.
+
 You have to install essential TomoBEAR dependencies (CUDA, Dynamo, and IMOD) and may additionally install optional ones (MotionCor2, GCTF, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
+
+## Video-tutorial
+
+We have prepared a small video-tutorial explaining the most basic `TomoBEAR` setup, which is needed for our [80S ribosome data processing tutorial](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials):
+* [Video-tutorial](https://drive.google.com/file/d/1Nhltdo7DbWdzPhAbnkzq7lCkDghxJrku/view?usp=share_link) explaining how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies.
+
+For more detailed or specific instructions please look at the further chapters provided on this page.
 
 ## Get source code and binary
 

@@ -1,3 +1,4 @@
+# Modules
 In this section you can find descriptions of the implemented modules, their functionality
 and their parameters which can be setup in the JSON configuration file in their
 corresponding blocks.

@@ -1,27 +1,28 @@
 # TomoBEAR
 
-> **Warning**
-> <br/> This software is currently in pre-release state. New features may still appear and refactoring may still take place between all the current and future 0.x.y versions until 1.0.0 will be ready to be released.
-
 **TomoBEAR** is a configurable and customizable modular pipeline for streamlined processing of cryo-electron tomographic data and preliminary subtomogram averaging (StA) based on best practices in the scientific research group of Dr. Misha Kudryashev[^1][^2].
+
+![TomoBEAR Social Media Logo Image](images/TomoBEAR_gitlogo.png)
 
 Implementation details and benchmarks you can find in our preprint:
 </br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: [10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
-> **Note**
-> <br/> **We can support you trying out one of the latest [TomoBEAR releases](https://github.com/KudryashevLab/TomoBEAR/releases) and would appreciate [any kind of feedback](#feedback-and-contribution)!**
-
-![TomoBEAR Social Media Logo Image](images/TomoBEAR_gitlogo.png)
+> **Warning**
+> <br/> This software is currently in pre-release state. New features may still appear and refactoring may still take place between all the current and future 0.x.y versions until 1.0.0 will be ready to be released.
 
 ## Contents
 
-- [Quick start](#quick-start)
-- [Documentation and licensing](#documentation-and-licensing)
-- [Changes and releases](#changes-and-releases)
-- [Feedback and contribution](#feedback-and-contribution)
-- [Citation](#citation)
-- [Acknowledgements](#acknowledgements)
-- [Contacts](#contacts)
+- [TomoBEAR](#tomobear)
+  - [Contents](#contents)
+  - [Quick start](#quick-start)
+    - [Video-tutorials](#video-tutorials)
+    - [Pipeline structure](#pipeline-structure)
+  - [Documentation and licensing](#documentation-and-licensing)
+  - [Changes and releases](#changes-and-releases)
+  - [Feedback and contribution](#feedback-and-contribution)
+  - [Citation](#citation)
+  - [Acknowledgements](#acknowledgements)
+  - [Contacts](#contacts)
 
 ## Quick start
 
@@ -59,8 +60,8 @@ If you want to clone a specific ```TomoBEAR``` version, please refer to the **Se
 ## Feedback and contribution
 
 In case of any questions, issues or suggestions you may interact with us by one of the following ways:
-* write an e-mail to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com) or [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de);
 * open an issue/bug report, feature request or post a question using [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues);
+* write an e-mail to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com) or [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de);
 * start a discussion in [Discussions](https://github.com/KudryashevLab/TomoBEAR/discussions);
 
 If you wish to contribute, please, fork this repository and make a pull request back with your changes and a short description.

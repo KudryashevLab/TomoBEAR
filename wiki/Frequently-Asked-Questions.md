@@ -1,3 +1,5 @@
+# Frequently asked questions
+
 Here you can find frequently asked questions which appear from time to time when you process data with `TomoBEAR`:
 
 1. What can I do if `TomoBEAR` outputs `out of memory` error during execution of the module `DynamoTiltSeriesAlignment`?
