@@ -2,7 +2,7 @@
 
 All notable changes will be documented in this file.
 
-## v0.3.0 - 2023-04-:exclamation:**XX**:exclamation:
+## v0.3.0 - 2023-05-2X
 
 ### :rocket: New Features
 * ```local_live``` data processing mode - new mode allows to make on-the-fly pre-processing and reconstructions during data collection to check the sample quality. *Currently only single-shot collected data is supported for this feature.*
@@ -12,17 +12,15 @@ All notable changes will be documented in this file.
 
 ### :arrow_up: Improvements
 * ```BinStacks```: added possibility to bin non-aligned stacks
-* ```AreTomo```: enabled binned stack input
-* ```Reconstruct```: enabled **nonlinear anisotropic diffusion** (NAD) filter for tomograms post-filtering
-* ```GCTFCtfphaseflipCTFCorrection```: added possibility to use ```CTFFIND4```
+* ```AreTomo```:
+  - enabled binned stack input
+  - enabled local patch-based alignment
+* ```BatchRunTomo```: enabled IMOD-based patch-tracking
+* ```Reconstruct```: enabled [*nonlinear anisotropic diffusion* (NAD)](https://www.sciencedirect.com/science/article/pii/S1047847701944065?via%3Dihub) filter for tomograms post-filtering
+* ```GCTFCtfphaseflipCTFCorrection```: added possibility to use [CTFFIND4](https://www.sciencedirect.com/science/article/pii/S1047847715300460)
 
-### :bug: Fixes
-* input files perception:
-  * fixed duplicated file extension ( issue #16 )
-  * fixed regular expression for date/time perception
-  * fixed user-enforced input filenames parsing scheme changes (like [tilt_number/angle/date/time]_position)
-* ```AreTomo```: fixed views exclusion for unbinned stack
-* ```BatchRunTomo```: fixed bugs preventing patch-tracking
+### :bug: Major fixes
+* input files perception - fixed duplicated file extension ( issue #16 )
 
 ---
 ## v0.2.0 - 2023-02-23
@@ -49,4 +47,4 @@ All notable changes will be documented in this file.
 ## v0.1.2 - 2023-01-20
 
 ### :bug: Fixes
-* `AreTomo` module: fixed parallelization and usage  
+* `AreTomo` module: fixed parallelization and usage
