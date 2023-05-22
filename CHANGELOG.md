@@ -2,13 +2,13 @@
 
 All notable changes will be documented in this file.
 
-## v0.3.0 - 2023-05-2X
+## v0.3.0 - 2023-05-22
 
 ### :rocket: New Features
 * ```local_live``` data processing mode - new mode allows to make on-the-fly pre-processing and reconstructions during data collection to check the sample quality. *Currently only single-shot collected data is supported for this feature.*
 * ```EER``` (*Electron Event Representation*) support: input files format perception along with ```.gain``` gain file format support are now enabled in ```MotionCor2``` module
 * ```GenerateParticles``` - new module which allows to generate particles using either Dynamo (by cropping) or SUSAN (by subtomogram reconstructions)
-* ```IsoNet``` - module wrapping ```IsoNet``` CNN for denoising and missing wedge reconstruction
+* ```IsoNet``` - module wrapping [IsoNet](https://github.com/IsoNet-cryoET/IsoNet) - CNN for denoising and missing wedge reconstruction
 
 ### :arrow_up: Improvements
 * ```BinStacks```: added possibility to bin non-aligned stacks
