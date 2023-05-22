@@ -12,17 +12,13 @@ Implementation details and benchmarks you can find in our preprint:
 
 ## Contents
 
-- [TomoBEAR](#tomobear)
-  - [Contents](#contents)
-  - [Quick start](#quick-start)
-    - [Video-tutorials](#video-tutorials)
-    - [Pipeline structure](#pipeline-structure)
-  - [Documentation and licensing](#documentation-and-licensing)
-  - [Changes and releases](#changes-and-releases)
-  - [Feedback and contribution](#feedback-and-contribution)
-  - [Citation](#citation)
-  - [Acknowledgements](#acknowledgements)
-  - [Contacts](#contacts)
+- [Quick start](#quick-start)
+- [Documentation and licensing](#documentation-and-licensing)
+- [Changes and releases](#changes-and-releases)
+- [Feedback and contribution](#feedback-and-contribution)
+- [Citation](#citation)
+- [Acknowledgements](#acknowledgements)
+- [Contacts](#contacts)
 
 ## Quick start
 
