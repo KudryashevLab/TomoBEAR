@@ -57,7 +57,6 @@ CTFFIND4 from cisTEM package:
 
 #### SUSAN
 
-The software package is not yet published, but if you use it, please, cite [the following publication](https://www.eurasip.org/Proceedings/Eusipco/eusipco2019/Proceedings/papers/1570533917.pdf) describing the main algorithm idea as the following:
-- Sánchez RM, Mester R & Kudryashev M (2019) Fast Alignment of Limited Angle Tomograms
-by projected Cross Correlation. *2019 27th European Signal Processing Conference
-(EUSIPCO)* pp 1–5.
+If you used SUSAN, please, cite as the following:
+
+- Sánchez RM (2023) rkms86/SUSAN: Release for TomoBEAR (v0.1-RC1-TomoBEAR). *Zenodo*. DOI: [10.5281/zenodo.7950904](https://doi.org/10.5281/zenodo.7950904)

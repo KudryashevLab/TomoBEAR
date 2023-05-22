@@ -3,9 +3,16 @@ In this section you can find descriptions of the implemented modules, their func
 and their parameters which can be setup in the JSON configuration file in their
 corresponding blocks.
 
-# Global parameters configuration
+## Contents
+- [Global parameters configuration](#global-parameters-configuration)
+- [Pipeline behavior control modules](#pipeline-behavior-control-modules)
+- [CryoET data processing modules](#cryoet-data-processing-modules)
+- [Template matching-associated modules](#template-matching-associated-modules)
+- [Subtomogram Averaging modules](#subtomogram-averaging-modules)
 
-## general
+## Global parameters configuration
+
+### general
 **Description**
 </br>
 The general section is not a module but a configuration section where all the general
@@ -274,9 +281,9 @@ section.
 ```
 </details>
 
-# Pipeline behavior control modules
+## Pipeline behavior control modules
 
-## StopPipeline
+### StopPipeline
 **Description**
 </br>
 
@@ -298,13 +305,17 @@ need to be optimized.
     }
 ```
 
-# CryoET data processing modules
-## MetaData
+## CryoET data processing modules
+### MetaData
 
 **Description**
 </br>
 The MetaData module collects descriptive statistics such as min, max,
 mean, std from the raw data.
+
+**Dependencies**
+</br>
+This module does not depend on any external packages.
 
 **Parameters**
 </br>
@@ -329,12 +340,16 @@ mean, std from the raw data.
     }
 ```
 
-## SortFiles
+### SortFiles
 
 **Description**
 </br>
 The SortFiles module sorts the raw files on a tomogram basis and links
 them to their corresponding folders for further processing.
+
+**Dependencies**
+</br>
+This module does not depend on any external packages.
 
 **Parameters**
 </br>
@@ -359,21 +374,20 @@ them to their corresponding folders for further processing.
       }
 ```
 
-## MotionCor2
+### MotionCor2
 
 **Description**
 </br>
 
-The MotionCor2 module uses as the module's name suggests MotionCor2 to
-correct for the sample movement in a given projection which is basically
-a dose-fractionated movie.
+This module uses MotionCor2 to correct for the sample movement in a given projection can be a dose-fractionated movie or EER sequence.
 
-For some of the options it is advised to look also into the manual of
-MotionCor2 as there are some more detailed descriptions which you can
-find
-[here](https://docs.google.com/forms/d/e/1FAIpQLSfAQm5MA81qTx90W9JL6ClzSrM77tytsvyyHh1ZZWrFByhmfQ/viewform)
-or [here](https://emcore.ucsf.edu/ucsf-software) when you download the
-archive of MotionCor2.
+For some of the options it is advised to look also into the original manual of MotionCor2 provided along with the source code as there are some more detailed descriptions.
+
+**Dependencies**
+</br>
+- MotionCor2
+- IMOD
+- CUDA (compatible with chosen MotionCor2 version, if GPU parallelization is needed)
 
 **Parameters**
 </br>
@@ -462,10 +476,14 @@ archive of MotionCor2.
 ```
 </details>
 
-## GridEdgeEraser
+### GridEdgeEraser
 **Description**
 </br>
 This module performs grid edge identification and erases it for Au grids data.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -486,7 +504,7 @@ This module performs grid edge identification and erases it for Au grids data.
     }
 ```
 
-## CreateStacks
+### CreateStacks
 
 **Description**
 </br>
@@ -497,6 +515,11 @@ to divide the projections by their frame count. TomoBEAR detects
 automatically if you are using high-dose images and divides them by
 their corresponding frame count in contrast to low-dose images where the
 frame-count is different.
+
+**Dependencies**
+</br>
+- Dynamo
+- IMOD
 
 **Parameters**
 </br>
@@ -533,7 +556,7 @@ frame-count is different.
     }
 ```
 
-## DynamoTiltSeriesAlignment
+### DynamoTiltSeriesAlignment
 
 **Description**
 </br>
@@ -544,6 +567,10 @@ fiducial-based alignment. As default reasonable parameters for many cryo
 ET projects are set. Some of them are dynamically derived. The option to
 override non-dynamically derived parameters is still available and can
 be done in the json configuration file.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -692,7 +719,7 @@ be done in the json configuration file.
 ```
 </details>
 
-## DynamoCleanStacks
+### DynamoCleanStacks
 
 **Description**
 </br>
@@ -701,6 +728,11 @@ DynamoTiltSeriesAlignment to automatically clean up the tilt stacks. For
 that **DynamoCleanStacks** uses the output from dynamo tilt stacks
 alignment which states on which projections the fiducials could be fit.
 The others are then removed from the tilt stacks for further processing.
+
+**Dependencies**
+</br>
+- Dynamo
+- IMOD
 
 **Parameters**
 </br>
@@ -725,36 +757,43 @@ The others are then removed from the tilt stacks for further processing.
     }
 ```
 
-## AreTomo
+### AreTomo
 **Description**
 </br>
 This module performs AreTomo-based fiducial-free alignment.
+
+**Dependencies**
+</br>
+- AreTomo
+- IMOD
+- CUDA (compatible with AreTomo)
 
 **Parameters**
 </br>
 
 ```json
   "AreTomo": {
-        "execution_method": "in_order",
-        "input_stack_binning": 1,
-        "reconstruction": false,
-        "weighted_back_projection": true,
-        "tilt_axis_refine_flag": 1,
-        "apply_tilt_axis_offset": 0,
-        "tilt_axis_offset": 0,
-        "align_height_ratio": 0.75,
-        "apply_dose_weighting": false,
-        "sart": "20 5",
-        "roi": "0 0",
-        "roi_file": "",
-        "patch": "0 0",
-        "flip_volume": 1,
-        "flip_intensity": 0,
-        "citation": ""
+      "execution_method": "in_order",
+      "input_stack_binning": 1,
+      "reconstruction": false,
+      "weighted_back_projection": true,
+      "tilt_axis_refine_flag": 1,
+      "correct_tilt_axis_offset": 0,
+      "apply_given_tilt_axis_offset": false,
+      "tilt_axis_offset": 0,
+      "align_height_ratio": 0.75,
+      "apply_dose_weighting": false,
+      "sart": "20 5",
+      "roi": "0 0",
+      "roi_file": "",
+      "patch": "0 0",
+      "flip_volume": 1,
+      "flip_intensity": 0,
+      "citation": ""
     }
 ```
 
-## BatchRunTomo
+### BatchRunTomo
 
 **Description**
 </br>
@@ -786,6 +825,10 @@ fulfill all the steps batchruntomo normally can do:
 -   19: Volcombine
 -   20: Post Processing with Trimvol
 -   21: NAD (Nonlinear anisotropic diffusion)
+
+**Dependencies**
+</br>
+- IMOD
 
 **Parameters**
 </br>
@@ -937,13 +980,19 @@ tomoBEAR and should not be replaced or changed by the user.
 ```
 </details>
 
-## GCTFCtfphaseflipCTFCorrection
+### GCTFCtfphaseflipCTFCorrection
 
 **Description**
 </br>
 The GCTFCtfphaseflipCTFCorrection module is detecting the CTF for the
 tomograms which are reconstructed for template matching or particle
 cropping.
+
+**Dependencies**
+</br>
+- IMOD
+- GCTF/CTFFIND4
+- CUDA (compatible with GCTF/CTFFIND4)
 
 **Parameters**
 </br>
@@ -1018,12 +1067,16 @@ cropping.
 ```
 </details>
 
-## BinStacks
+### BinStacks
 **Description**
 </br>
 The BinStacks module is used for binning the stacks to be able to
 reconstruct them with the Reconstruct module which should be used after
 your stacks are binned.
+
+**Dependencies**
+</br>
+- IMOD
 
 **Parameters**
 </br>
@@ -1044,23 +1097,23 @@ your stacks are binned.
 | doi                             | ""            | this variable holds the information for automatically generating the citations, **note** functionality is not fully implemented and tested                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |          |
 
 ```json
-    "BinStacks":{   
+    "BinStacks":{
         "execution_method": "parallel",
-        "use_ctf_corrected_aligned_stack": true,    
-        "antialias_filter": 6,  
-        "defocus_tolerance": 20,    
-        "iWidth": 2,    
+        "use_ctf_corrected_aligned_stack": true,
+        "antialias_filter": 6,
+        "defocus_tolerance": 20,
+        "iWidth": 2,
         "ampContrast": 0.1,
         "run_ctf_phaseflip": false,
-        "ctf_corrected_stack_suffix": "ctfc",   
-        "skip": false,  
+        "ctf_corrected_stack_suffix": "ctfc",
+        "skip": false,
         "citation": "",
-        "citation_link": "",    
-        "doi": ""   
+        "citation_link": "",
+        "doi": ""
     }
 ```
 
-## Reconstruct
+### Reconstruct
 
 **Description**
 </br>
@@ -1070,6 +1123,10 @@ with the BinStacks module or used aligned tilt stack binning option
 greater than one. The module is set up by default to reconstruct binned
 stacks. If you otherwise want to reconstruct unbinned stacks you need to
 set up the Reconstruct module properly.
+
+**Dependencies**
+</br>
+- IMOD
 
 **Parameters**
 </br>
@@ -1107,7 +1164,108 @@ set up the Reconstruct module properly.
     }
 ```
 
-## DynamoImportTomograms
+### IsoNet
+
+**Description**
+</br>
+This module provides functionality of the IsoNet - DL framework for pre-processing, training and prediciton of restored information in the missing wedge region on the reconstructed cryo-elecrtron tomography volumes.
+
+**Dependencies**
+</br>
+- Anaconda
+- IsoNet (and its Python dependencies)
+- CUDA
+
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
+
+```json
+"IsoNet": {
+        "execution_method": "once",
+        "isonet_env": "",
+        "repository_path": "",
+        "tomograms_to_use": [],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "prepare_star": {
+                "use_ctf_corrected_tomograms": false,
+                "add_defocus_to_star": true,
+                "tomograms_binning": -1,
+                "folder_name": "tomograms",
+                "output_star": "tomograms.star",
+                "number_subtomos": -1
+            },
+            "deconv": {
+                "star_file": "tomograms.star",
+                "deconv_folder": "deconv",
+                "snrfalloff": 0.7,
+                "deconvstrength": -1,
+                "highpassnyquist": -1,
+                "chunk_size": -1,
+                "overlap_rate": -1,
+                "ncpu": -1
+            },
+            "make_mask": {
+                "star_file": "tomograms.star",
+                "mask_folder": "mask",
+                "patch_size": -1,
+                "mask_boundary": "",
+                "density_percentage": 50,
+                "std_percentage": 50,
+                "z_crop": -1,
+                "use_deconv_tomo": true
+            },
+            "extract": {
+                "star_file": "tomograms.star",
+                "subtomo_folder": "subtomo",
+                "subtomo_star": "subtomo.star",
+                "cube_size": -1,
+                "crop_size": -1,
+                "use_deconv_tomo": true
+            },
+            "refine": {
+                "subtomo_star": "subtomo.star",
+                "iterations": 30,
+                "data_dir": "",
+                "pretrained_model": "",
+                "result_dir": "results",
+                "preprocessing_ncpus": -1,
+                "continue_from": "",
+                "epochs": -1,
+                "batch_size": -1,
+                "steps_per_epoch": -1,
+                "noise_level": [0.05,0.1,0.15,0.2],
+                "noise_start_iter": [10,15,20,25],
+                "noise_mode": "",
+                "noise_dir": "",
+                "learning_rate": -1,
+                "drop_out": -1,
+                "convs_per_depth": -1,
+                "kernel": [],
+                "unet_depth": -1,
+                "filter_base": -1,
+                "batch_normalization": -1,
+                "normalize_percentile": -1
+            },
+            "predict": {
+                "star_file": "tomograms.star",
+                "model": "results/model_iter30.h5",
+                "output_dir": "corrected_tomos",
+                "cube_size": -1,
+                "crop_size": -1,
+                "batch_size": -1,
+                "normalize_percentile": -1
+            }
+        }
+    }
+```
+</details>
+
+
+## Template matching-associated modules
+
+### DynamoImportTomograms
 
 **Description**
 </br>
@@ -1115,6 +1273,10 @@ The DynamoImportTomograms module generates a dynamo catalogue for you
 and inputs the tomograms to that catalogue. After that you can call the
 dynamo catalogue manager (dcm) to generate the models for the tomograms
 or pick in them particles by hand.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -1139,8 +1301,8 @@ or pick in them particles by hand.
     }
 ```
 
-# Template matching-associated modules
-## EMDTemplateGeneration
+### EMDTemplateGeneration
+
 **Description**
 </br>
 The EMDTemplateGeneration module is used to automatically download a
@@ -1148,6 +1310,10 @@ EMDB template which is further down-scaled to match your desired template
 matching binning. Besides that an automated routine to generate the mask
 is also implemented. This module needs to be run before template
 matching is executed.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -1173,10 +1339,15 @@ matching is executed.
     }
 ```
 
-## TemplateGenerationFromFile
+### TemplateGenerationFromFile
+
 **Description**
 </br>
 The concept of this module is the same as in EMDTemplateMatching, with the only difference of taking the template from a user-defined path instead of fetching it directly from EMDB.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -1201,7 +1372,7 @@ The concept of this module is the same as in EMDTemplateMatching, with the only 
     }
 ```
 
-## DynamoTemplateMatching
+### DynamoTemplateMatching
 
 **Description**
 </br>
@@ -1209,6 +1380,10 @@ The DynamoTemplateMatching module re-implements the template
 matching from Dynamo but on a GPU. Because of the GPU usage the whole
 thing runs up to 15 times faster than the normal template matching
 implementation of dynamo.
+
+**Dependencies**
+</br>
+- Dynamo
 
 **Parameters**
 </br>
@@ -1243,10 +1418,15 @@ implementation of dynamo.
 ```
 </details>
 
-## TemplateMatchingPostProcessing
+### TemplateMatchingPostProcessing
 **Description**
 </br>
 This module creates Dynamo-like table of particles based on the results of the template matching procedure from the module DynamoTemplateMatching. As well, using this module you can extract subtomograms of the identified particles.
+
+**Dependencies**
+</br>
+- Dynamo
+- SUSAN (if you chose it as the particles generation method)
 
 **Parameters**
 </br>
@@ -1294,11 +1474,52 @@ This module creates Dynamo-like table of particles based on the results of the t
 ```
 </details>
 
-# Subtomogram Averaging (StA) modules
-## DynamoAlignmentProject
+## Subtomogram Averaging modules
+
+### GenerateParticles.m
+**Description**
+</br>
+This module uses Dynamo-like particles table to either extract Dynamo-like particles from the tomogram or to crop SUSAN-like substacks and make from them particles reconstructions.
+
+**Dependencies**
+</br>
+- Dynamo
+- SUSAN (if you chose it as the particles generation method)
+
+**Parameters**
+</br>
+
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
+
+```json
+  "GenerateParticles": {
+     "execution_method": "once",
+     "generate_particles_method": "",
+     "particles_table_path": "",
+     "box_size": 1.0,
+     "particles_binning": -1,
+     "use_SUSAN": false,
+     "ctf_correction_method": "defocus_file",
+     "susan_padding": 200,
+     "per_particle_ctf_correction": "phase_flip",
+     "padding_policy": "zero",
+     "normalization": "zm"
+   }
+```
+</details>
+
+
+### DynamoAlignmentProject
+
 **Description**
 </br>
 This module is basically a wrapper for performing Dynamo alignment projects.
+
+**Dependencies**
+</br>
+- Dynamo
+- SUSAN (if you chose it as the classification method)
 
 **Parameters**
 </br>
@@ -1348,58 +1569,58 @@ This module is basically a wrapper for performing Dynamo alignment projects.
         "classes": 0,
         "selected_classes": [],
         "sampling": 0,
-        "ite_r1": 0,    
-        "nref_r1": 0,      
-        "cone_range_r1": 0,    
-        "cone_sampling_r1": 0,     
-        "cone_flip_r1": 0,     
-        "cone_check_peak_r1": 0,  
+        "ite_r1": 0,
+        "nref_r1": 0,
+        "cone_range_r1": 0,
+        "cone_sampling_r1": 0,
+        "cone_flip_r1": 0,
+        "cone_check_peak_r1": 0,
         "cone_freeze_reference_r1": 0,
-        "inplane_range_r1": 0,     
-        "inplane_sampling_r1": 0,     
-        "inplane_flip_r1": 0,                       
-        "inplane_check_peak_r1": 0,        
-        "inplane_freeze_reference_r1": 0,       
-        "refine_r1": 0,       
-        "refine_factor_r1": 0,  
-        "high_r1": 0,           
-        "low_r1": 0,     
-        "sym_r1": 0,                                
-        "dim_r1": 0,                                
+        "inplane_range_r1": 0,
+        "inplane_sampling_r1": 0,
+        "inplane_flip_r1": 0,
+        "inplane_check_peak_r1": 0,
+        "inplane_freeze_reference_r1": 0,
+        "refine_r1": 0,
+        "refine_factor_r1": 0,
+        "high_r1": 0,
+        "low_r1": 0,
+        "sym_r1": 0,
+        "dim_r1": 0,
         "area_search_r1": 0,
-        "area_search_modus_r1": 0,                  
-        "separation_in_tomogram_r1": 0,             
-        "limit_xy_check_peak_r1": 0,                
-        "limit_z_check_peak_r1": 0,                 
-        "use_CC_r1": 0,                             
-        "localnc_r1": 0,                            
-        "mra_r1": 0,                                
-        "threshold_r1": 0,                          
-        "threshold_modus_r1": 0,                    
-        "threshold2_r1": 0,                         
-        "threshold2_modus_r1": 0,                   
-        "ccmatrix_r1": 0,     
-        "ccmatrix_type_r1": 0,                      
-        "ccmatrix_batch_r1": 0,                     
-        "Xmatrix_r1": 0,                            
-        "Xmatrix_maxMb_r1": 0,                      
-        "PCA_r1": 0,                                
-        "PCA_neigs_r1": 0,                          
-        "kmeans_r1": "",                             
-        "kmeans_ncluster_r1": 0,                    
-        "kmeans_ncoefficients_r1": 0,               
-        "nclass_r1": 0,                             
-        "plugin_align_r1": 0,                       
-        "plugin_post_r1": 0,                        
-        "plugin_iter_r1": 0,                        
-        "plugin_align_order_r1": 0,                 
-        "plugin_post_order_r1": 0,                  
-        "plugin_iter_order_r1": 0,                  
-        "flags_r1": 0,                              
-        "convergence_type_r1": 0,                   
-        "convergence_r1": 0,                        
-        "rings_r1": 0,                              
-        "rings_random_r1": 0,                       
+        "area_search_modus_r1": 0,
+        "separation_in_tomogram_r1": 0,
+        "limit_xy_check_peak_r1": 0,
+        "limit_z_check_peak_r1": 0,
+        "use_CC_r1": 0,
+        "localnc_r1": 0,
+        "mra_r1": 0,
+        "threshold_r1": 0,
+        "threshold_modus_r1": 0,
+        "threshold2_r1": 0,
+        "threshold2_modus_r1": 0,
+        "ccmatrix_r1": 0,
+        "ccmatrix_type_r1": 0,
+        "ccmatrix_batch_r1": 0,
+        "Xmatrix_r1": 0,
+        "Xmatrix_maxMb_r1": 0,
+        "PCA_r1": 0,
+        "PCA_neigs_r1": 0,
+        "kmeans_r1": "",
+        "kmeans_ncluster_r1": 0,
+        "kmeans_ncoefficients_r1": 0,
+        "nclass_r1": 0,
+        "plugin_align_r1": 0,
+        "plugin_post_r1": 0,
+        "plugin_iter_r1": 0,
+        "plugin_align_order_r1": 0,
+        "plugin_post_order_r1": 0,
+        "plugin_iter_order_r1": 0,
+        "flags_r1": 0,
+        "convergence_type_r1": 0,
+        "convergence_r1": 0,
+        "rings_r1": 0,
+        "rings_random_r1": 0,
         "dynamic_mask_r1": 0,
         "mask_path": "",
         "mask_apix": 1,

@@ -8,21 +8,24 @@
 > <br/> Implementation details and benchmarks you can find in our preprint:
 </br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: [10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
-## Contents
+## Wiki contents
 
-- [General description of the pipeline](#general-description) 
+- [General description of the pipeline](#general-description)
 - [Installation and setup notes](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup)
 - [Frequently Asked Questions](https://github.com/KudryashevLab/TomoBEAR/wiki/Frequently-Asked-Questions)
 - [Tutorials on TomoBEAR setup and usage](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials)
 - [Available modules description, their parameters and default values](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules)
 - [Usage cases and tips](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage)
+- [List of external software to be cited](https://github.com/KudryashevLab/TomoBEAR/wiki/Additional-Software-Citation)
 
 
 ## Gerenal description
 
 **TomoBEAR** can assist you in large-scale processing of the tomographic data acquired on the electron microscope starting from the raw tilt series, possibly dose fractionated, or already assembled tilt stacks up to sample volume 3D reconstruction and even to biological structure of interest. More on input formats you [can read here](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage.md#input-data-file-formats).
 
-**TomoBEAR** is designed to operate in automated manner minimizing user intervention where that is possible. The pipeline wraps popular cryo-ET tools (such as IMOD, Dynamo, MotionCor2, GCTF/CTFFIN4, etc.). Since number of TomoBEAR parameters is huge,to help users cope with that we have carefully designed a predefined set of defaults which were chosen based on several different cryo-ET datasets.
+**TomoBEAR** is designed to operate in automated manner minimizing user intervention where that is possible. The pipeline consists of modules, which wrap popular cryo-ET tools (such as IMOD, Dynamo, MotionCor2, GCTF/CTFFIN4, etc.) as well as developed in our laboratory StA framework called [SUSAN](https://github.com/rkms86/SUSAN).
+
+Since number of **TomoBEAR** parameters is huge, to help users cope with that we have carefully designed a predefined set of defaults which were chosen based on several different cryo-ET datasets. Description of all modules and corresponding default values is given on the [Modules page](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules).
 
 > **Note**
 > <br/> `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
@@ -71,7 +74,7 @@
 </details>
 
 ## Pipeline structure
-In the following picture you can see a flow chart which visualizes pipeline steps which `TomoBEAR` can execute in an automated and parallel manner. 
+In the following picture you can see a flow chart which visualizes pipeline steps which `TomoBEAR` can execute in an automated and parallel manner.
 
 ![Schematic Pipeline Image](/images/pipeline_light_mode.svg)
 

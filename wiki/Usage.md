@@ -1,6 +1,6 @@
 # TomoBEAR Configuration
 
-If you followed the instructions thoroughly then you should have a
+If you followed the [installation instructions](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup) thoroughly then you should have a
 working copy of the TomoBEAR. Now you need to generate a JSON file for your
 project to start to process your acquired cryo-ET data.
 
@@ -58,7 +58,7 @@ You may use the script above ```softlink_files.sh``` to rename input data as sof
 ```bash
 softlink_files.sh PREFIX1_PREFIX2_PREFIX3_ PREFIXNEW_ original/dir/path renamed/dir/path
 ```
-where for each ```TIF``` file in the location ```original/dir/path``` a set of prefixes ```PREFIX1_PREFIX2_PREFIX3_``` will be substituted with a single prefix ```PREFIXNEW_``` and softlinks with the new filenames to the corresponding original files will be saved in the ```renamed/dir/path``` directory.  
+where for each ```TIF``` file in the location ```original/dir/path``` a set of prefixes ```PREFIX1_PREFIX2_PREFIX3_``` will be substituted with a single prefix ```PREFIXNEW_``` and softlinks with the new filenames to the corresponding original files will be saved in the ```renamed/dir/path``` directory.
 
 ### EER input file format pre-processing
 
@@ -97,7 +97,7 @@ where the parameters are the following:
 * ```eer_total_number_of_fractions```: total number of fractions (data slices) present in raw EER data;
 * ```eer_fraction_grouping```: number of fractions (data slices) to group and integrate into a frame;
 * ```eer_exposure_per_fraction```: total electron dose accumulated per frame (group of fractions).
-These parameters relate to the corresponding MotionCor2 parameters such as ```–EerSampling``` and three parameter values denoted in the file passed to ```–FmIntFile``` option, namely - total number of fractions (1st column), number of fractions in group (2nd column) and total accumulated dose per group (3rd column). 
+These parameters relate to the corresponding MotionCor2 parameters such as ```–EerSampling``` and three parameter values denoted in the file passed to ```–FmIntFile``` option, namely - total number of fractions (1st column), number of fractions in group (2nd column) and total accumulated dose per group (3rd column).
 
 ## JSON Configuration Templates
 
@@ -867,7 +867,7 @@ Since live data processing mainly serves for sample quality check, in order to a
 
 In order to improve contrast in reconstructions we would recommend to enable `"generate_exact_filtered_tomograms"` and setup `"exact_filter_size"` to define filter to be used to produce contrast-enhanced reconstructions.
 
-If you start collection from zero-tilt, to avoid problems of files perception and sorting caused by `-0.0`/`+0.0` appearing as the angle for untilted views (due to small initial tilting offset being present) instead of expected `0.0` it is also recommended to add `"first_tilt_angle": 0` to `general` section of your input JSON file.   
+If you start collection from zero-tilt, to avoid problems of files perception and sorting caused by `-0.0`/`+0.0` appearing as the angle for untilted views (due to small initial tilting offset being present) instead of expected `0.0` it is also recommended to add `"first_tilt_angle": 0` to `general` section of your input JSON file.
 
 # Executing the Workflow
 
