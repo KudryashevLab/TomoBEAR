@@ -1,7 +1,8 @@
 # License
 
+Copyright © 2021-2023 Max Delbruck Center for Molecular Medicine (MDC)
+</br>
 Copyright © 2021 Max Planck Institute of Biophysics (MPIBP)
-Copyright © 2021-2023 Max Delbruck Center for Molecular Medicine (MDCMM)
 
 This work is licensed under multiple licenses:
 - The source code (MATLAB, Python, Bash, etc.) and the accompanying material are licensed under [AGPL3](LICENSES/AGPL-3.0-or-later.txt).
