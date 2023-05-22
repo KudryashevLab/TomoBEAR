@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 classdef LocalPipeline < Pipeline
     methods
         function obj = LocalPipeline(configuration_path, default_configuration_path)
@@ -588,7 +607,7 @@ classdef LocalPipeline < Pipeline
                 [status_mkdir, message, message_id] = mkdir(pool_folder);
             end
 
-            generatePool(workers, false, pool_folder);
+            poolobj = generatePool(workers, false, pool_folder);
             
             cumulative_sum_previous_tomogram_status = cumsum(previous_tomogram_status);
             indices = find(previous_tomogram_status);
@@ -609,7 +628,7 @@ classdef LocalPipeline < Pipeline
                 % TODO intermediate configurations need to be saved to be
                 % consistent
                 f(mod(j - 1, workers) + 1) = ...
-                    parfeval(@iteration, 2, merged_configurations{j}, pipeline_definition, tomogram_names{indices(j)}, previous_tomogram_status(indices(j)));
+                    parfeval(poolobj, @iteration, 2, merged_configurations{j}, pipeline_definition, tomogram_names{indices(j)}, previous_tomogram_status(indices(j)));
             end
             
             if exist("f", "var") && ~isempty(f)

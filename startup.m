@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+%
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+%
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+%
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 % TODO: decide what to do with userpath
 %userpath("clear");
 %userpath(project_path);
@@ -31,7 +50,7 @@ if isunix()
             system("chmod ug+x ./load_modules.sh");
         end
     end
-    
+
     if ~fileExists(default_configuration.general.matlab_shell) || default_configuration.general.regenerate_load_modules_file == true
         fid = fopen(default_configuration.general.matlab_shell, "w+");
         fprintf(fid, "%s\n", "#!/bin/bash");
@@ -41,7 +60,7 @@ if isunix()
         if fileExists("./load_modules.sh")
             fprintf(fid, "%s\n", "source $SCRIPTPATH/load_modules.sh > /dev/null");
         end
-        
+
         if default_configuration.general.additional_shell_initialization_script ~= ""
             fprintf(fid, "%s\n", "source " + default_configuration.general.additional_shell_initialization_script);
         end
@@ -71,8 +90,8 @@ if isunix()
         setenv("MATLAB_SHELL", project_path + string(filesep) + default_configuration.general.matlab_shell);
         [status, output] = system("chmod ug+x " + default_configuration.general.matlab_shell);
     else
-        
-    end 
+
+    end
 end
 
 if ~isdeployed()

@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 classdef DynamoTiltSeriesAlignment < Module
     methods
@@ -46,7 +65,7 @@ classdef DynamoTiltSeriesAlignment < Module
                     file = char(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).config_file_path = config_file_path;
                     if obj.configuration.use_newstack_for_binning == true
-                        [folder, name, extension] = fileparts(file);
+                        %[folder, name, extension] = fileparts(file);
                         system("newstack -in " + file + " -ou binned_stack.st -bin " + obj.configuration.pre_aligned_stack_binning / obj.configuration.ft_bin);
                         file = 'binned_stack.st';
                     end

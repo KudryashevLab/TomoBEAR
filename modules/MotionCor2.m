@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 classdef MotionCor2 < Module
     methods
         function obj = MotionCor2(configuration)
@@ -26,8 +45,10 @@ classdef MotionCor2 < Module
             
             mrc_list = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).raw_files;
             
-            if  obj.configuration.method == "MotionCor2"
+            if obj.configuration.method == "MotionCor2"
                 [motion_corrected_files, symbolic_link_standard_folder] = obj.correctWithMotionCor2(mrc_list);
+            elseif obj.configuration.method == "SumOnly"
+                [motion_corrected_files, symbolic_link_standard_folder] = obj.summarizeOnly(mrc_list);
             else
                 [motion_corrected_files, symbolic_link_standard_folder] =  obj.correctWithAlignFrames(mrc_list);
             end
@@ -172,10 +193,17 @@ classdef MotionCor2 < Module
                 [folder, name, extension] = fileparts(obj.configuration.gain);
                 name_rep = strrep(name, " ", "\ ");
                 gain_path =  folder + string(filesep) + name_rep + extension;
-                if ~fileExists(output_folder + string(filesep) + name + ".mrc") && extension == ".dm4"
-                    gain_path = output_folder + string(filesep) + name_rep + ".mrc";
-                    executeCommand("dm2mrc -u " + folder + string(filesep) + name_rep + extension + " " + gain_path);
-                elseif fileExists(output_folder + string(filesep) + name + ".mrc") && extension == ".dm4"
+                if ~fileExists(output_folder + string(filesep) + name + ".mrc") 
+                    if extension == ".dm4"
+                        gain_path_new = output_folder + string(filesep) + name_rep + ".mrc";
+                        executeCommand("dm2mrc -u " + gain_path + " " + gain_path_new);
+                        gain_path = gain_path_new;
+                    elseif extension == ".gain"
+                        gain_path_new = output_folder + string(filesep) + name_rep + ".mrc";
+                        executeCommand("newstack -in " + gain_path + " -ou " + gain_path_new);
+                        gain_path = gain_path_new;
+                    end
+                elseif extension == ".dm4" || extension == ".gain"
                     gain_path = output_folder + string(filesep) + name_rep + ".mrc";
                 end
                 
@@ -394,6 +422,47 @@ classdef MotionCor2 < Module
                 %         createSymbolicLink(mrc_output, destination, obj.log_file_id);
                 %     end
                 motion_corrected_files{i} = mrc_output;
+            end
+        end
+        
+        function [motion_corrected_files, symbolic_link_standard_folder] = summarizeOnly(obj, mrc_list)
+            disp("INFO: Method - summarize movies without correction");
+            disp("INFO: Getting ready to process...");
+            disp("INFO: Processing micrographs in " + obj.configuration.output_folder);
+            
+            % TODO: support for frame integration files
+            field_names = fieldnames(obj.configuration.tomograms);
+            
+            mkdir(obj.configuration.processing_path + string(filesep)...
+                    + obj.configuration.output_folder + string(filesep)...
+                    + obj.configuration.motion_corrected_files_folder + string(filesep) + field_names{obj.configuration.set_up.j});
+            
+            output_folder = obj.output_path;
+            configuration = obj.configuration;
+            log_file_id = -1;
+            
+            parfor i = 1:length(mrc_list)
+                disp("INFO: Processing " + mrc_list(i) + "...");
+                
+                % TODO: is the output_postfix needed? makes
+                % createSymbolicLinkInStandardFolder more complicated
+                %mrc_output = output_folder + string(filesep) + name + "_" + configuration.output_postfix + ".mrc";
+                [~, name, ~] = fileparts(mrc_list{i});
+                mrc_output = output_folder + string(filesep) + name + ".mrc";
+                
+                input_movie = dread(mrc_list(i));
+                output_frame = sum(input_movie, 3);
+                dwrite(output_frame, mrc_output);
+                
+                [output_symbolic_link_standard_folder, symbolic_link_standard_folder(i)] = createSymbolicLinkInStandardFolder(configuration, mrc_output, "motion_corrected_files_folder", log_file_id);
+                motion_corrected_files{i} = mrc_output;
+            end
+            
+            if obj.configuration.ft_bin ~= 1
+                ft_bin = obj.configuration.ft_bin;
+                parfor i = 1:length(motion_corrected_files)
+                    system("newstack -in " + motion_corrected_files{i} + " -ou " + motion_corrected_files{i} + " -bin " + ft_bin);
+                end
             end
         end
         

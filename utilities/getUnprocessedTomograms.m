@@ -1,19 +1,47 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 function [dynamic_configuration, file_count_changed] = getUnprocessedTomograms(configuration, log_file_id)
 dynamic_configuration = struct;
 original_files = getOriginalFiles(configuration, false);
 original_files = original_files(~startsWith({original_files.name}, "."));
 
-if checkForMultipleExtensions({original_files.name});
+if ~isempty(original_files) && checkForMultipleExtensions({original_files.name})
     error("ERROR: Multiple unknown extensions found!");
 end
 file_count = length(original_files);
 if ~isfield(configuration, "file_count") || (isfield(configuration, "file_count") && (configuration.file_count < file_count))
     dynamic_configuration.file_count = length(original_files);
-    file_count_changed = true;
+    if isempty(original_files)
+        file_count_changed = false;
+        return;
+    else
+        file_count_changed = true;
+    end
 else
     dynamic_configuration.file_count = configuration.file_count;
     dynamic_configuration.tomograms_count = configuration.tomograms_count;
-    dynamic_configuration.starting_tomogram = configuration.starting_tomogram;
+    if ~isfield(configuration, "starting_tomogram")
+        dynamic_configuration.starting_tomogram = 1;
+    else
+        dynamic_configuration.starting_tomogram = configuration.starting_tomogram;
+    end
     file_count_changed = false;
     return;
 end
@@ -226,6 +254,29 @@ if configuration.automatic_filename_parts_recognition == true
             dynamic_configuration.original_files(i).tilt_stack = true;
             dynamic_configuration.tilt_stacks = true;
         end
+        
+        % re-write with the user-enforced parameters values if present
+        % NOTE:TODO: dirty, subject for later refactoring!
+        if isfield(configuration, "tomogram_number_position") && configuration.tomogram_number_position ~= -1
+            dynamic_configuration.original_files(i).tomogram_number_position = configuration.tomogram_number_position;
+        end
+        
+        if isfield(configuration, "tilt_number_position") && configuration.tilt_number_position ~= -1
+            dynamic_configuration.original_files(i).tilt_number_position = configuration.tilt_number_position;
+        end
+        
+        if isfield(configuration, "angle_position") && configuration.angle_position ~= -1
+            dynamic_configuration.original_files(i).angle_position = configuration.angle_position;
+        end
+        
+        if isfield(configuration, "date_position") && configuration.date_position ~= -1
+            dynamic_configuration.original_files(i).date_position = configuration.date_position;
+        end
+        
+        if isfield(configuration, "time_position") && configuration.time_position ~= -1
+            dynamic_configuration.original_files(i).time_position = configuration.time_position;
+        end
+        
     end
     
     %[values, indices] = sort({dynamic_configuration.original_files.name});
@@ -380,7 +431,7 @@ if dynamic_configuration.tilt_stacks == false
         else
             tomogram_file_indices = start_indices(i + 1):start_indices(i + 2)-1;
         end
-        
+        disp("INFO: Number of files available: " + num2str(length(tomogram_file_indices)));
         if length(tomogram_file_indices) < configuration.minimum_files
             disp("INFO: Not enough files for this tomogram to do reconstructions!");
             dynamic_configuration.tomograms.(tomogram_name).skipped = true;
@@ -445,6 +496,14 @@ if dynamic_configuration.tilt_stacks == false
         dynamic_configuration.tomograms.(tomogram_name).adjusted_tilt_number_position = dynamic_configuration.original_files(tomogram_file_indices(1)).adjusted_tilt_number_position;
         dynamic_configuration.tomograms.(tomogram_name).date_position = dynamic_configuration.original_files(tomogram_file_indices(1)).date_position;
         dynamic_configuration.tomograms.(tomogram_name).time_position = dynamic_configuration.original_files(tomogram_file_indices(1)).time_position;
+        
+        if isfield(configuration, "live_data_mode") && configuration.live_data_mode == true
+            [~, last_collected_frame_name, ~] = fileparts(sorted_files(tomogram_file_indices(end)));
+            last_collected_frame_name_split = strsplit(last_collected_frame_name, '_');
+            dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_date = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).date_position);
+            dynamic_configuration.tomograms.(tomogram_name).last_collected_frame_time = last_collected_frame_name_split(dynamic_configuration.tomograms.(tomogram_name).time_position);
+        end
+        
         dynamic_configuration.tomograms.(tomogram_name).zero_tilt = [dynamic_configuration.original_files(tomogram_file_indices).zero_tilt];
         [sorted_angle_values, sorted_angle_indices] = sort([dynamic_configuration.original_files(tomogram_file_indices).angle]);
         dynamic_configuration.tomograms.(tomogram_name).sorted_angles = sorted_angle_values;
@@ -520,7 +579,11 @@ else
         current_tomogram = current_tomogram + 1;
     end
 end
-dynamic_configuration.starting_tomogram = current_tomogram;
+
+if ~isfield(configuration, "live_data_mode") || configuration.live_data_mode == false
+    dynamic_configuration.starting_tomogram = current_tomogram;
+end
+
 end
 
 

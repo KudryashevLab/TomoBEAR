@@ -1,41 +1,74 @@
-**We are mainly at the stage of testing, debugging and maitenance work. However, new features may still appear and refactorings may still take place. We will be happy, if you would try it out the current version and get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or writing an e-mail to [Artsemi Yushkevich](Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR).**
-
-:tada:**The first standalone executable release for GPU workstations is available now! :tada: You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**
-
 # TomoBEAR
-TomoBEAR is an automated, configurable and customizable full processing pipeline for tomographic cryo-electron microscopy data and subtomogram averaging in the broad field of Cryo-ET based on best practices in the scientific research groups of [Misha Kudryashev](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR):
-- (previous one) [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;
-- (current one) [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
 
-## Documentation
+**TomoBEAR** is a configurable and customizable modular pipeline for streamlined processing of cryo-electron tomographic data and preliminary subtomogram averaging (StA) based on best practices in the scientific research group of Dr. Misha Kudryashev[^1][^2].
 
-Information on the installation, setup and usage as well as tutorials and example results can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
+![TomoBEAR Social Media Logo Image](images/TomoBEAR_gitlogo.png)
 
-## Repository structure
-User branches:
-- `main` - more or less stable version (*in a normal case use this one, please!*);
-- `develop_live` - an experimental (non-stable) version with live data processing functionality (*warning! new functionality and bug fixes from main coming here slowly!*)
+Implementation details and benchmarks you can find in our preprint:
+</br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: [10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
 
-All the other branches are not intended for user usage! They hold non-stable development versions (with new features, bug-fixes and refactorings).
+> **Warning**
+> <br/> This software is currently in pre-release state. New features may still appear and refactoring may still take place between all the current and future 0.x.y versions until 1.0.0 will be ready to be released.
 
-In the future we are planning to introduce wiki versioning as well, stay tuned!
+## Contents
 
-## Pipeline structure
+- [Quick start](#quick-start)
+- [Documentation and licensing](#documentation-and-licensing)
+- [Changes and releases](#changes-and-releases)
+- [Feedback and contribution](#feedback-and-contribution)
+- [Citation](#citation)
+- [Acknowledgements](#acknowledgements)
+- [Contacts](#contacts)
 
-In the following picture you can see a flow chart which visualizes which steps `TomoBEAR` will and can do for you in an automated and parallel manner. `TomoBEAR` supports workstations and single interactive nodes with GPUs on the comuting clusters at the moment. We are also working towards enabling the support of computer clusters through a queue manager like SLURM or SGE (Sun Grid Engine).
+## Quick start
 
-Note that it is not needed to start from raw data but you can also use already assembled tilt stacks if you provide the angular information.
+### Video-tutorials
 
-![Schematic Pipeline Image Light Mode](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/pipeline_light_mode.svg#gh-light-mode-only)
-![Schematic Pipeline Image Dark Mode](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/pipeline_dark_mode.svg#gh-dark-mode-only)
+We have prepared a range of short (8-12 min) video-tutorials explaining setup, usage and example output of the ```TomoBEAR``` to help you get started with ```TomoBEAR``` based on the [ribosome tutorial](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials):
+* [Video 1](https://drive.google.com/file/d/1Nhltdo7DbWdzPhAbnkzq7lCkDghxJrku/view?usp=share_link): how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies;
+* [Video 2](https://drive.google.com/file/d/12h8Vs4eUeJDJAb5S6nF2BuOX7lfvmmYo/view?usp=share_link): description of the project configuration file and the pipeline execution;
+* [Video 3](https://drive.google.com/file/d/16nNdu89XUZglO_PiRKmGkK85o_nWqOB8/view?usp=share_link): additional configuration file parameters description, ```TomoBEAR```-```IMOD```-```TomoBEAR``` loop for checking tilt series alignment results and fiducials refinement (if needed);
+* [Video 4](https://drive.google.com/file/d/1t3ol3KlHqBGtnZp1bnLHi_Anurd2VPcx/view?usp=share_link): checking on further intermediate results (alignment, CTF-correction, reconstruction, template matching).
 
-Orange processing steps in the flow chart are mandatory and must be executed by TomoBEAR. Yellow boxes are optional and can be activated if desired.
+### Pipeline structure
 
-## Feedback
+In the following picture you can see a flow chart of the main `TomoBEAR` processing steps. As the basic input data you can use raw frame movies or already assembled tilt stacks. More on input formats you [can read here](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage.md#input-data-file-formats).
 
-In case of any questions or errors do not hesitate to contact one of the provided persons mentioned in the `Contacts` section below. Alternatively, for bug reports or feature suggestions you may use our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues). Please, be polite and precise!
+![Schematic Pipeline Image](images/pipeline_simplified.png)
 
-# Acknowledgements
+Blue boxes outline the steps that are performed fully automatically, green boxes may require human intervention. The steps encapsulated in the red frame represent the functionality of live data processing. More detailed diagram [is located on wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
+
+> **Note**
+> <br/> Full MATLAB (source code) version of `TomoBEAR` supports workstations and single interactive nodes with GPUs on the computing clusters at the moment. We are also working towards enabling the support of binaries on the mentioned systems as well as support of both source code and binary versions of the `TomoBEAR` on HPC clusters.
+
+## Documentation and licensing
+
+Detailed information on the installation, setup and usage as well as tutorials and example results can be found in the corresponding [wiki](https://github.com/KudryashevLab/TomoBEAR/wiki).
+
+Please, see the [LICENSE file](LICENSE.md) for the information about how the content of this repository is licensed.
+
+## Changes and releases
+
+The [CHANGELOG file](CHANGELOG.md) contains all notable changes corresponding to the different `TomoBEAR` releases, which are available at the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
+
+If you want to clone a specific ```TomoBEAR``` version, please refer to the **Setup > Get source code and binary > Clone specific version** section on the wiki page [Installation and Setup](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup.md).
+
+## Feedback and contribution
+
+In case of any questions, issues or suggestions you may interact with us by one of the following ways:
+* open an issue/bug report, feature request or post a question using [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues);
+* write an e-mail to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com) or [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de);
+* start a discussion in [Discussions](https://github.com/KudryashevLab/TomoBEAR/discussions);
+
+If you wish to contribute, please, fork this repository and make a pull request back with your changes and a short description.
+
+## Citation
+
+If you use `TomoBEAR` or its parts in your research, please **cite both** `TomoBEAR` and **all external software packages** which you have used under `TomoBEAR`.
+
+The `TomoBEAR` modules dependencies on third-party software are listed on the page [Modules](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules.md) and the list of the corresponding references to cite is located on the page [Additional Software Citation](https://github.com/KudryashevLab/TomoBEAR/wiki/Additional-Software-Citation.md).
+
+## Acknowledgements
 
 We are grateful to the following organizations:
 - Buchmann family and [BMLS (Buchmann Institute for Molecular Life Sciences)](https://www.bmls.de) for supporting this project with their starters stipendia for PhD students;
@@ -43,11 +76,16 @@ We are grateful to the following organizations:
 
 As well we are grateful to the [structural biology scientific research group of Werner Kühlbrandt](https://www.biophys.mpg.de/2207989/werner_kuehlbrandt) at the [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de) and the [MPIBP](https://www.biophys.mpg.de) in Frankfurt (Hesse), Germany for support.
 
-# Contacts
-[Prof. Dr. Misha Kudryashev (Project Leader)](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR) - Principal Investigator, head of the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
+## Contacts
+* Prof. Dr. Misha Kudryashev[^1][^2] ([e-mail](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)) - `TomoBEAR` project leader, Principal Investigator;
 
-[Nikita Balyschew (Developer)](mailto:nikita.balyschew@gmail.com?subject=[GitHub]%20TomoBEAR) - Guest Scientist in the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany; alumni Ph.D. student in the [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany.
+* Nikita Balyschew[^2] - `TomoBEAR` core version developer, alumni Ph.D. student.
 
-[Artsemi Yushkevich (Contributing Developer)](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR) - Ph.D. student in the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
+* Artsemi Yushkevich[^1] ([e-mail](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR)) - `TomoBEAR` contributing developer, Ph.D. student.
 
-[Vasili Mikirtumov (Application Engineer)](mailto:mikivasia@gmail.com?subject=[GitHub]%20TomoBEAR) - Ph.D. student in the [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
+* Vasilii Mikirtumov[^1] ([e-mail](mailto:mikivasia@gmail.com?subject=[GitHub]%20TomoBEAR)) - `TomoBEAR` application engineer, Ph.D. student.
+
+
+[^1]: [In situ Structural Biology Group](https://www.mdc-berlin.de/kudryashev) at the [MDCMM (Max Delbrück Center of Molecular Medicine)](https://www.mdc-berlin.de) in Berlin, Germany.
+
+[^2]: [Independent Research Group (Sofja Kovaleskaja)](https://www.biophys.mpg.de/2149775/members) at the Department of Structural Biology at [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de/en) in Frankfurt (Hesse), Germany;

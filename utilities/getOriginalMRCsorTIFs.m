@@ -1,5 +1,24 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 function [original_files, tif_flag] = getOriginalMRCsorTIFs(configuration, grouped)
-if nargin == 1
+if nargin < 2
     grouped = false;
 end
     
@@ -17,7 +36,10 @@ elseif isfield(configuration, "tomogram_input_prefix") && configuration.tomogram
     mrc_path = configuration.data_path + string(filesep)...
         + configuration.tomogram_input_prefix + "*.mrc";
 else
-    mrc_path = configuration.data_path + string(filesep) + "*.mrc";
+    mrc_path = configuration.data_path;
+    if ~contains(mrc_path, ".mrc")
+        mrc_path = mrc_path + string(filesep) + "*.mrc";
+    end
 end
 
 counter = 1;
@@ -33,11 +55,17 @@ if counter == 1
     [original_files, tif_flag] = getOriginalTIFs(configuration);
 end
 
-if isempty(original_files)
-	error("ERROR: No micrographs found at location " + mrc_path);
+if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
+    [original_files, ~] = getOriginalEERs(configuration);
 end
 
-if iscell(original_files)
+if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
+    if ~isfield(configuration, "live_data_mode") || ~configuration.live_data_mode
+        error("ERROR: No micrographs found at location " + mrc_path);
+    else
+        original_files = [];
+    end
+elseif iscell(original_files)
     original_files_tmp = struct("name", '', "folder", '', "date", '',...
         "bytes", 0, "isdir", false, "datenum", 0);
     for i = 1:length(original_files)

@@ -4,7 +4,22 @@ authors:
   - family-names: Balyschew
     given-names: Nikita
     orcid: https://orcid.org/0000-0001-7330-4628
-title: "TomoBEAR: an automated, configurable and customizable full processing pipeline for tomographic cryo electron microscopy data and subtomogram averaging"
-version: 0.1.3.alpha
-doi: 
-date-released: 2021-08-13
+  - family-names: Yushkevich
+    given-names: Artsemi
+    orcid: https://orcid.org/0000-0002-8729-9281
+  - family-names: Mikirtumov
+    given-names: Vasilii
+    orcid:
+  - family-names: Sanchez
+    given-names: Ricardo M.
+    orcid: https://orcid.org/0000-0002-2854-0119
+  - family-names: Sprink
+    given-names: Thiemo
+    orcid: https://orcid.org/0000-0002-0760-6828
+  - family-names: Kudryashev
+    given-names: Misha
+    orcid: https://orcid.org/0000-0003-3550-6274
+title: "Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR"
+version: 0.3.0
+doi: https://doi.org/10.1101/2023.01.10.523437
+date-released: 2023-05-22

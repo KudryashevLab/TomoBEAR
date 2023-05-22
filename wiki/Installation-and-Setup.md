@@ -1,7 +1,7 @@
-Currently we are at the stage of testing, we will be happy if you try it, we will help you to get going. Please get back to us by using our [Issue Tracker](https://github.com/KudryashevLab/TomoBEAR/issues) or write to
-[Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de?subject=[GitHub]%20TomoBEAR) if you have problems.
+# Installation and setup
 
-:tada:**The first standalone executable release for GPU workstations is available now! :tada: You may find it on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).**
+> **Note**
+> <br/> If you experience problems with TomoBEAR installation, do not hestitate to communicate with us by one of mentioned ways in [Feedback and Contribution](https://github.com/KudryashevLab/TomoBEAR#feedback-and-contribution) section.
 
 # Prerequisites
 
@@ -30,50 +30,92 @@ There are two ways to operate TomoBEAR.
 * The first way is to [[ use it directly from MATLAB | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#matlab ]]
 * The second way is to [[ use a standalone executable which is available precompiled | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#standalone ]]
 
-For both methods of operation, you will need to get TomoBEAR source code and to get and install its dependencies. Thus, you have to install essential dependencies (Dynamo, IMOD, MotionCor2 and GCTF) and may additionally install optional ones (SUSAN, AreTomo, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
+For both methods of operation, you will need to [[ get TomoBEAR source code | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#get-source-code-and-binary ]] and to get and install its dependencies.
 
-## MATLAB
+You have to install essential TomoBEAR dependencies (CUDA, Dynamo, and IMOD) and may additionally install optional ones (MotionCor2, GCTF, etc.). The corresponding links you may find in the section [[ Additional software | https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software ]].
+
+## Video-tutorial
+
+We have prepared a small video-tutorial explaining the most basic `TomoBEAR` setup, which is needed for our [80S ribosome data processing tutorial](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials):
+* [Video-tutorial](https://drive.google.com/file/d/1Nhltdo7DbWdzPhAbnkzq7lCkDghxJrku/view?usp=share_link) explaining how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies.
+
+For more detailed or specific instructions please look at the further chapters provided on this page.
+
+## Get source code and binary
+
+### Clone the latest version
+
+To get the latest ```TomoBEAR``` version you can simply clone *main* branch by:
+```bash
+ git clone https://github.com/KudryashevLab/TomoBEAR.git
+```
+
+### Clone specific version
+
+To get a specific version of the ```TomoBEAR``` you need to create the following ```install_TomoBEAR.sh``` installation bash script:
+
+```bash
+VER=${1}
+INSTALL_DIR=$(readlink -f ./${2})
+echo "Installing TomoBEAR-v"${VER} "in the directory " ${INSTALL_DIR}
+
+echo "Fetching and unpacking source code from GitHub..."
+mkdir -p ${INSTALL_DIR}
+cd ${INSTALL_DIR}
+wget https://github.com/KudryashevLab/TomoBEAR/archive/refs/tags/v${VER}.tar.gz
+tar zxvf v${VER}.tar.gz
+ln -s TomoBEAR-${VER} ${VER}
+```
+
+If binary was also applied to the release which you want to get, you need to add as well the following lines to the ```install_TomoBEAR.sh```:
+```
+echo "Fetching and activating binary..."
+cd ${VER}
+wget https://github.com/KudryashevLab/TomoBEAR/releases/download/v${VER}/TomoBEAR-${VER}
+chmod +x TomoBEAR-${VER}
+ln -s TomoBEAR-${VER} TomoBEAR
+rm -f ../v${VER}.tar.gz
+```
+To use it, activate it by
+```bash
+chmod +x install_TomoBEAR.sh
+```
+and execute as the following
+```bash
+./install_TomoBEAR.sh X.Y.Z /path/to/dir
+```
+where ```X.Y.Z``` is the version of the release (e.g., 0.3.0) and ```/path/to/dir``` is the path to the folder where to put the TomoBEAR source code.
+
+The list of available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
+
+> **Note**
+> </br> We are grateful to Wolfgang Lugmayr (CSSB, Hamburg) for the installation script idea.
+
+## Initialize TomoBEAR
+
+### MATLAB
 
 If you want to run on a local machine then it is advised to run TomoBEAR from within MATLAB. This way you also don't need to download and install the MATLAB Compiled Runtime (MCR) if it is not already installed in your facility.
 
 It is adviced to use the following MATLAB release under which the software was tested: MATLAB R2021a.
 
-Everything you need to get TomoBEAR on your machine is to change to some folder where you want to have TomoBEAR and execute the following command
+Further you need to install TomoBEAR's dependencies, at least all mandatory ones: CUDA, Dynamo and IMOD. For the corresponding links and some instructions on that refer to the section [Additional Software](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
 
-* `git clone https://github.com/KudryashevLab/tomoBEAR.git`.
+Afterwards you need to configure and initialize TomoBEAR with the corresponding paths to the dependencies. Instructions on that part you may find below in the subsection [Configure installed software](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#configure-installed-software)
 
-After that change to the folder TomoBEAR with
-
-* `cd tomoBEAR`
-
-Inside of the tomoBEAR folder you will find a configurations folder in which the file `defaults.json` can be found. Open the file `defaults.json` and adjust the following variables inside the general section
-
-* `"pipeline_location": ""` put in the double quotes the location of cloned TomoBEAR
-* `"motion_correction_command": ""` put in the double quotes the executable name of MotionCor2 or the full path (with the executable name)
-* `"ctf_correction_command": ""` put in the double quotes the executable name of Gctf or the full path (with the executable name)
-* `"dynamo_path": ""` put in the double quotes the path to your dynamo folder
-
-Optionally you can set up as well the following variables inside the `"general"` section:
-
-* `"aretomo_command": ""` put in the double quotes the executable name of AreTomo or the full path (with the executable name)
-* `"SUSAN_path": ""` put in the double quotes the location of cloned SUSAN
-
-If you use the Linux module system please insert the module names which need to be loaded to make all the necessary software available and working in the following variable in the general section
-
-* `"modules": ["IMOD_module", "Gctf_module", "MotionCor2_module", "CUDA_module_1", "CUDA_module_2"]`
-
-Afterwards start MATLAB with the command
+Finally, start MATLAB with the command
 
 * `./run_matlab.sh`
 
 To be able to run that MATLAB should be in your system's `PATH` variable.
 The first time you start TomoBEAR after cloning it, initialization of necessary paths will be automatically performed, which could take a couple of minutes. But no worries, this is happening only once per the TomoBEAR clone you have fetched.
 
-## Standalone
+### Standalone
 
-TomoBEAR can also be used as a standalone application. For that you will need the standalone package itself which can be found on the [Releases page](https://github.com/KudryashevLab/tomoBEAR/releases). You have to download the zipped source code and the corresponding attached binary called `TomoBEAR`. Further you need to unzip archive with the source code and put in that folder downloaded `TomoBEAR` binary.
+TomoBEAR can also be used as a standalone application. For that you will need to run the [installation script (see section above)](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#get-source-code-and-binary).
+The available releases can be found on the [Releases page](https://github.com/KudryashevLab/TomoBEAR/releases).
 
-As well, you will need to install and setup the additional software which is [mentioned below](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
+As well, you will need to install and setup the external software which is [mentioned below](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
 
 Additionally you will need the MCR (MATLAB Compiled Runtime) from [here](https://www.mathworks.com/products/compiler/matlab-runtime.html). There you need to get the newest **MCR 2021a** to be able to run TomoBEAR. When the download of the MCR is finished you will need to give it execution rights.
 For that change to the folder where the file was downloaded to and execute the following command
@@ -101,35 +143,56 @@ When the installation is finished, remember to include to the enviromental varia
 /usr/local/MATLAB/MATLAB_Runtime/v910/extern/bin/glnxa64
 ```
 
-Inside of the cloned TomoBEAR folder you will find a "configurations" folder in which the file `defaults.json` can be found. Open the file `defaults.json` and adjust the following variables inside the `"general"` section:
+Further you need to install TomoBEAR's dependencies, at least all mandatory ones: CUDA, Dynamo and IMOD. For the corresponding links and some instructions on that refer to the section [Additional Software](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#additional-software).
 
-* `"pipeline_location": ""` put in the double quotes the location of cloned TomoBEAR
-* `"motion_correction_command": ""` put in the double quotes the executable name of MotionCor2 or the full path (with the executable name)
-* `"ctf_correction_command": ""` put in the double quotes the executable name of Gctf or the full path (with the executable name)
-* `"dynamo_path": ""` put in the double quotes the path to your dynamo folder
+Afterwards you need to configure and initialize TomoBEAR with the corresponding paths to the dependencies. Instructions on that part you may find below in the subsection [Configure installed software](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup#configure-installed-software)
 
-Optionally you can set up as well the following variables inside the `"general"` section:
-
-* `"aretomo_command": ""` put in the double quotes the executable name of AreTomo or the full path (with the executable name)
-* `"SUSAN_path": ""` put in the double quotes the location of cloned SUSAN
-
-If you use the Linux module system please insert the module names which need to be loaded to make all the necessary software available and working in the following variable in the general section
-
-* `"modules": ["IMOD_module", "Gctf_module", "MotionCor2_module", "CUDA_module_1", "CUDA_module_2"]`
-
-Afterwards initialize the current TomoBEAR standalone by running (from TomoBEAR code directory)
+Finally, initialize the current TomoBEAR standalone by running (from TomoBEAR code directory)
 
 * `./TomoBEAR init`
 
 which will perform the initialization of necessary paths automatically, which could take a couple of minutes. But this you should do only once per the TomoBEAR clone you have fetched.
 
+#### Configure installed software
+
+Please, follow the setup instructions for all the software packages you downloaded. At the best, you will find the paths to the executables of the downloaded software in your `PATH` variable of your Linux system.
+
+If this is not the case you need to adjust the paths to the executables in the
+`configurations/defaults.json` file. The keys where the values need to be adjusted can be found in the section `general` of the `defaults.json` file and are the following ones:
+* mandatory:
+  - `"pipeline_location": ""` - location of the cloned TomoBEAR source code
+  - `"dynamo_path": ""` - path to your Dynamo folder
+* semi-mandatory (if you need motion/CTF-correction routines):
+  - `"motion_correction_command": ""` - executable name of MotionCor2 or the full executable filepath
+  - `"ctf_correction_command": ""` - executable name of Gctf/CTFFIND4 or the full executable filepath
+* optional:
+  - `"aretomo_command": ""` - executable name of AreTomo or the full executable filepath
+  - `"SUSAN_path": ""` - location of the cloned SUSAN source code
+  - `"conda_path": ""` - location of the anaconda/miniconda
+
+Additionaly, to be able to use IsoNet, you need fill in the following variables in the section `IsoNet`:
+*  `"isonet_env": ""` - name of the environment created and configured for IsoNet (following the [IsoNet setup instructions](https://github.com/IsoNet-cryoET/IsoNet) )
+*  `"repository_path": ""` - location of the cloned IsoNet source code
+
+> **Warning**
+> <br/> Be sure to use a version that supports your current CUDA installation.
+
+> **Note**
+> <br/> Sometimes software which depends on the newer CUDA libraries can handle versions compiled with older CUDA libraries.
+
+If you install IMOD the normal way then IMOD should be already in your `PATH` variable and therefore callable from everywhere. This is the only way of IMOD configuration supported by TomoBEAR.
+
+If you use the Linux module system please insert the module names which need to be loaded to make all the necessary software available and working in the following variable in the general section
+
+* `"modules": ["IMOD_module", "Gctf_module", "MotionCor2_module", "CUDA_module_1", "CUDA_module_2"]`
+
 ## Additional Software
 
-As tomoBEAR is also wrapping standardized tools to fulfill some of the processing steps these need to be installed and executable. The advantage of such an Best of Breed approach is that you can profit of developments in algorithms in these tools and you can use them in the pipeline without any changes to the code at best.
+As TomoBEAR is wrapping standardized tools to fulfill some of the processing steps these need to be installed and executable.
 
 ### Module System
 
-If you are working in a cryo electron microscopy facility and employ a cluster with a module system where all the needed software is already deployed as modules it is fairly easy to setup tomoBEAR. If not all the software packages are available as modules you have two possibilities.
+If you are working in a cryo electron microscopy facility and employ a cluster with a module system where all the needed software is already deployed as modules it is fairly easy to setup TomoBEAR. If not all the software packages are available as modules you have two possibilities.
 
 1. The first and probably the easiest possibility for inexperienced users is to ask the administrator or some responsible person for the module system to introduce the needed software as modules
 
@@ -143,7 +206,7 @@ As for the other software packages you can add the required CUDA versions also t
 
 The easiest way for the manual installation is to add the repositories with CUDA to your specific OS package manager. That is yum in CentOS and apt or apt-get in Ubuntu. The other way is a manual installation from the executables which are available from the [NVIDIA homepage](https://developer.nvidia.com/cuda-toolkit-archive).
 
-#### CUDA
+##### CUDA
 
 For all the additional software packages the proper CUDA toolkits with the newest driver for your graphics card need to be installed.
 
@@ -161,11 +224,11 @@ To get the newest CUDA on an Ubuntu system the easiest way is to install it via 
 
 #### Dynamo
 
-For the non standalone version of tomoBEAR you need a Dynamo version with tilt stack alignment capabilities. The newest version can be downloaded from here.
+For the non standalone version of TomoBEAR you need a Dynamo version with tilt stack alignment capabilities. The newest version can be [downloaded from here](https://wiki.dynamo.biozentrum.unibas.ch/w/index.php/Downloads).
 
 To minimize the dependencies on different CUDA versions it is advised to recompile the CUDA kernel for averaging with the newest CUDA version which is at best already available on your machine. If not please revise the chapter CUDA on this page.
 
-To recompile the kernel you just need to the location where dynamo was extracted and access the folder ´cuda´ inside. There you will find a file called ´makefile´ which you need to open and modify the second line containing the variable ´CUDA_ROOT=´. Please put in there the path to your most recent CUDA release available on the system.
+To recompile the kernel you just need to the location where dynamo was extracted and access the folder ```cuda``` inside. There you will find a file called ```makefile``` which you need to open and modify the second line containing the variable ```CUDA_ROOT=```. Please put in there the path to your most recent CUDA release available on the system.
 
 To recompile just execute the following two commands:
 
@@ -181,12 +244,25 @@ MotionCor2 version greater than 1.4.0 is desired.
 
 -   Alternative download [link](https://emcore.ucsf.edu/ucsf-software).
 
-#### Gctf
+#### AreTomo
 
 Head to the
-[Gctf](https://www2.mrc-lmb.cam.ac.uk/research/locally-developed-software/zhang-software/)
-downlaod page and download Gctf version 1.06. Gctf version 1.18 could
-also work but is not tested.
+[AreTomo](https://drive.google.com/drive/folders/1Z7pKVEdgMoNaUmd_cOFhlt-QCcfcwF3_)
+download page. There you can find different AreTomo versions along with the documentation.
+
+#### Gctf
+
+You can download and try one of the following GCTF versions:
+-   [Gctf v1.06](https://www2.mrc-lmb.cam.ac.uk/download/gctf_v1-06-and-examples/) - the main version, tested to be working under TomoBEAR;
+-   [Gctf v1.18](https://www2.mrc-lmb.cam.ac.uk/download/special-version-for-phase-plate-gctf_v1-18/) - special version for phase plate data;
+-   [Gctf Gautomatch cu10.1](https://www2.mrc-lmb.cam.ac.uk/download/gctf_gautomatch_cu10-1-tar-gz/) - version for CUDA-10 (should work under TomoBEAR, but was not tested).
+
+#### CTFFIND4
+
+Head to the [CTFFIND4](https://grigoriefflab.umassmed.edu/ctf_estimation_ctffind_ctftilt) or [cisTEM](https://cistem.org/) download page. There you can find CTFFIND4/cisTEM source code and/or binaries.
+
+> **Note**
+> <br/> In the following releases we are also planning to include CTFFIND4 updated version with tilted images support from the development version of the cisTEM package (https://cistem.org/development).
 
 #### IMOD
 
@@ -200,38 +276,14 @@ To install and use SUSAN follow the instructions in the [SUSAN](https://github.c
 
 #### Anaconda
 
-TomoBEAR can use various python based techniques to extend its functionality like using a neural net-based picker or a neural net-based denoising algorithm. For that, it assumes you have Anaconda or Miniconda installed. For that either use your OS-included package manager or install it from the [Anaconda](https://www.anaconda.com/products/individual) web page. You can also take the miniconda installation to save on space and inodes.
+TomoBEAR can use various python based techniques to extend its functionality like using a neural net-based picker, denoising or missing wedge reconstruction algorithm. For that, it assumes you have Anaconda or Miniconda installed. For that either use your OS-included package manager or install it from the [Anaconda](https://www.anaconda.com/products/individual) web page. You can also take the miniconda installation to save on space and inodes.
 
-#### CryoCARE
+#### IsoNet
 
-CryoCARE is a neural net-based denoising framework based on convolutional neural nets and the u-net architecture which can learn to denoise cryo images. With TomoBEAR it is possible to denoise tomograms with the help of CryoCARE. To be able to do so it needs to be installed. For that please clone the [CryoCARE](https://github.com/juglab/cryoCARE_pip) implementation from [juglab](https://github.com/juglab) and follow the instructions on their page.
+IsoNet is a DL framework based on convolutional neural nets (CNNs) and the U-net architecture which can learn both to denoise and reconstruct missing wedge on cryo-elecrtron microscopy images. With TomoBEAR it is possible to perform those operations on tomograms using IsoNet. For that please clone the [IsoNet](https://github.com/IsoNet-cryoET/IsoNet) and follow the instructions on their page to setup Python environment.
 
-
-
-#### Software Installation
-
-Please follow the instructions for all the software packages you
-downloaded. At best you will find the paths to the executables of the
-downloaded software in your `PATH` variable of your Linux system. If this
-is not the case you need to adjust the paths to the executables in the
-`defaults.json` file which you can find in the folder `configurations`.
-
-The keys where the values need to be adjusted can be found in the section `general` of the JSON file and are the following ones:
-
-* `"pipeline_location": ""`
-* `"motion_correction_command": ""`
-* `"ctf_correction_command": ""`
-* `"dynamo_path": ""`
-
-If you don't have the software in your path you can provide the full
-path to the executable as the value. Also if you downloaded a newer
-version you will need to adjust the name of the executable even if you
-can find it in the PATH variable. Also, be sure to use a version that
-supports your current CUDA installation. Sometimes newer CUDA libraries
-can handle versions compiled with older CUDA libraries. So it is worth
-trying executables compiled for older CUDA libraries if you have newer
-ones installed.
-
-If you install IMOD the normal way then IMOD should be already in your
-`PATH` variable and therefore callable from everywhere. This is the only
-way supported by TomoBEAR.
+The original IsoNet version has limited missing wedge angular range of -60...+60, however there is an extended IsoNet version which allows for arbitrary parametrized missing wedge angular range on the ```mw_angle``` branch of the IsoNet original repository. TomoBEAR supports this version as well, so if you want to use it, you need to clone this branch by:
+```bash
+git clone --branch mw_angle https://github.com/IsoNet-cryoET/IsoNet.git IsoNet_mw
+```
+where ```IsoNet_mw``` is the folder name where this IsoNet version will be cloned so that original IsoNet version is not overwritten if you already got one.

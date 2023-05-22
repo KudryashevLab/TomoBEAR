@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 function runPipeline(compute_environment, configuration_path, default_configuration_path, starting_tomogram, ending_tomogram, step, gpu)
 if nargin <= 3
     starting_tomogram = -1;
@@ -72,6 +91,30 @@ if string(compute_environment) == "initialize" || string(compute_environment) ==
     else
         disp("WARNING: TomoBEAR is only partly initialized!");
     end
+elseif string(compute_environment) == "local_live"
+    %% PIPELINE GENERATION
+    if nargin == 1
+        pipeline = LocalLivePipeline("meta_data/project.json");
+    elseif nargin == 2 && ~exist("default_configuration_path", "var")
+        pipeline = LocalLivePipeline(configuration_path);
+    elseif nargin >= 3 || nargin == 2 && exist("default_configuration_path", "var")
+        pipeline = LocalLivePipeline(configuration_path, default_configuration_path);
+    end
+    
+    %% PRINT GENERATED PIPELINE
+    pipeline.print();
+    
+    %% PIPELINE EXECUTION
+    if nargin <= 3
+        pipeline.execute()
+    else
+        if isdeployed() == true
+            pipeline.execute(str2double(starting_tomogram), str2double(ending_tomogram), str2double(step), str2double(gpu));
+        else
+            pipeline.execute(starting_tomogram, ending_tomogram, step, gpu);
+        end
+    end
+    
 elseif string(compute_environment) == "local"
     %if isdeployed()
     % TODO: think of passing project_path to initializeEnvironment

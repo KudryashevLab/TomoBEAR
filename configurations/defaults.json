@@ -35,6 +35,7 @@
         "wipe_cache": false,
         "motion_correction_command": "", 
         "ctf_correction_command": "",
+        "ctffind_heredoc_path": "configurations/ctffind_heredoc.sh",
         "double_numbering": true,
         "prefix_position": 0,
         "tomogram_number_position": -1,
@@ -101,7 +102,7 @@
         "number_regex": "[_]*([\\d]+[_[\\d]*]*)_",
         "name_number_regex": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)",
         "name_number_regex_backup": "([A-Za-z\\d_]+[A-Za-z]+)[_]*([\\d]+[_[\\d]*]*)_",
-        "month_date_time_regex": "[_]+([{A-Z}1][{a-z}2]+[\\d]+)_([{\\d}2]+.[{\\d}2]+.[{\\d}2]+)[.]+",
+        "month_date_time_regex": "_([A-Z][a-z]{2}[\\d]{2})_([\\d]{2}.[\\d]{2}.[\\d]{2})[._]",
         "tomogram_acquisition_time_in_minutes": 70,
         "keep_intermediates": true,
         "reconstruct": "binned",
@@ -193,7 +194,8 @@
         "dose_weighted_sum_tilt_stacks_folder": "dose_weighted_sum_tilt_stacks",
         "denoised_binned_tomograms_folder": "denoised_binned_tomograms",
         "denoised_tilt_stacks_folder": "denoised_tilt_stacks",
-        "aretomo_command": ""
+        "aretomo_command": "",
+        "listening_time_threshold_in_minutes": 15
     },
     "StopPipeline": {
         "execution_method": "control"
@@ -224,6 +226,11 @@
         "use_ctf_corrected_stack": true,
         "generate_exact_filtered_tomograms": false,
         "exact_filter_size": 1500,
+        "generate_nad_filtered_tomograms": false,
+        "nad_filter_output_iterations_list": [3],
+        "nad_filter_number_of_iterations": -1,
+        "nad_filter_sigma_for_smoothing": -1,
+        "nad_filter_threshold_for_gradients": -1,
         "use_rawtlt": true,
         "correct_angles": "center",
         "skip": false,
@@ -331,7 +338,16 @@
         "citation_link": "",
         "doi": "",
         "do_EPA": true,
-        "estimated_astigmatism": 1000
+        "estimated_astigmatism": 1000,
+        "ctf_estimation_method": "gctf",
+        "fourier_spectrum_size": 1024,
+        "resL": 50,
+        "resH": 4,
+        "defL": 5000,
+        "defH": 90000,
+        "ctf_preestim_defS": 500,
+        "ctf_estim_defS": 100,
+        "ctffind_output_suffix": "ctfestim"
     },
     "RefineFiducialModel": {
         "execution_method": "sequential",
@@ -877,10 +893,12 @@
     },
     "AreTomo": {
         "execution_method": "in_order",
+        "input_stack_binning": 1,
         "reconstruction": false,
         "weighted_back_projection": true,
         "tilt_axis_refine_flag": 1,
-        "apply_tilt_axis_offset": 0,
+        "correct_tilt_axis_offset": 0,
+        "apply_given_tilt_axis_offset": false,
         "tilt_axis_offset": 0,
         "align_height_ratio": 0.75,
         "apply_dose_weighting": false,
@@ -910,5 +928,96 @@
         "smoothing_exp_decay": -40,
         "cleaned_postfix": "gef",
         "relink_as_previous_output": false
+    },
+    "GenerateParticles": {
+        "execution_method": "once",
+        "generate_particles_method": "",
+        "particles_table_path": "",
+        "box_size": 1.0,
+        "particles_binning": -1,
+        "use_SUSAN": false,
+        "ctf_correction_method": "defocus_file",
+        "susan_padding": 200,
+        "per_particle_ctf_correction": "phase_flip",
+        "padding_policy": "zero",
+        "normalization": "zm"
+    },
+    "IsoNet": {
+        "execution_method": "once",
+        "isonet_env": "",
+        "repository_path": "",
+        "tomograms_to_use": [],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "prepare_star": {
+                "use_ctf_corrected_tomograms": false,
+                "add_defocus_to_star": true,
+                "tomograms_binning": -1,
+                "folder_name": "tomograms",
+                "output_star": "tomograms.star",
+                "number_subtomos": -1
+            },
+            "deconv": {
+                "star_file": "tomograms.star",
+                "deconv_folder": "deconv",
+                "snrfalloff": 0.7,
+                "deconvstrength": -1,
+                "highpassnyquist": -1,
+                "chunk_size": -1,
+                "overlap_rate": -1,
+                "ncpu": -1
+            },
+            "make_mask": {
+                "star_file": "tomograms.star",
+                "mask_folder": "mask",
+                "patch_size": -1,
+                "mask_boundary": "",
+                "density_percentage": 50,
+                "std_percentage": 50,
+                "z_crop": -1,
+                "use_deconv_tomo": true
+            },
+            "extract": {
+                "star_file": "tomograms.star",
+                "subtomo_folder": "subtomo",
+                "subtomo_star": "subtomo.star",
+                "cube_size": -1,
+                "crop_size": -1,
+                "use_deconv_tomo": true
+            },
+            "refine": {
+                "subtomo_star": "subtomo.star",
+                "iterations": 30,
+                "data_dir": "",
+                "pretrained_model": "",
+                "result_dir": "results",
+                "preprocessing_ncpus": -1,
+                "continue_from": "",
+                "epochs": -1,
+                "batch_size": -1,
+                "steps_per_epoch": -1,
+                "noise_level": [0.05,0.1,0.15,0.2],
+                "noise_start_iter": [10,15,20,25],
+                "noise_mode": "",
+                "noise_dir": "",
+                "learning_rate": -1,
+                "drop_out": -1,
+                "convs_per_depth": -1,
+                "kernel": [],
+                "unet_depth": -1,
+                "filter_base": -1,
+                "batch_normalization": -1,
+                "normalize_percentile": -1
+            },
+            "predict": {
+                "star_file": "tomograms.star",
+                "model": "results/model_iter30.h5",
+                "output_dir": "corrected_tomos",
+                "cube_size": -1,
+                "crop_size": -1,
+                "batch_size": -1,
+                "normalize_percentile": -1
+            }
+        }
     }
 }

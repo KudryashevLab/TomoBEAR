@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 function particles_path = generateParticles(configuration, table_path, binning, box_size, append_tags, force_method)
 
 if nargin < 6
@@ -116,6 +135,11 @@ table = dread(table_path);
 
 if binning > 1
     aligned_tilt_stacks = getBinnedAlignedTiltStacksFromStandardFolder(configuration, true, binning);
+    aligned_tilt_stacks = aligned_tilt_stacks(contains({aligned_tilt_stacks.name}, "bin_" + binning));
+    if isempty(aligned_tilt_stacks) == true
+        error("ERROR: No binned aligned non-CTF-corrected stacks at the requested binning level bin_" + binning);
+        %aligned_tilt_stacks = getCtfCorrectedBinnedAlignedTiltStacksFromStandardFolder(configuration, true);
+    end
 else
     aligned_tilt_stacks_raw = getAlignedTiltStacksFromStandardFolder(configuration, true);
     
@@ -138,8 +162,9 @@ end
 %tlt_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "tlt", "last");
 tlt_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".tlt");
 
-%defocus_files = getFilesFromLastModuleRun(obj.configuration, "BatchRunTomo", "defocus", "last");
-defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".defocus");
+%defocus_files = getFilesFromLastModuleRun(configuration, "GCTFCtfphaseflipCTFCorrection", "defocus", "last");
+%defocus_files = getFilesWithMatchingPatternFromLastBatchruntomoRun(configuration, ".defocus");
+defocus_files = getDefocusFiles(configuration, ".defocus");
 
 tomos_id = unique(table(:,20));
 

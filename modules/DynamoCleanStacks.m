@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 classdef DynamoCleanStacks < Module
     methods
         function obj = DynamoCleanStacks(configuration)
@@ -101,7 +120,7 @@ classdef DynamoCleanStacks < Module
                         obj.dynamic_configuration.tilt_index_angle_mapping.(name)(4,:) = cumsum(obj.dynamic_configuration.tilt_index_angle_mapping.(name)(3,:));
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_tilt_stack_path = tilt_stack_destination;
                         obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).modified_tilt_stack_symbolink_link = createSymbolicLinkInStandardFolder(obj.configuration, tilt_stack_destination, "tilt_stacks_folder", obj.log_file_id);
-                        if obj.configuration.keep_intermediates == false
+                        if obj.configuration.execute == false && obj.configuration.keep_intermediates == false
                             delete(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_path);
                         end
                         if obj.configuration.show_truncated_stacks

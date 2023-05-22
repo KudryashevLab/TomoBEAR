@@ -1,3 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This file is part of the TomoBEAR software.
+% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% 
+% This program is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as
+% published by the Free Software Foundation, either version 3 of the
+% License, or (at your option) any later version.
+% 
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+% 
+% You should have received a copy of the GNU Affero General Public License
+% along with this program.  If not, see <https://www.gnu.org/licenses/>.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 % NOTE: https://bio3d.colorado.edu/imod/betaDoc/alignframesGuide.html
 % NOTE: https://bio3d.colorado.edu/imod/download.html
 classdef BatchRunTomo < Module
@@ -665,8 +684,10 @@ classdef BatchRunTomo < Module
                         %                             fprintf(fileID, "%0.2f\n", angles(i));
                         %                         end
                         %                         fclose(fileID);
-                    elseif obj.configuration.starting_step == 0 && obj.configuration.ending_step == 3 && ~fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid")
-                        obj.configuration.ending_step = 5;
+                    % NOTE: commented out lines below because otherwise
+                    % patch tracking-based alignment is impossible
+                    %elseif obj.configuration.starting_step == 0 && obj.configuration.ending_step == 3 && ~fileExists(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.fid_files_folder + string(filesep) + splitted_name{1} + string(filesep) + splitted_name{1} + ".fid")
+                    %    obj.configuration.ending_step = 5;
                         %obj.dynamic_configuration.ending_step = obj.configuration.ending_step;
                         %disp("INFO: updated ending step to step " + obj.dynamic_configuration.ending_step + " due to incorrect DynamoTiltSeriesAlignment!");
                     end
@@ -732,64 +753,85 @@ classdef BatchRunTomo < Module
                     [folder, name, extension] = fileparts(dir_list(i).name);
                     tilt_stack_file_path = string(dir_list(i).folder) + string(filesep) + string(dir_list(i).name);
                     
-                    if obj.configuration.ending_step >= 8
-                        if obj.configuration.aligned_stack_binning > 1
-                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name);
+                    if obj.configuration.aligned_stack_binning > 1
+                        if obj.configuration.ending_step == 8
+                            % link binned aligned tilt stacks before
+                            % creating unbinned aligned tilt stacks
+                            [folder, name, extension] = fileparts(dir_list(i).name);
+                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name);
+                            if fileExists(current_location + string(filesep) + name + ".ali")
+                                createSymbolicLink(current_location + string(filesep) + name + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
+                            else
+                                createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
+                            end
+                            
+                            xf_file = dir(current_location + string(filesep) + name + ".xf");
+                            [status, command_output] = system("header -s " + tilt_stack_file_path);
+                            command_output = str2num(command_output);
+                            status = system("newstack -InputFile " + tilt_stack_file_path...
+                                + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali -TransformFile "...
+                                + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                            if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                            else
+                                createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                            end
+                            
+                            if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
+                                even_tilt_stacks = getEvenTiltStacksFromStandardFolder(obj.configuration, true);
+                                status = system("newstack -InputFile " + even_tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + even_tilt_stacks(obj.configuration.set_up.adjusted_j).name...
+                                    + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali -TransformFile "...
+                                    + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                    + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name);
+                                if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                else
+                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                end
+
+                                odd_tilt_stacks = getOddTiltStacksFromStandardFolder(obj.configuration, true);
+                                status = system("newstack -InputFile " + odd_tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + odd_tilt_stacks(obj.configuration.set_up.adjusted_j).name...
+                                    + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali -TransformFile "...
+                                    + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
+                                    + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
+                                [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name);
+                                if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
+                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                else
+                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                                end
+                            end
+                        elseif obj.configuration.ending_step > 8
+                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name);     
                             if fileExists(current_location + string(filesep) + name + "_ali.mrc")
                                 createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
                             else
                                 createSymbolicLink(current_location + string(filesep) + name + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_binned_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + "_bin_" + obj.configuration.aligned_stack_binning + ".ali", obj.log_file_id);
                             end
-                            if obj.configuration.ending_step == 8
-                                xf_file = dir(current_location + string(filesep) + name + ".xf");
-                                [status, command_output] = system("header -s " + tilt_stack_file_path);
-                                command_output = str2num(command_output);
-                                status = system("newstack -InputFile " + tilt_stack_file_path...
-                                    + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali -TransformFile "...
-                                    + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
-                                    + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
-                                [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
-                                if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
-                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                else
-                                    createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                end
-                                
-                                if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
-                                    even_tilt_stacks = getEvenTiltStacksFromStandardFolder(obj.configuration, true);
-                                    status = system("newstack -InputFile " + even_tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + even_tilt_stacks(obj.configuration.set_up.adjusted_j).name...
-                                        + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali -TransformFile "...
-                                        + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
-                                        + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
-                                    [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name);
-                                    if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
-                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                    else
-                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_even_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_even_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                    end
-                                    
-                                    odd_tilt_stacks = getOddTiltStacksFromStandardFolder(obj.configuration, true);
-                                    status = system("newstack -InputFile " + odd_tilt_stacks(obj.configuration.set_up.adjusted_j).folder + filesep + odd_tilt_stacks(obj.configuration.set_up.adjusted_j).name...
-                                        + " -OutputFile " + current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali -TransformFile "...
-                                        + xf_file(i).folder + string(filesep) + xf_file(i).name + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin -SizeToOutputInXandY "...
-                                        + num2str(command_output(2)) + "," + num2str(command_output(1))  + " -TaperAtFill 1,0");
-                                    [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name);
-                                    if fileExists(current_location + string(filesep) + name + "_bin_" + num2str(1) + ".ali")
-                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd.ali", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                    else
-                                        createSymbolicLink(current_location + string(filesep) + name + "_bin_" + num2str(1) + "_odd_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_odd_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
-                                    end
-                                end
-                            end
-                        else
+                        end
+                    else
+                        if obj.configuration.ending_step == 8
                             [folder, name, extension] = fileparts(dir_list(i).name);
-                            if fileExists(obj.configuration, current_location + string(filesep) + name + ".ali")
-                                createSymbolicLinkInStandardFolder(obj.configuration, current_location + string(filesep) + name + ".ali", "ctf_corrected_aligned_tilt_stacks_folder", obj.log_file_id);
+                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name);
+                            if fileExists(current_location + string(filesep) + name + ".ali")
+                                createSymbolicLink(current_location + string(filesep) + name + ".ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                             else
-                                createSymbolicLinkInStandardFolder(obj.configuration, current_location + string(filesep) + name + "_ali.mrc", "ctf_corrected_aligned_tilt_stacks_folder", obj.log_file_id);
+                                createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                            end
+                        elseif obj.configuration.ending_step > 8
+                            [folder, name, extension] = fileparts(dir_list(i).name);
+                            [success, message, message_id] = mkdir(obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_aligned_tilt_stacks_folder + string(filesep) + name);
+                            if fileExists(current_location + string(filesep) + name + ".ali")
+                                createSymbolicLink(current_location + string(filesep) + name + ".ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
+                            else
+                                createSymbolicLink(current_location + string(filesep) + name + "_ali.mrc", obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.ctf_corrected_aligned_tilt_stacks_folder + string(filesep) + name + string(filesep) + name + ".ali", obj.log_file_id);
                             end
                         end
                     end
+                    
                     % TODO:NOTE: infact step 21
                     if obj.configuration.ending_step > 14
                         if fileExists(obj.configuration, current_location + string(filesep) + name + ".rec")
