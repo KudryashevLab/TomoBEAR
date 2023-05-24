@@ -118,9 +118,11 @@ classdef TemplateMatchingPostProcessing < Module
                 end
             end
             
-            tab_all_path = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder;
-            tab_all_file_path = char(tab_all_path + string(filesep) + "tab_ini_all_bin_" + obj.configuration.template_matching_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
+            tab_all_file_path = char(output_path + string(filesep) + "tab_ini_all_bin_" + obj.configuration.template_matching_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
             dwrite(tab_all, tab_all_file_path);
+             
+            link_destination = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder;
+            createSymbolicLink(tab_all_file_path, link_destination, obj.log_file_id);
             
             if obj.configuration.crop_particles == true
                 generateParticles(obj.configuration, tab_all_file_path, obj.configuration.template_matching_binning, box_size, true);
