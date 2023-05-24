@@ -71,6 +71,7 @@ classdef IsoNet < Module
                         break
                     end
                 end
+                tomograms = tomograms_all(contains({tomograms.name}, "bin_" + binning));
             elseif step_params.tomograms_binning > 1
                 binning = step_params.tomograms_binning;
                 tomograms = tomograms(contains({tomograms.name}, "bin_" + binning));
