@@ -1019,5 +1019,50 @@
                 "normalize_percentile": -1
             }
         }
+    },
+    "crYOLO": {
+        "execution_method": "once",
+        "cryolo_env": "",
+        "tomograms_to_use": [],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "config": {
+                "cryolo_command": "cryolo_gui.py config", 
+                "target_boxsize": 220,
+                "config_json_filepath": "config_cryolo.json",
+                "filter": "LOWPASS",
+                "low_pass_cutoff": 0.1,
+                "janni_model_path": "",
+                "train_mode": false,
+                "train_tomograms_folder": "train_tomograms",
+                "tomograms_binning": -1,
+                "train_annot_folder": "train_annot"
+            },
+            "train": {
+                "cryolo_command": "cryolo_train.py",
+                "config_json_filepath": "config_cryolo.json",
+                "num_cpu": -1,
+                "early": 15,
+                "warmup": -1
+            },
+            "predict": {
+                "cryolo_command": "cryolo_predict.py",
+                "config_json_filepath": "config_cryolo.json",
+                "trained_model_filepath": "cryolo_model.h5",
+                "threshold": -1,
+                "test_tomograms_folder": "test_tomograms",
+                "tomograms_binning": -1,
+                "predict_annot_folder": "predict_annot",
+                "num_cpu": -1,
+                "tracing_search_range": -1,
+                "tracing_memory": -1,
+                "tracing_min_length": -1
+            },
+            "produce_particles_table": {
+                "raw_prtcl_coords_dir": "predict_annot/COORDS",
+                "per_table_particle_count": -1,
+                "total_particle_count": -1
+            }
+        }
     }
 }
