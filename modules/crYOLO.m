@@ -37,7 +37,7 @@ classdef crYOLO < Module
             end
             
             % NOTE: add 'success' files to be able to re-run substeps
-            
+            % NOTE: add 'stop' execution control step
             for subjob_idx=1:length(steps_to_execute_fields)
                 disp("INFO: crYOLO substep " + string(subjob_idx) + ":" + string(steps_to_execute_fields{subjob_idx}));
                 step_params = mergeConfigurations(obj.configuration.steps_to_execute_defaults.(steps_to_execute_fields{subjob_idx}), obj.configuration.steps_to_execute.(steps_to_execute_fields{subjob_idx}), "crYOLO", "dynamic");
@@ -58,22 +58,24 @@ classdef crYOLO < Module
             end
             
             if step_params.train_mode == true
-                use_params_cell{length(use_params_cell)+1} = 'train_tomograms_folder';
+                use_params_cell{length(use_params_cell)+1} = 'train_image_folder';
                 use_params_cell{length(use_params_cell)+1} = 'train_annot_folder';
                 
                 if ~isfolder(step_params.train_tomograms_folder) || isempty(step_params.train_tomograms_folder)
                     obj.LinkTomogramsToRequestedDirectory(step_params.tomograms_binning, step_params.train_tomograms_folder);
+                    step_params.train_tomograms_folder = obj.output_path + string(filesep) + step_params.train_tomograms_folder;
+                    step_params.train_image_folder = step_params.train_tomograms_folder;
                 end
+                
                 if ~isfolder(step_params.train_annot_folder)
                     mkdir(step_params.train_annot_folder);
                     disp("WARNING: Has not found any annotation files! Be sure to prepare them before the training!");
+                    step_params.train_annot_folder = obj.output_path + string(filesep) + step_params.train_annot_folder;                    
                 end
-                
-                step_params.train_tomograms_folder = obj.output_path + string(filesep) + step_params.train_tomograms_folder;
-                step_params.train_annot_folder = obj.output_path + string(filesep) + step_params.train_annot_folder;
             end
             
             use_params = obj.getRequestedOnlyParametersStructure(step_params, use_params_cell);
+            
             step_params.config_json_filepath = obj.output_path + string(filesep) + step_params.config_json_filepath;
             params_string = obj.getParamsString(use_params);
             params_string = step_params.config_json_filepath...
@@ -86,6 +88,8 @@ classdef crYOLO < Module
 
             if ~isfile(step_params.config_json_filepath)
                 error('ERROR: the requested config_json_filepath was not found!');
+            elseif isfile(obj.output_path + string(filesep) + step_params.config_json_filepath)
+                step_params.config_json_filepath = obj.output_path + string(filesep) + step_params.config_json_filepath;
             end
 
             if obj.configuration.gpu > 0
@@ -103,7 +107,7 @@ classdef crYOLO < Module
             else
                 use_params.num_cpu = getCpuPoolSize(1, step_params.num_cpu);
             end
-            step_params.config_json_filepath = obj.output_path + string(filesep) + step_params.config_json_filepath;
+            
             params_string = "-c " + step_params.config_json_filepath + " " + obj.getParamsString(use_params);
             command_output = obj.executeCrYOLOCommand(params_string, step_params.cryolo_command);
         end
@@ -112,6 +116,8 @@ classdef crYOLO < Module
              
             if ~isfile(step_params.config_json_filepath)
                 error('ERROR: the requested config_json_filepath was not found!');
+            elseif isfile(obj.output_path + string(filesep) + step_params.config_json_filepath)
+                step_params.config_json_filepath = obj.output_path + string(filesep) + step_params.config_json_filepath;
             end
 
             if obj.configuration.gpu > 0
@@ -122,15 +128,26 @@ classdef crYOLO < Module
             
             if ~isfile(step_params.trained_model_filepath)
                 error('ERROR: the requested trained_model_filepath was not found!');
+            elseif isfile(obj.output_path + string(filesep) + step_params.trained_model_filepath)
+                 step_params.weights = obj.output_path + string(filesep) + step_params.trained_model_filepath;
+            else
+                 step_params.weights = step_params.trained_model_filepath;
             end
-            step_params.weights = step_params.trained_model_filepath;
             
             if ~isfolder(step_params.test_tomograms_folder) || isempty(step_params.test_tomograms_folder)
                 obj.LinkTomogramsToRequestedDirectory(step_params.tomograms_binning, step_params.test_tomograms_folder);
+                step_params.input = obj.output_path + string(filesep) + step_params.test_tomograms_folder;
+            elseif isfolder(obj.output_path + string(filesep) + step_params.test_tomograms_folder)
+                step_params.input = obj.output_path + string(filesep) + step_params.test_tomograms_folder;
+            else
+                step_params.input = step_params.test_tomograms_folder;
             end
-            step_params.input = obj.output_path + string(filesep) + step_params.test_tomograms_folder;
-            step_params.output = obj.output_path + string(filesep) + step_params.predict_annot_folder;
-            step_params.config_json_filepath = obj.output_path + string(filesep) + step_params.config_json_filepath;
+            
+            if isfolder(obj.output_path + string(filesep) + step_params.predict_annot_folder)
+                step_params.output = obj.output_path + string(filesep) + step_params.predict_annot_folder;
+            else
+                step_params.output = step_params.predict_annot_folder;
+            end
             
             use_params_cell = {'weights', 'input', 'output', 'threshold',...
                 'tracing_search_range','tracing_memory','tracing_min_length',...
@@ -148,7 +165,7 @@ classdef crYOLO < Module
             command_output = obj.executeCrYOLOCommand(params_string, step_params.cryolo_command);
         end
         
-        function obj = produce_particles_table(obj, step_params)
+        function obj = export_annotations(obj, step_params)
             
             prtcl_coord_path = step_params.raw_prtcl_coords_dir + string(filesep) + "*.coords";
             prtcl_coord_files = dir(prtcl_coord_path);

@@ -1043,13 +1043,13 @@
                 "config_json_filepath": "config_cryolo.json",
                 "num_cpu": -1,
                 "early": 15,
-                "warmup": -1
+                "warmup": 5
             },
             "predict": {
                 "cryolo_command": "cryolo_predict.py",
                 "config_json_filepath": "config_cryolo.json",
                 "trained_model_filepath": "cryolo_model.h5",
-                "threshold": -1,
+                "threshold": 0.1,
                 "test_tomograms_folder": "test_tomograms",
                 "tomograms_binning": -1,
                 "predict_annot_folder": "predict_annot",
@@ -1058,7 +1058,7 @@
                 "tracing_memory": -1,
                 "tracing_min_length": -1
             },
-            "produce_particles_table": {
+            "export_annotations": {
                 "raw_prtcl_coords_dir": "predict_annot/COORDS",
                 "per_table_particle_count": -1,
                 "total_particle_count": -1
