@@ -166,32 +166,55 @@ classdef crYOLO < Module
         end
         
         function obj = export_annotations(obj, step_params)
-            
-            prtcl_coord_path = step_params.raw_prtcl_coords_dir + string(filesep) + "*.coords";
-            prtcl_coord_files = dir(prtcl_coord_path);
-            
-            if isempty(prtcl_coord_files)
-               error("ERROR: particles table was requested, but annotated raw particles coordinates were not found!");
+
+            cbox_paths = step_params.predict_annot_folder + string(filesep) + "CBOX_3D" + string(filesep) + "*.cbox";
+            cbox_files = dir(cbox_paths);
+
+            if isempty(cbox_files)
+               error("ERROR: particles table was requested, but CBOX_3D annotated particles were not found!");
             end
             
-            [~, name, ~] = fileparts(prtcl_coord_files(1).name);
-            name_splitted = strsplit(name, "_");
-            tomogram_binning = str2num(name_splitted{4});            
+            cbox_filt_dirpath = obj.output_path + string(filesep) + step_params.filtered_CBOX_3D_folder;
+            if ~isfolder(cbox_filt_dirpath)
+                mkdir(cbox_filt_dirpath)
+            end
+            
+            dtbl_filt_dirpath = obj.output_path + string(filesep) + step_params.filtered_Dynamo_tbl_folder;
+            if ~isfolder(dtbl_filt_dirpath)
+                mkdir(dtbl_filt_dirpath)
+            end
+            
             % NOTE: get per each tomo separate particles table
-            output_path = obj.output_path;
-            per_table_particle_count = step_params.per_table_particle_count;
             tab_tomo = {};
-            for i = 1:length(prtcl_coord_files)
-                prtcl_coord_filepath = prtcl_coord_files(i).folder + string(filesep) + prtcl_coord_files(i).name;
-                tab_tomo{i} = produceParticlesTableForTomogram(prtcl_coord_filepath, per_table_particle_count, output_path);
+            disp("INFO: extracting particles with confidence threshold >= " + num2str(step_params.threshold));
+            for i = 1:length(cbox_files)
+                cbox_filepath= cbox_files(i).folder + string(filesep) + cbox_files(i).name;
+                tab_tomo{i} = obj.getFilteredCBOX(cbox_filepath, cbox_filt_dirpath, step_params);
+                obj.writeDynamoTable(cbox_filepath, dtbl_filt_dirpath, tab_tomo{i}, step_params);
             end
             
-            % NOTE: merge individual particles tables
+            % merge all tables and write in a single Dynamo table
+            [~, name, ~] = fileparts(cbox_filepath);
+            name_splitted = strsplit(name, "_");
+            tomogram_binning = str2num(name_splitted{4});  
+            obj.mergeDynamoTables(dtbl_filt_dirpath, tomogram_binning, step_params);
+        end
+        
+        function obj = mergeDynamoTables(obj, dtbl_filt_dirpath, tomogram_binning, step_params)
+            
+            tab_tomo_path = dtbl_filt_dirpath + string(filesep) + "*.tbl";
+            tab_tomo_files = dir(tab_tomo_path);   
+
+            tab_tomo = {};
+            for i = 1:length(tab_tomo_files)
+                tab_tomo_filepath = tab_tomo_files(i).folder + string(filesep) + tab_tomo_files(i).name;
+                tab_tomo{i} = dread(char(tab_tomo_filepath));
+            end            
+            
             tab_all = dynamo_table_blank(size(tab_tomo{1}, 1));
             sum_particles_previous_table = 0;
-            particle_count = step_params.total_particle_count;
-            
-            break_flag = false;
+            particle_count = step_params.particle_count_in_total;
+
             for i = 1:length(tab_tomo)
                 if isempty(tab_tomo{i}) || tab_tomo{i}(1,20) == 0
                     continue;
@@ -203,84 +226,273 @@ classdef crYOLO < Module
                     tab_tomo_tmp(:,1) = tab_tomo{i}(:,1) + sum_particles_previous_table;
                     tab_all(end + 1:end + size(tab_tomo{i}, 1), :) = tab_tomo_tmp;
                 end
-                
+
                 sum_particles_previous_table = sum_particles_previous_table + size(tab_tomo{i}, 1);
                 if particle_count > 0
                     if sum_particles_previous_table > particle_count
                         tab_all(particle_count + 1:end, :) = [];
-                        tab_tomo{i}(particle_count + 1:end, :) = [];
-                        break_flag = true;
+                        break;
                     else
                         particle_count = particle_count - sum_particles_previous_table;
                     end
                 end
-                
-                if break_flag == true
-                	break;
-                end
             end
-            
-            tab_all_file_path = char(output_path + string(filesep) + "tab_ini_all_bin_" + tomogram_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
+            disp("INFO: in total: " + num2str(sum_particles_previous_table) + " particles extracted");
+            tab_all_file_path = char(obj.output_path + string(filesep) + "tab_ini_all_bin_" + tomogram_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
             dwrite(tab_all, tab_all_file_path);
-            
+
             link_destination = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder;
             createSymbolicLink(tab_all_file_path, link_destination, obj.log_file_id);
+        end
+%         
+        function tab_tomo = writeDynamoTable(obj, cbox_filepath, dtbl_filt_dirpath, table, step_params)
             
-            function tab_tomo = produceParticlesTableForTomogram(raw_prtcl_coords_filepath, particle_count, output_path)
+            [~, name, ~] = fileparts(cbox_filepath);
+            name_splitted = strsplit(name, "_");
+            tomogram_number = str2num(name_splitted{2});
+            tomogram_binning = str2num(name_splitted{4});
             
-                [~, name, ~] = fileparts(raw_prtcl_coords_filepath);
-                name_splitted = strsplit(name, "_");
-                tomogram_number = str2num(name_splitted{2});
-                tomogram_binning = str2num(name_splitted{4});
-
-                if fileExists(output_path + string(filesep) + "SUCCESS_" + tomogram_number)
-                    table_file = dir(output_path + string(filesep)...
-                        + "tab_" + num2str(tomogram_number) + "_ini_bin_"...
-                        + num2str(tomogram_binning) + "_*.tbl");
-                    table_file_path = table_file(1).folder + string(filesep) + table_file(1).name;
-                    tab_tomo = dread(char(table_file_path));
+            success_filepath = dtbl_filt_dirpath + string(filesep) + "SUCCESS_" + tomogram_number;
+            failure_filepath = dtbl_filt_dirpath + string(filesep) + "FAILURE_" + tomogram_number;
+            if ~fileExists(success_filepath) && ~fileExists(failure_filepath)
+                
+                if step_params.particle_count_per_tomo > 0
+                    particle_count = min(size(table,1), step_params.particle_count_per_tomo);
+                    table = table(1:step_params.particle_count_per_tomo,:);
                 else
-                    raw_tab_tomo = readtable(raw_prtcl_coords_filepath, 'FileType', 'text');
-                    raw_tab_tomo = table2array(raw_tab_tomo);
-
-                    if particle_count > 0
-                        particle_count = min(size(raw_tab_tomo,1), particle_count);
-                        raw_tab_tomo = raw_tab_tomo(1:particle_count,:);
-                    else
-                        particle_count = size(raw_tab_tomo,1);
-                    end
-                    disp("INFO: " + num2str(particle_count) + " particles were found in tomogram_" + num2str(tomogram_number));
-
+                    particle_count = size(table,1);
+                end
+                disp("INFO: tomogram_" + num2str(tomogram_number) + ": " + num2str(particle_count) + " particles extracted");
+                
+                if particle_count > 0
                     tab_tomo = dynamo_table_blank(particle_count);
 
                     tab_tomo(1:particle_count,1) = 1:particle_count;
                     tab_tomo(1:particle_count,2:3) = ones(particle_count,2);
-                    tab_tomo(1:particle_count,24:26) = raw_tab_tomo(:,:);
 
+                    % NOTE: box left down corner > box center
+                    tab_tomo(1:particle_count,24:25) = table(:,1:2) + table(:,4:5)/2;
+                    tab_tomo(1:particle_count,26) = table(:,3);
+                    
+                    % NOTE: prediction confidence level
+                    tab_tomo(1:particle_count,10) = table(:,9);
+                    
                     tab_tomo(1:particle_count,20) = tomogram_number * ones(particle_count,1);
                     tab_tomo(1:particle_count,32) = ones(particle_count,1);
 
                     if tab_tomo(1,20) ~= 0
-                        table_file_path = output_path + string(filesep)...
+                        table_file_path = dtbl_filt_dirpath + string(filesep)...
                             + "tab_" + num2str(tomogram_number) + "_ini_bin_"...
                             + num2str(tomogram_binning) + "_"...
                             + num2str(particle_count) + ".tbl";
 
                         dwrite(tab_tomo, table_file_path);
-
-                        %writetable(tab_tomo, table_file_path, 'WriteVariableNames', false, 'FileType', 'text', 'Delimiter', ' ');
-
-                        fid = fopen(output_path + string(filesep)...
-                            + "SUCCESS_" + num2str(tomogram_number), "w");
+                        fid = fopen(success_filepath, "w");
                         fclose(fid);
                     else
-                        fid = fopen(output_path + string(filesep)...
-                            + "FAILURE_" + num2str(tomogram_number), "w");
+                        fid = fopen(failure_filepath, "w");
                         fclose(fid);
                     end
+                else
+                    fid = fopen(failure_filepath, "w");
+                    fclose(fid);
                 end
             end
         end
+        
+        function cbox_data_filt = getFilteredCBOX(obj, cbox_filepath, cbox_filt_dirpath, step_params)
+            
+            % read original CBOX and write confidence level-filtered CBOX
+            cbox_fid = fopen(cbox_filepath, 'r');
+
+            [~, cbox_name, cbox_ext] = fileparts(cbox_filepath);
+            cbox_filt_filepath = cbox_filt_dirpath + string(filesep) + cbox_name + cbox_ext;            
+            cbox_filt_fid = fopen(cbox_filt_filepath, 'w');
+            
+            % NOTE: loop over and rewrite lines before data_cryolo
+            fl = rewriteLinesBeforePattern(cbox_fid, cbox_filt_fid, 'data_cryolo');
+            fprintf(cbox_filt_fid, '%s\n', fl);
+            
+            % NOTE: loop over and rewrite lines before loop_
+            fl = rewriteLinesBeforePattern(cbox_fid, cbox_filt_fid, 'loop_');
+            fprintf(cbox_filt_fid, '%s\n', fl);
+            
+            % NOTE: loop over and rewrite _Property lines
+            fl = rewriteLinesMatchingPattern(cbox_fid, cbox_filt_fid, '(_[a-zA-Z]+) (#[\d]+)');
+            
+            % NOTE: read particles coordinates and confidence level
+            cbox_data = [];
+            while ~feof(cbox_fid) && length(fl)>0
+                cbox_extracted_data = textscan(fl,'%f','TreatAsEmpty','<NA>');
+                cbox_data = [cbox_data; cbox_extracted_data{1}'];
+                fl = fgetl(cbox_fid);
+            end
+            
+            % NOTE: filter particles by confidence level threshold
+            cbox_data_filt = cbox_data(cbox_data(:,9) >= step_params.threshold,:);
+            if size(cbox_data_filt,1) > 0
+                cbox_z_data_filt = sort(cbox_data_filt(:,3));
+
+                % NOTE: write filtered particles
+                cbox_data_cell = cellstr(string(cbox_data_filt));
+                cbox_data_cell(cellfun(@isempty,cbox_data_cell)) = {'<NA>'};
+                cbox_data_strarr = join(string(cbox_data_cell), " ");
+                fprintf(cbox_filt_fid, '%s\n', cbox_data_strarr);
+
+                % NOTE: loop over and rewrite lines before _slice_index
+                fl = rewriteLinesBeforePattern(cbox_fid, cbox_filt_fid, '_slice_index #1');
+                fprintf(cbox_filt_fid, '%s\n', fl);
+
+                % NOTE: write filtered slice indexes
+                fprintf(cbox_filt_fid, '%s\n', string(cbox_z_data_filt));
+                fclose(cbox_filt_fid);
+            else
+                fclose(cbox_filt_fid);
+                delete(cbox_filt_filepath);
+            end
+            fclose(cbox_fid);
+            
+            function last_line = rewriteLinesBeforePattern(fid_input, fid_output, pattern)
+                while ~feof(fid_input)
+                    fl = fgetl(fid_input);
+                    if isempty(regexp(fl,pattern, 'once'))
+                        nl = fl; fprintf(fid_output, '%s\n', nl);
+                    else
+                        break
+                    end
+                end
+                last_line = fl;
+            end
+            
+            function last_line = rewriteLinesMatchingPattern(fid_input, fid_output, pattern)
+                while ~feof(fid_input)
+                    fl = fgetl(fid_input);
+                    if ~isempty(regexp(fl,pattern, 'once'))
+                        nl = fl; fprintf(fid_output, '%s\n', nl);
+                    else
+                        break
+                    end
+                end
+                last_line = fl;
+            end
+        end
+        
+%         function obj = export_annotations(obj, step_params)
+%             
+%             prtcl_coord_path = step_params.raw_prtcl_coords_dir + string(filesep) + "*.coords";
+%             prtcl_coord_files = dir(prtcl_coord_path);
+%             
+%             if isempty(prtcl_coord_files)
+%                error("ERROR: particles table was requested, but annotated raw particles coordinates were not found!");
+%             end
+%             
+%             [~, name, ~] = fileparts(prtcl_coord_files(1).name);
+%             name_splitted = strsplit(name, "_");
+%             tomogram_binning = str2num(name_splitted{4});            
+%             % NOTE: get per each tomo separate particles table
+%             output_path = obj.output_path;
+%             per_table_particle_count = step_params.per_table_particle_count;
+%             tab_tomo = {};
+%             for i = 1:length(prtcl_coord_files)
+%                 prtcl_coord_filepath = prtcl_coord_files(i).folder + string(filesep) + prtcl_coord_files(i).name;
+%                 tab_tomo{i} = produceParticlesTableForTomogram(prtcl_coord_filepath, per_table_particle_count, output_path);
+%             end
+%             
+%             % NOTE: merge individual particles tables
+%             tab_all = dynamo_table_blank(size(tab_tomo{1}, 1));
+%             sum_particles_previous_table = 0;
+%             particle_count = step_params.total_particle_count;
+%             
+%             break_flag = false;
+%             for i = 1:length(tab_tomo)
+%                 if isempty(tab_tomo{i}) || tab_tomo{i}(1,20) == 0
+%                     continue;
+%                 end
+%                 if i == 1
+%                     tab_all(1:end, :) = tab_tomo{i};
+%                 else
+%                     tab_tomo_tmp = tab_tomo{i};
+%                     tab_tomo_tmp(:,1) = tab_tomo{i}(:,1) + sum_particles_previous_table;
+%                     tab_all(end + 1:end + size(tab_tomo{i}, 1), :) = tab_tomo_tmp;
+%                 end
+%                 
+%                 sum_particles_previous_table = sum_particles_previous_table + size(tab_tomo{i}, 1);
+%                 if particle_count > 0
+%                     if sum_particles_previous_table > particle_count
+%                         tab_all(particle_count + 1:end, :) = [];
+%                         tab_tomo{i}(particle_count + 1:end, :) = [];
+%                         break_flag = true;
+%                     else
+%                         particle_count = particle_count - sum_particles_previous_table;
+%                     end
+%                 end
+%                 
+%                 if break_flag == true
+%                 	break;
+%                 end
+%             end
+%             
+%             tab_all_file_path = char(output_path + string(filesep) + "tab_ini_all_bin_" + tomogram_binning + "_" + num2str(size(tab_all,1)) + ".tbl");
+%             dwrite(tab_all, tab_all_file_path);
+%             
+%             link_destination = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.particles_table_folder;
+%             createSymbolicLink(tab_all_file_path, link_destination, obj.log_file_id);
+%             
+%             function tab_tomo = produceParticlesTableForTomogram(raw_prtcl_coords_filepath, particle_count, output_path)
+%             
+%                 [~, name, ~] = fileparts(raw_prtcl_coords_filepath);
+%                 name_splitted = strsplit(name, "_");
+%                 tomogram_number = str2num(name_splitted{2});
+%                 tomogram_binning = str2num(name_splitted{4});
+% 
+%                 if fileExists(output_path + string(filesep) + "SUCCESS_" + tomogram_number)
+%                     table_file = dir(output_path + string(filesep)...
+%                         + "tab_" + num2str(tomogram_number) + "_ini_bin_"...
+%                         + num2str(tomogram_binning) + "_*.tbl");
+%                     table_file_path = table_file(1).folder + string(filesep) + table_file(1).name;
+%                     tab_tomo = dread(char(table_file_path));
+%                 else
+%                     raw_tab_tomo = readtable(raw_prtcl_coords_filepath, 'FileType', 'text');
+%                     raw_tab_tomo = table2array(raw_tab_tomo);
+% 
+%                     if particle_count > 0
+%                         particle_count = min(size(raw_tab_tomo,1), particle_count);
+%                         raw_tab_tomo = raw_tab_tomo(1:particle_count,:);
+%                     else
+%                         particle_count = size(raw_tab_tomo,1);
+%                     end
+%                     disp("INFO: " + num2str(particle_count) + " particles were found in tomogram_" + num2str(tomogram_number));
+% 
+%                     tab_tomo = dynamo_table_blank(particle_count);
+% 
+%                     tab_tomo(1:particle_count,1) = 1:particle_count;
+%                     tab_tomo(1:particle_count,2:3) = ones(particle_count,2);
+%                     tab_tomo(1:particle_count,24:26) = raw_tab_tomo(:,:);
+% 
+%                     tab_tomo(1:particle_count,20) = tomogram_number * ones(particle_count,1);
+%                     tab_tomo(1:particle_count,32) = ones(particle_count,1);
+% 
+%                     if tab_tomo(1,20) ~= 0
+%                         table_file_path = output_path + string(filesep)...
+%                             + "tab_" + num2str(tomogram_number) + "_ini_bin_"...
+%                             + num2str(tomogram_binning) + "_"...
+%                             + num2str(particle_count) + ".tbl";
+% 
+%                         dwrite(tab_tomo, table_file_path);
+% 
+%                         %writetable(tab_tomo, table_file_path, 'WriteVariableNames', false, 'FileType', 'text', 'Delimiter', ' ');
+% 
+%                         fid = fopen(output_path + string(filesep)...
+%                             + "SUCCESS_" + num2str(tomogram_number), "w");
+%                         fclose(fid);
+%                     else
+%                         fid = fopen(output_path + string(filesep)...
+%                             + "FAILURE_" + num2str(tomogram_number), "w");
+%                         fclose(fid);
+%                     end
+%                 end
+%             end
+%         end
         
         function LinkTomogramsToRequestedDirectory(obj, tomograms_binning, tomograms_folder)
             

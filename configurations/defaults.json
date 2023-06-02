@@ -1059,9 +1059,12 @@
                 "tracing_min_length": -1
             },
             "export_annotations": {
-                "raw_prtcl_coords_dir": "predict_annot/COORDS",
-                "per_table_particle_count": -1,
-                "total_particle_count": -1
+                "predict_annot_folder": "predict_annot",
+                "threshold": 0.1,
+                "filtered_CBOX_3D_folder": "CBOX_3D_filt",
+                "filtered_Dynamo_tbl_folder": "dynamo_tbl_filt",
+                "particle_count_per_tomo": -1,
+                "particle_count_in_total": -1
             }
         }
     }
