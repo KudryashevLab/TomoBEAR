@@ -517,6 +517,7 @@
     },
     "DynamoTemplateMatching": {
         "execution_method": "in_order",
+        "use_custom_tomograms_path": "",
         "use_ctf_corrected_tomograms": true,
         "show_table": false,
         "show_cross_correlations": false,

@@ -37,7 +37,15 @@ classdef DynamoTemplateMatching < Module
             return_path = cd(dynamo_folder);
             %dynamo_folder = obj.configuration.processing_path + string(filesep) + obj.configuration.output_folder + string(filesep) + obj.configuration.dynamo_folder;
             
-            if isfield(obj.configuration, "use_ctf_corrected_tomograms") && obj.configuration.use_ctf_corrected_tomograms == true
+            if isfield(obj.configuration, "use_custom_tomograms_path") && isfolder(obj.configuration.use_custom_tomograms_path)
+                tomograms = dir(obj.configuration.use_custom_tomograms_path + string(filesep) + "*.rec");
+                if isempty(tomograms)
+                    tomograms = dir(obj.configuration.use_custom_tomograms_path + string(filesep) + "*.mrc");
+                    if isempty(tomograms)
+                        error("ERROR: no tomograms were found! Provided path: " + obj.configuration.use_custom_tomograms_path);
+                    end
+                end
+            elseif isfield(obj.configuration, "use_ctf_corrected_tomograms") && obj.configuration.use_ctf_corrected_tomograms == true
                 if  isfield(obj.configuration, "use_denoised_tomograms") &&  obj.configuration.use_denoised_tomograms == true
                     if  isfield(obj.configuration, "template_matching_binning") && obj.configuration.template_matching_binning > 1
                         tomograms = getDenoisedCtfCorrectedBinnedTomogramsFromStandardFolder(obj.configuration, true, obj.configuration.template_matching_binning);
