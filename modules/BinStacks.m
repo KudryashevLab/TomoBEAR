@@ -172,7 +172,12 @@ classdef BinStacks < Module
                     %                     end
                 else
                     bin_factor = obj.configuration.binnings(i);
-                    tilt_stacks = getTiltStacks(obj.configuration, true);
+                    if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
+                        tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
+                    else
+                        tilt_stacks = getTiltStacks(obj.configuration, true);
+                    end
+                    
                     tilt_stacks = tilt_stacks(contains({tilt_stacks(:).folder}, sprintf("tomogram_%03d", obj.configuration.set_up.j)));
                    
                     if isempty(tilt_stacks)
@@ -183,17 +188,20 @@ classdef BinStacks < Module
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
-                        xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
-                        obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
-                        xform_command_snippet = " -xform " + xf_file_destination;
+                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                        
+                        %xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
+                        %xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
+                        %obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
+                        %xform_command_snippet = " -xform " + xf_file_destination;
+                        
                         stk_bin_ext = ".ali";
                     else
-                        xform_command_snippet = "";
+                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                        %xform_command_snippet = "";
                         stk_bin_ext = ".st";
                     end
                     
-                    stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
                     stack_destination = obj.output_path + string(filesep) + name + ".st";
                     obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
                    
@@ -211,7 +219,7 @@ classdef BinStacks < Module
                         + " -input " + stack_destination...
                         + " -output " + stack_output_path...
                         ...%+ " -xform " + xf_file_destination...
-                        + xform_command_snippet...
+                        ...%+ xform_command_snippet...
                         + " -antialias " + obj.configuration.antialias_filter...
                         + " -bin " + num2str(bin_factor), false, obj.log_file_id);
                     executeCommand("alterheader -del " + apix + "," + apix + "," + apix + "," + " " + stack_output_path, false, obj.log_file_id);
