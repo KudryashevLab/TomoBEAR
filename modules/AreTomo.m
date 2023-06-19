@@ -56,8 +56,8 @@ classdef AreTomo < Module
             % substacks or pseudo subtomograms are aligned?
 
             % TODO:NOTE: implement reconstruct aligned tilt series
-
-            min_and_max_tilt_angles = getTiltAngles(obj.configuration);
+            
+            min_and_max_tilt_angles = getTiltAngles(obj.configuration, true);
             %             if false == true %length(min_and_max_tilt_angles) > 2
             fid = fopen(obj.output_path + filesep + obj.name + ".rawtlt", "w+");
             for i = 1:length(min_and_max_tilt_angles)
@@ -72,24 +72,34 @@ classdef AreTomo < Module
                     fprintf(fid, "%s\n", num2str(min_and_max_tilt_angles(i)));
                 end
             end
-            angular_file_command_snippet = "-AngFile " + obj.output_path + filesep + obj.name + ".rawtlt";
+            angular_file_command_snippet = " -AngFile " + obj.output_path + filesep + obj.name + ".rawtlt";
             %             else
             %angle_command_snippet = "-TiltRange " + min_and_max_tilt_angles(1) + " " + min_and_max_tilt_angles(end);
             
-            if obj.configuration.patch ~= "0 0"
-                local_ali = true;
-                patch_alignment_command_snippet = "-Patch " + strjoin(obj.configuration.patch," ");
+            if obj.configuration.use_previous_alignment == true
+                aln_file_path = getFilesFromLastModuleRun(obj.configuration,"AreTomo","aln","last");
+                alignment_command_snippet = angular_file_command_snippet...
+                    + " -AlnFile " + string(aln_file_path);
             else
-                local_ali = false;
-                patch_alignment_command_snippet = "";
-            end
-            
-            tilt_axis_command_snippet = "-TiltAxis " + num2str(obj.configuration.rotation_tilt_axis) + " " + num2str(obj.configuration.tilt_axis_refine_flag);
-            
-            if obj.configuration.apply_given_tilt_axis_offset == true
-                tilt_axis_offset_command_snippet = "-TiltCor " + num2str(obj.configuration.correct_tilt_axis_offset) + " " + num2str(obj.configuration.tilt_axis_offset);
-            else
-                tilt_axis_offset_command_snippet = "";
+                if obj.configuration.patch ~= "0 0"
+                    local_ali = true;
+                    patch_alignment_command_snippet = " -Patch " + strjoin(obj.configuration.patch," ");
+                else
+                    local_ali = false;
+                    patch_alignment_command_snippet = "";
+                end
+
+                tilt_axis_command_snippet = " -TiltAxis " + num2str(obj.configuration.rotation_tilt_axis) + " " + num2str(obj.configuration.tilt_axis_refine_flag);
+
+                if obj.configuration.apply_given_tilt_axis_offset == true
+                    tilt_axis_offset_command_snippet = " -TiltCor " + num2str(obj.configuration.correct_tilt_axis_offset) + " " + num2str(obj.configuration.tilt_axis_offset);
+                else
+                    tilt_axis_offset_command_snippet = "";
+                end
+                alignment_command_snippet = angular_file_command_snippet...
+                    + tilt_axis_command_snippet...
+                    + tilt_axis_offset_command_snippet...
+                    + patch_alignment_command_snippet;
             end
             
             if obj.configuration.set_up.gpu >  0
@@ -111,18 +121,17 @@ classdef AreTomo < Module
                     + " -InMrc " + stack_source...
                     + " -OutMrc " + stack_destination...
                     + " -VolZ 0 -OutBin " + num2str(obj.configuration.aligned_stack_binning / obj.configuration.input_stack_binning)...
-                    + " -Gpu " + num2str(gpu_number) + " "...
-                    + angular_file_command_snippet + " "...
-                    + tilt_axis_command_snippet + " "...
-                    + tilt_axis_offset_command_snippet + " "...
-                    + patch_alignment_command_snippet...
+                    + " -Gpu " + num2str(gpu_number)...
+                    + alignment_command_snippet...
                     + " -OutImod 1", false, obj.log_file_id);
             
             % NOTE: rename ALN file
-            [~,filename,fileext] = fileparts(stack_source);
-            alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
-            alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
-            movefile(alignment_file_out, alignment_file_destination);
+            if obj.configuration.use_previous_alignment == false
+                [~,filename,fileext] = fileparts(stack_source);
+                alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
+                alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
+                movefile(alignment_file_out, alignment_file_destination);
+            end
             
             % TODO: check linkage here
             if obj.configuration.aligned_stack_binning == 1
@@ -176,9 +185,11 @@ classdef AreTomo < Module
             stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
             stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
             
-            aln_file = dir(obj.output_path + filesep + obj.name + ".aln");
-            aln_file_path = aln_file(1).folder + string(filesep) + aln_file(1).name;
-
+            if obj.configuration.use_previous_alignment == false
+                aln_file = dir(obj.output_path + filesep + obj.name + ".aln");
+                aln_file_path = aln_file(1).folder + string(filesep) + aln_file(1).name;
+            end
+            
             executeCommand(obj.configuration.aretomo_command...
                 + " -InMrc " + stack_source...
                 + " -OutMrc " + stack_destination_unbinned...
@@ -204,7 +215,7 @@ classdef AreTomo < Module
             end
             
             folder_destination = obj.configuration.aligned_tilt_stacks_folder;
-            filename_link_destination = obj.name + "_bin_" + num2str(1) + ".ali";
+            filename_link_destination = obj.name + ".ali";
 
             path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
             link_destination = path_destination + filesep + filename_link_destination;

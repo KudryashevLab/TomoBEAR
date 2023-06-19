@@ -909,6 +909,7 @@
         "patch": "0 0",
         "flip_volume": 1,
         "flip_intensity": 0,
+	"use_previous_alignment": false,
         "citation": ""
     },
     "RelionAlignmentProject": {
