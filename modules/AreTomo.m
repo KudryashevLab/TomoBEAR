@@ -463,6 +463,7 @@ classdef AreTomo < Module
                 obj.deleteFilesOrFolders(files);
                 obj.deleteFolderIfEmpty(folder);
             end
+            obj = cleanUp@Module(obj);
         end
     end
 end
