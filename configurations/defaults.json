@@ -1019,6 +1019,14 @@
                 "crop_size": -1,
                 "batch_size": -1,
                 "normalize_percentile": -1
+            },
+            "postprocess": {
+                "input_dir": "corrected_tomos",
+                "output_dir": "postproc_tomos",
+                "nad_filter_output_iterations_list": [3],
+                "nad_filter_number_of_iterations": -1,
+                "nad_filter_sigma_for_smoothing": -1,
+                "nad_filter_threshold_for_gradients": -1
             }
         }
     },

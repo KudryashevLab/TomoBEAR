@@ -325,6 +325,31 @@ classdef IsoNet < Module
             command_output = obj.executeIsoNetCommand(params_string);
         end
         
+        function obj = postprocess(obj, step_name, step_params)
+            
+            step_params.i = step_params.nad_filter_output_iterations_list;
+            step_params.n = step_params.nad_filter_number_of_iterations;
+            step_params.s = step_params.nad_filter_sigma_for_smoothing;
+            step_params.k = step_params.nad_filter_threshold_for_gradients;
+            
+            use_params_cell = {'i', 'n', 's', 'k'};
+            use_params = obj.getRequestedOnlyParametersStructure(step_params, use_params_cell);
+            params_string = obj.getParamsString(use_params, "-");
+            params_string = "nad_eed_3d" + params_string;
+            
+            step_params.input_dir = obj.output_path + string(filesep) + step_params.input_dir;
+            step_params.output_dir = obj.output_path + string(filesep) + step_params.output_dir;
+            mkdir(step_params.output_dir);
+            input_tomograms = dir(step_params.input_dir + filesep + '*.mrc');
+            for file_id = 1:length(input_tomograms)
+                input_tomogram_path = step_params.input_dir + string(filesep) + input_tomograms(file_id).name;
+                [~,filename,fileext] = fileparts(input_tomograms(file_id).name);
+                output_tomogram_path = step_params.output_dir + string(filesep) + filename + "_nadf" + fileext;
+                cmd_string = params_string + " " + input_tomogram_path + " " + output_tomogram_path;
+                output_msg = executeCommand(cmd_string, false, obj.log_file_id);
+            end
+        end
+        
         function parameters_req = getRequestedOnlyParametersStructure(obj, parameters_all, parameters_req_names)
             parameters_req = struct();
             for idx=1:length(parameters_req_names)
@@ -338,11 +363,14 @@ classdef IsoNet < Module
             end
         end
             
-        function params_string = getParamsString(obj, params)
+        function params_string = getParamsString(obj, params, param_prefix)
+            if nargin < 3
+                param_prefix="--";
+            end
             params_fields = fieldnames(params);
             params_string = "";
             for idx=1:length(params_fields)
-                params_string = params_string + " --" + params_fields{idx} + " " + params.(params_fields{idx});
+                params_string = params_string + " " + param_prefix + params_fields{idx} + " " + params.(params_fields{idx});
             end
         end
         
