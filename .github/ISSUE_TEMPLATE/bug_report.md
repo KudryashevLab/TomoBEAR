@@ -1,45 +1,51 @@
 ---
 name: Bug report
-about: Create a report to help us improve TomoBEAR
-title: "[BUG] give a descriptive name here"
-labels: ''
+about: File a bug to help us improve TomoBEAR
+title: "[BUG] Short and descriptive title"
+labels: 'pending'
 assignees: ''
-
 ---
 
-**Describe the bug**
+## Computing setup
 
-A clear and concise description of what the bug is
+**Environment:**
+ - Computing system[GPU workstation/cluster node]:
+ - CUDA version:
+ - GPU info [amount/type/memory]: 
+ - RAM:
+ 
+**Software:**
+ - TomoBEAR version:
+ - TomoBEAR type [full MATLAB/standalone]:
+ - MATLAB version:
+ - IMOD version:
+ - Dynamo version:
+ - Other relevant to the problem software versions:
 
-**Project JSON file**
+**Configuration:**
 
+Please, put here relevant project json file
+<details>
+<summary><b> Project JSON file (expand to see)</b></summary>
+ 
 ```JSON
 Place the contents of the JSON file here
 ```
+</details>
 
-**Error message**
+## Bug description
 
-Place the error message here
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Step
-2. Step
-3. See error
+**Current behaviour**
+A clear and concise description of what the bug is.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - OS Version [e.g. 22]
- - MotionCor2 Version
- - Gctf Version
- - Dynamo Version
-
-
-**Additional context**
-Add any other context about the problem here.
+**Additional context (if any)**
+Add any other context about the problem here, including:
+- sequence of actions to reproduce behaviour
+- toy/example data
+- additional configurations
+- screenshots
+- links / references
+- etc.
