@@ -1,0 +1,41 @@
+{
+    "general": {
+       ...
+       "new_global_param_number": default_value,
+       "new_global_param_string": "default_value",
+       "new_global_params_list": [default_value1,...,default_valueN],
+       "new_global_params_section": {
+            ... // put here global params and their defaults
+        }
+       ...
+    },
+    "GeneralModuleTemplate": {
+        "execution_method": "once",
+        "new_module_param_number": default_value,
+        "new_module_param_string": "default_value",
+        "new_module_params_list": [default_value1,...,default_valueN],
+        "new_module_params_section": {
+            ... // put here module params and their defaults
+        }
+    },
+    "DLToolModuleTemplate": {
+        "execution_method": "once",
+        "dltool_env": "",
+        "repository_path": "",
+        ... // put here module params and their defaults
+        "tomograms_to_use": [X, X, X],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "step_name1": {
+                "tomograms_binning": X,
+                "ncpu": X,
+                "output_dir": "module_subdirectory_name",
+                ... // put here other params and defaults for step #1
+            },
+            ...
+            "step_nameN": {
+                ... // put here params and defaults for step #N
+            }
+        }
+    }
+}
