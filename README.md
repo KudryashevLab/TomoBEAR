@@ -25,10 +25,10 @@ Implementation details and benchmarks you can find in our preprint:
 ### Video-tutorials
 
 We have prepared a range of short (8-12 min) video-tutorials explaining setup, usage and example output of the ```TomoBEAR``` to help you get started with ```TomoBEAR``` based on the [ribosome tutorial](https://github.com/KudryashevLab/TomoBEAR/wiki/Tutorials):
-* [Video 1](https://drive.google.com/file/d/1Nhltdo7DbWdzPhAbnkzq7lCkDghxJrku/view?usp=share_link): how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies;
-* [Video 2](https://drive.google.com/file/d/12h8Vs4eUeJDJAb5S6nF2BuOX7lfvmmYo/view?usp=share_link): description of the project configuration file and the pipeline execution;
-* [Video 3](https://drive.google.com/file/d/16nNdu89XUZglO_PiRKmGkK85o_nWqOB8/view?usp=share_link): additional configuration file parameters description, ```TomoBEAR```-```IMOD```-```TomoBEAR``` loop for checking tilt series alignment results and fiducials refinement (if needed);
-* [Video 4](https://drive.google.com/file/d/1t3ol3KlHqBGtnZp1bnLHi_Anurd2VPcx/view?usp=share_link): checking on further intermediate results (alignment, CTF-correction, reconstruction, template matching).
+* [Video 1](https://youtu.be/2uizkE616tE): how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies;
+* [Video 2](https://youtu.be/N93tfAXp990): description of the project configuration file and the pipeline execution;
+* [Video 3](https://youtu.be/qbkRtMJp0eI): additional configuration file parameters description, ```TomoBEAR```-```IMOD```-```TomoBEAR``` loop for checking tilt series alignment results and fiducials refinement (if needed);
+* [Video 4](https://youtu.be/BP2T_Y7BiDo): checking on further intermediate results (alignment, CTF-correction, reconstruction, template matching).
 
 ### Pipeline structure
 
@@ -60,13 +60,13 @@ In case of any questions, issues or suggestions you may interact with us by one 
 * write an e-mail to [Misha Kudryashev](mailto:misha.kudryashev@gmail.com) or [Artsemi Yushkevich](mailto:Artsemi.Yushkevich@mdc-berlin.de);
 * start a discussion in [Discussions](https://github.com/KudryashevLab/TomoBEAR/discussions);
 
-If you wish to contribute, please, fork this repository and make a pull request back with your changes and a short description.
+If you wish to contribute, please, fork this repository and make a pull request back with your changes and a short description. For further details on contribution plase read our [contribution guidelines](CONTRIBUTING.md). 
 
 ## Citation
 
 If you use `TomoBEAR` or its parts in your research, please **cite both** `TomoBEAR` and **all external software packages** which you have used under `TomoBEAR`.
 
-The `TomoBEAR` modules dependencies on third-party software are listed on the page [Modules](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules.md) and the list of the corresponding references to cite is located on the page [Additional Software Citation](https://github.com/KudryashevLab/TomoBEAR/wiki/Additional-Software-Citation.md).
+The `TomoBEAR` modules dependencies on third-party software are listed on the page [Modules](https://github.com/KudryashevLab/TomoBEAR/wiki/Modules.md) and the list of the corresponding references to cite is located on the page [External Software](https://github.com/KudryashevLab/TomoBEAR/wiki/External-Software.md).
 
 ## Acknowledgements
 
@@ -75,6 +75,15 @@ We are grateful to the following organizations:
 - [DFG (Deutsche Forschungsgesellschaft)](https://www.dfg.de) for funding the project.
 
 As well we are grateful to the [structural biology scientific research group of Werner Kühlbrandt](https://www.biophys.mpg.de/2207989/werner_kuehlbrandt) at the [MPIBP (Max Planck Institute of Biophysics)](https://www.biophys.mpg.de) and the [MPIBP](https://www.biophys.mpg.de) in Frankfurt (Hesse), Germany for support.
+
+The authors thank as well the following people:
+* Dr. Daniel Castano-Diez, Dr. Kendra Leigh and Dr. Christoph Diebolder and Dr. Wolfgang Lugmayr for useful discussions;
+* Uljana Kravchenko, Xiaofeng Chu, Giulia Glorani for testing the developmental versions and providing feedback,
+* Ricardo Sanchez for producing MATLAB version of the [SUSAN framework](https://github.com/rkms86/SUSAN) in order to be compatible with TomoBEAR;
+* Juan Castillo from the Max Planck Institute for Biophysics for the IT support at the Max Planck for Biophysics,
+* the high-performance computing team at the MDC for supporting our operation at the Max-Cluster.
+
+We would like to acknowledge as well that TomoBEAR contains modified pieces of MATLAB source code of the Dynamo package developed by Dr. Daniel Castaño-Díez et al.: https://www.dynamo-em.org.
 
 ## Contacts
 * Prof. Dr. Misha Kudryashev[^1][^2] ([e-mail](mailto:misha.kudryashev@gmail.com?subject=[GitHub]%20TomoBEAR)) - `TomoBEAR` project leader, Principal Investigator;
