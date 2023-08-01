@@ -140,8 +140,10 @@ classdef MotionCor2 < Module
             end
             
             if extension == ".eer"
+                data_is_eer = true;
+                eer_upsampling_factor = 2 ^ (obj.configuration.eer_upsampling - 1);
                 motion_correction_arguments = motion_correction_arguments + " "...
-                    + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / obj.configuration.eer_sampling);
+                    + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / eer_upsampling_factor);
             else
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
@@ -228,7 +230,7 @@ classdef MotionCor2 < Module
                     + " -OutAln " + obj.configuration.out_aln;
             end  
 
-            if obj.configuration.gain ~= ""
+            if obj.configuration.dark ~= ""
                 [folder, name, extension] = fileparts(obj.configuration.dark);
                 name_rep = strrep(name, " ", "\ ");
                 dark_path =  folder + string(filesep) + name_rep + extension;
@@ -347,7 +349,7 @@ classdef MotionCor2 < Module
                         + " -InMrc " + input_projection;
                 elseif extension == ".eer"
                     command = obj.configuration.motion_correction_command...
-                        + " -InEer " + input_projection + " -EerSampling " + obj.configuration.eer_sampling;
+                        + " -InEer " + input_projection + " -EerSampling " + obj.configuration.eer_upsampling;
                     if obj.configuration.fm_int_file ~= ""
                         command = command + " -FmIntFile " + obj.configuration.fm_int_file;
                     else
@@ -363,17 +365,18 @@ classdef MotionCor2 < Module
                     + " " + motion_correction_arguments + " "...
                     + " -LogFile " + motion_correction_log;
 
-                if obj.configuration.fm_ref ~= ""
+                if obj.configuration.fm_ref ~= -1
                     command = command...                    
                         + " -FmRef " + obj.configuration.fm_ref;
                 elseif extension == ".eer"
                     command = command...                    
-                        + " -FmRef " + obj.configuration.eer_total_number_of_fractions / obj.configuration.eer_fraction_grouping;
+                        + " -FmRef " + floor(obj.configuration.eer_total_number_of_fractions / obj.configuration.eer_fraction_grouping);
                 else
                     command = command...                    
                         + " -FmRef " + last_frame;
                 end
 
+                %{
                 if ~isempty(regexp(input_projection, "_[-+]*0+\.0", "match")) && isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "high_dose") && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
                     command = command...
                         + " -Patch " + obj.configuration.patch;
@@ -385,6 +388,15 @@ classdef MotionCor2 < Module
                         command = command...
                             + " -Group " + string(num2str(obj.configuration.group));
                     end
+                end
+                %}
+                % NOTE: patches and groups crash when used simultaneously
+                if obj.configuration.patch ~= ""
+                    command = command...
+                            + " -Patch " + obj.configuration.patch;
+                elseif obj.configuration.group > 1
+                    command = command...
+                            + " -Group " + string(num2str(obj.configuration.group));
                 end
                 
                 if obj.configuration.apply_dose_weighting == true
@@ -421,6 +433,14 @@ classdef MotionCor2 < Module
                 %         createSymbolicLink(mrc_output, destination, obj.log_file_id);
                 %     end
                 motion_corrected_files{i} = mrc_output;
+            end
+            
+            % NOTE: Update global ft_bin value to match binning level
+            % relative to the set in "general" value of apix
+            if data_is_eer == true
+                eer_upsampling_factor = 2 ^ (obj.configuration.eer_upsampling - 1);
+                ft_bin = obj.configuration.ft_bin;
+                obj.configuration.ft_bin = ft_bin / eer_upsampling_factor;
             end
         end
         
