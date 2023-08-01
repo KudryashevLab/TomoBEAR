@@ -91,14 +91,26 @@ classdef AreTomo < Module
 
                 tilt_axis_command_snippet = " -TiltAxis " + num2str(obj.configuration.rotation_tilt_axis) + " " + num2str(obj.configuration.tilt_axis_refine_flag);
 
-                if obj.configuration.apply_given_tilt_axis_offset == true
-                    tilt_axis_offset_command_snippet = " -TiltCor " + num2str(obj.configuration.correct_tilt_axis_offset) + " " + num2str(obj.configuration.tilt_axis_offset);
+                if obj.configuration.correct_pretilt_flag ~= -1
+                    tilt_axis_offset_command_snippet = " -TiltCor " + num2str(obj.configuration.correct_pretilt_flag);
+                    pretilt_angle_to_use = -obj.configuration.pretilt_tilt_axis;
+                    if pretilt_angle_to_use == 0
+                        tilt_axis_offset_command_snippet = tilt_axis_offset_command_snippet + " " + num2str(pretilt_angle_to_use);
+                    end
                 else
                     tilt_axis_offset_command_snippet = "";
                 end
+                
+                if obj.configuration.align_z > 0
+                    align_z_command_snippet = " -AlignZ " + num2str(obj.configuration.align_z);
+                else
+                    align_z_command_snippet = "";
+                end
+                
                 alignment_command_snippet = angular_file_command_snippet...
                     + tilt_axis_command_snippet...
                     + tilt_axis_offset_command_snippet...
+                    + align_z_command_snippet...
                     + patch_alignment_command_snippet;
             end
             
