@@ -41,8 +41,9 @@ normTemplate = operationalData.normTemplate;
 Nmask        = operationalData.NMask;
 
 %
-chunkNormalized = dynamo_normalize_roi(chunk);
-
+gpuChunk = gpuArray(chunk);
+chunkNormalized = dynamo_normalize_roi(gpuChunk);
+chunkNormalized = gpuArray(chunkNormalized);
 %conjP        = gpuArray(conj(fftn(chunkNormalized)));
 %conjPSquared = gpuArray(conj(fftn(chunkNormalized.^2)));
 %clear chunkNormalized;
