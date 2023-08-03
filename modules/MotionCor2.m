@@ -145,6 +145,7 @@ classdef MotionCor2 < Module
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + (obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix / eer_upsampling_factor);
             else
+                data_is_eer = false;
                 motion_correction_arguments = motion_correction_arguments + " "...
                     + " -PixSize " + obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix;
             end
