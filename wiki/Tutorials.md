@@ -3,40 +3,40 @@ This page contains a range of tutorials explaining installation, setup, usage an
 
 ## Setup TomoBEAR
 First of all, you have to setup `TomoBEAR`:
-* [Video-tutorial](https://drive.google.com/file/d/1Nhltdo7DbWdzPhAbnkzq7lCkDghxJrku/view?usp=share_link) explaining how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies.
+* [Video-tutorial](https://youtu.be/2uizkE616tE) explaining how to get the latest ```TomoBEAR``` version and configure ```TomoBEAR``` and its dependencies.
 
-## Ribosome (EMPIAR-10064)
+## 80S ribosome (EMPIAR-10064)
 
-To provide an example of the `TomoBEAR` processing project we have chosen the well-known cryo-ET benchmarking dataset containing  80S ribosomes - EMPIAR-10064.
+To provide an example of the `TomoBEAR` processing project we have chosen the well-known cryo-ET benchmarking data set containing  80S ribosomes - EMPIAR-10064.
 
 In this tutorial we will:
 * explain structure and important parameters of the input `JSON` file used as a configuration file in `TomoBEAR` projects;
 * explain output data structure of `TomoBEAR` projects;
 * explain pipeline execution and control by checkpoint files;
-* guide you through the processing of the famous real-world dataset EMPIAR-10064 to achieve resolution of 11.25 Å with ~4k particles in nearly-automated parallelized manner.
+* guide you through the processing of the famous real-world dataset EMPIAR-10064 to achieve resolution of 11.3 Å with 4003 particles in nearly-automated parallelized manner.
 
-### Download tutorial data
-
-You can download EMPIAR-10064 dataset here (`mixedCTEM` part): <https://www.ebi.ac.uk/empiar/EMPIAR-10064>. After downloading the data extract it in a folder of your choice.
-
-In our case we used just the `mixedCTEM` data and achieved 11.25 Å in resolution with ~4k particles which is similar to the resolution achieved by the original researchers. If you want you can additionally use the `CTEM` data to be able to pick even more particles.
-
-### Video-tutorials
+#### Video-tutorials
 
 We have prepared a range of short (8-12 min) video-tutorials following the written version of the 80S ribosome tutorial provided below:
 
-* [Video-tutoral 1](https://drive.google.com/file/d/12h8Vs4eUeJDJAb5S6nF2BuOX7lfvmmYo/view?usp=share_link): description of the project configuration file and the pipeline execution
-* [Video-tutoral 2](https://drive.google.com/file/d/16nNdu89XUZglO_PiRKmGkK85o_nWqOB8/view?usp=share_link): additional configuration file parameters description, ```TomoBEAR```-```IMOD```-```TomoBEAR``` loop for checking tilt series alignment results and fiducials refinement (if needed);
-* [Video-tutoral 3](https://drive.google.com/file/d/1t3ol3KlHqBGtnZp1bnLHi_Anurd2VPcx/view?usp=share_link): checking on further intermediate results (alignment, CTF-correction, reconstruction, template matching).
+* [Video-tutoral 1](https://youtu.be/N93tfAXp990): description of the project configuration file and the pipeline execution
+* [Video-tutoral 2](https://youtu.be/qbkRtMJp0eI): additional configuration file parameters description, ```TomoBEAR```-```IMOD```-```TomoBEAR``` loop for checking tilt series alignment results and fiducials refinement (if needed);
+* [Video-tutoral 3](https://youtu.be/BP2T_Y7BiDo): checking on further intermediate results (alignment, CTF-correction, reconstruction, template matching).
 
-###  Setup configuration file
+### Step 1. Download tutorial data
 
-In the `TomoBEAR` source code folder you will find a subfolder `configurations/` containing a file `ribosome_empiar_10064_dynamo.json`. This file describes the processing pipeline which should be setup by `TomoBEAR` to process used in this tutorial dataset.
+You can download EMPIAR-10064 data set here (`mixedCTEM` part): <https://www.ebi.ac.uk/empiar/EMPIAR-10064>. After downloading the data extract it in a folder of your choice.
+
+In our case we used just the `mixedCTEM` data and achieved 11.3 Å in resolution with 4003 particles which is similar to the resolution achieved by the original researchers. If you want you can additionally use the `CTEM` data to be able to pick even more particles.
+
+### Step 2. Setup configuration file
+
+In the `TomoBEAR` source code folder you will find a subfolder `configurations/` containing a file `ribosome_empiar_10064_dynamo.json`. This file describes the processing pipeline which should be setup by `TomoBEAR` to process used in this tutorial data set.
 The whole `JSON` file used for this tutorial you may also find at the end of this tutorial.
 
 The following paragraphs will explain the variables contained in the `JSON` file and the needed changes to be able to run `TomoBEAR` on your local machine.
 
-First of all and most importantly you need to show `TomoBEAR` the path to the data and the processing folder. This must be done in the section `"general": {}` of the `JSON` file.
+First of all and most importantly you need to show `TomoBEAR` the path to the data and the processing folder. This must be done in the section `"general": {}` of the `JSON` file, as shown below:
 ```json
     "general": {
         "project_name": "Ribosome",
@@ -52,14 +52,14 @@ First of all and most importantly you need to show `TomoBEAR` the path to the da
         "binnings": [2, 4, 8],
         "reconstruction_thickness": 1400,
         "as_boxes": false
-  },
+  }
 ```
 
-Since the pixel size and tilt angles are not provided in the header of MRC files of the used here dataset EMPIAR-10064, we have to add this information in the `"general": {}` section of the configuration file. 
+Since the pixel size and tilt angles are not provided in the header of MRC files of the used here data set EMPIAR-10064, we have to add this information in the `"general": {}` section of the configuration file.
 
-### Execute until fiducials refinement
+### Step 3. Execute until fiducials refinement
 
-Everything else should be fine for now and the processing can be started. To run the `TomoBEAR` on the Ribosome data set you need to type in the following command in the command window of MATLAB
+Everything else should be fine for now and the processing can be started. To run the `TomoBEAR` on the ribosome data set you need to type in the following command in the command window of MATLAB
 
 ```matlab
 runTomoBear("local", "/path/to/ribosome_empiar_10064_dynamo.json")
@@ -91,9 +91,9 @@ When you followed all the steps thoroughly `TomoBEAR` should run up to the first
 ```
 This can take a while, as the result of this segment `TomoBEAR` will create a folder structure with subfolders for the individual steps. You can monitor the progress of the execution in shell and by inspecting the contents of the folders. Upon success of an operation a file `SUCCESS` is written inside each folder. If you want to rerun a step you can terminate the process, change parameters, remove the `SUCCESS` file (or the entire subfolder) and restart the process.
 
-Here the stacks have already been assembled, so neither `"Motioncorr2": {}`, not `"SortFiles": {}` modules were not needed. Here the key functionality is performed by `"DynamoTiltSeriesAlignment": {}` ([a recommended tutorial](https://wiki.dynamo.biozentrum.unibas.ch/w/index.php/Walkthrough_on_GUI_based_tilt_series_alignment)) after which the projections containing low number of tracked gold beads are excluded by `"DynamoCleanStacks": {}`. Finally, the output is converted into an IMOD project. The running time depends on your infrastructure and setup.
+Here the stacks have already been assembled, so neither `"Motioncor2": {}`, nor `"SortFiles": {}` modules were not needed. Here the key functionality is performed by `"DynamoTiltSeriesAlignment": {}` ([a recommended tutorial](https://wiki.dynamo.biozentrum.unibas.ch/w/index.php/Walkthrough_on_GUI_based_tilt_series_alignment)) after which the projections containing low number of tracked gold beads are excluded by `"DynamoCleanStacks": {}`. Finally, the output is converted into an IMOD project. The running time depends on your infrastructure and setup.
 
-### TomoBEAR-IMOD-TomoBEAR loop for fiducials refinement
+### Step 4. TomoBEAR-IMOD-TomoBEAR loop for fiducials refinement
 
 After `TomoBEAR` stops you can inspect the fiducial model in the folder of `"BatchRunTomo": {}` which you can find in your processing folder.
 
@@ -107,9 +107,13 @@ Now you can inspect the alignment of every tilt stack one after the other and ca
 etomo tomogram_xxx/*.edf
 ```
 
-When `etomo` starts just chose the `fine alignment` step which should be Lila if everything went fine for that tomogram and then click on `edit/view fiducial model` to start `3dmod` with the right options to be able to refine the gold beads. Before you start to refine just press the arrow up button in the top left corner of the window with the view port. To refine the gold beads click on `Go to next big residual` in the window with the stacked buttons from top to bottom and the view in the view port window should change immediately to the location of a gold bead with a big residual. Now see if you can center the marker better on the gold bead with the right mouse button. It is important that you don't put it on the peak of the red arrow but center it on the gold bead. When you are finished with this gold bead just press again on the `Go to next big residual` button. After you are finished with re-centering the marker on the gold beads you need to press the `Save and run tiltalign` button.
+When `etomo` starts just chose the `fine alignment` step which should be magenta-colored if everything went fine for that tomogram and then click on `edit/view fiducial model` to start `3dmod` with the right options to be able to refine the gold beads. If you do not see the green circles - please go to the IMODimod command window, Edit -> Object l-> Type-> activate scattered and increase the size of the circle to e.g. 5.
 
-### Execute up to tomogram reconstructions and template matching
+Before you start to refine just press the arrow up button in the top left corner of the window with the view port in order to zoom in. To refine the gold beads click on `Go to next big residual` in the window with the stacked buttons from top to bottom and the view in the view port window should change immediately to the location of a gold bead with a big residual.
+
+Now see if you can center the marker better on the gold bead with the right mouse button. It is important that you don't put it on the peak of the red arrow but center it on the gold bead. When you are finished with this gold bead just press again on the `Go to next big residual` button. After you are finished with re-centering the marker on the gold beads you need to press the `Save and run tiltalign` button.
+
+### Step 5. Execute up to tomogram reconstructions and template matching
 
 After you finished the inspection of all the alignments you can start `TomoBEAR` again as previously and it will continue from where it stopped up to the next `StopPipeline` section.
 
@@ -149,6 +153,8 @@ or if you are using a compiled version of `TomoBEAR` and have everything set up 
         "flip_handedness": true
     },
     "DynamoTemplateMatching": {
+        "sampling": 15,
+        "size_of_chunk": [463, 463, 175]
     },
     "TemplateMatchingPostProcessing": {
         "cc_std": 2.5
@@ -157,9 +163,14 @@ or if you are using a compiled version of `TomoBEAR` and have everything set up 
 
 This segment performs estimation of defocus, and hence, of the **Contrast Transfer Function** (**CTF**) using GCTF and subsequent CTF-correction  using Ctfphaseflip from IMOD (`"GCTFCtfphaseflipCTFCorrection": {}`). You can inspect the quality of fitting by going into the folder `8_GCTFCtfphaseflipCTFCorrection_1` and typing `imod tomogram_xxx/slices/*.ctf` and making sure that the Thon rings match the estimation. If not - play with the parameters of the `GCTFCtfphaseflipCTFCorrection` module.
 
-Then binned aligned CTF-corrected stacks are produced by `"BinStacks": {}` and tomographic reconstructions are generated for the binnings specified in the section `"general": {}`. In this example the particles are picked using template matching. First a template from EMDB is produced at a proper voxel size, then `"DynamoTemplateMatching": {}` creates **cross-correlation** (**CC**) volumes which can be inspected. Finally, highest cross-correlation peaks, over 2.5 standard deviations above the mean value in the cross-correlation volume are selected for extraction to 3D particle files, the initial coordinates are stored in the `particles_table` folder as a file in the dynamo table format.
+Then binned aligned CTF-corrected stacks are produced by `"BinStacks": {}` and tomographic reconstructions are generated for the binnings specified in the section `"general": {}`. In this example the particles are picked using template matching. First a template from EMDB is produced at a proper voxel size, then `"DynamoTemplateMatching": {}` creates **cross-correlation** (**CC**) volumes which can be inspected.
 
-### Execute subtomogram averaging (StA)
+> **Note**
+> <br/> At a high binning level (e.g. 8 or 16) using the whole volume as a single chunk is more optimal than doing several chunks, so it is important to set the corresponding parameter to the size of the binned tomogram used for template matching.
+
+Finally, highest cross-correlation peaks, over 2.5 standard deviations above the mean value in the cross-correlation volume are selected for extraction to 3D particle files, the initial coordinates are stored in the `particles_table` folder as a file in the dynamo table format.
+
+### Step 6. Execute subtomogram averaging (StA)
 
 In the section below you will find **subtomogram classification projects** that should produce you a reasonable structure. They first use **multi-reference alignment projects** with a true class and so-called **noise trap classes** to first classify out false-positive particles produced by template matching, this happens at the binning which was used for template matching. In the end of the segment you should have a reasonable set of particles in the best class.
 
@@ -238,7 +249,7 @@ Once you have selected the best class, insert corresponding class number in the 
 ```
 The section above is called **single reference project**, which will split the particles of the previously selected best class into two equally sized classes (called even/odd halves) with subsequent alignment of the particles in those halves to produce corresponding averages. This division will be needed further when unbinned data will be produced to be able to calculate the resolution of the resulting averaged map using **Fourier Shell Correlation** (**FSC**) curve.
 
-After the first single reference project introduced above you will need to process tomograms by similar projects but at lower binnings in order to reduce the voxel size up to unbinned data to get the information corresponding to the highest possible resolution to be achieved using the current dataset. At this point automated workflow is finished as the user needs to play with the masks, particle sets, etc.
+After the first single reference project introduced above you will need to process tomograms by similar projects but at lower binnings in order to reduce the voxel size up to unbinned data to get the information corresponding to the highest possible resolution to be achieved using the current data set. At this point automated workflow is finished as the user needs to play with the masks, particle sets, etc.
 
 You may want to try to use the following example of the end section of `JSON` file in order to have experience of processing tomograms at lower binnings to produce unbinned data to finally be able to calculate resolution of your ribosome electron-density map as a result of the first experience with `TomoBEAR`!
 
@@ -276,7 +287,7 @@ You may want to try to use the following example of the end section of `JSON` fi
 
 If you get `out of memory` error while running some of `"DynamoAlignmentProject": {}` at lower binnings (especially the last one), you may put additional parameter `"dt_crop_in_memory": 0` to the corresponding `"DynamoAlignmentProject": {}` sections in order to prevent keeping the whole tomogram in memory for processing. For example, in this tutorial size of the one of unbinned tomograms is ~72Gb, while for binning 2 it is near 9Gb.
 
-### Estimate resolution of the output final map
+### Step 7. Estimate resolution of the output final map
 Finally, to estimate resolution of produced by `TomoBEAR` results, you need to use the following `Dynamo` command in `MATLAB`:
 ```
 fsc = dfsc(path_to_half1, path_to_half2, 'apix', 2.62, 'mask', path_to_mask, 'show', 'on')
@@ -288,7 +299,7 @@ After that you should get a similar FSC curve to the following one:
 
 ![Ribosome EMPIAR-10064 FSC](https://raw.githubusercontent.com/KudryashevLab/TomoBEAR/main/images/ribosome_empiar_10064_fsc.jpg)
 
-where in Red we added a so-called "gold-standard" criterion of `FSC = 0.143` to estimate the final map resolution, which in our case for the final set of ~4k ribosome particles reached 11.25Å.
+where in red we added a so-called "gold-standard" criterion of `FSC = 0.143` to estimate the final map resolution, which in our case for the final set of ~4k ribosome particles reached 11.3Å.
 
 ### Conclusion
 Here the Ribosome data set-based tutorial is finished. We thank you for trying out `TomoBEAR` and hope you have enjoyed it!
@@ -348,6 +359,8 @@ Here the Ribosome data set-based tutorial is finished. We thank you for trying o
         "flip_handedness": true
     },
     "DynamoTemplateMatching": {
+        "sampling": 15,
+        "size_of_chunk": [463, 463, 175]
     },
     "TemplateMatchingPostProcessing": {
         "cc_std": 2.5
@@ -446,14 +459,131 @@ Here the Ribosome data set-based tutorial is finished. We thank you for trying o
 ```
 </details>
 
+## In situ 80S ribosomes (EMPIAR-11306)
+
+As the second data set to showcase the capabilities of `TomoBEAR` we have chosen the [plasma-FIB-milled data set EMPIAR-11306](https://www.ebi.ac.uk/empiar/EMPIAR-11306/).
+
+This data set is fiducial-less and contains raw dose-fractionated movies in the Electron-Event Representation (EER) format.
+
+In our case we performed EER movies integration using MotionCor2 utilities, than we used IMOD-based patch-tracking in order to align this fiducial-less data set with the following CTF-estimation and correction and IMOD-based reconstruction. Finally, we used Dynamo-based template matching to pick particles.
+
+> **Note on StA part**
+</br> Further StA processing happened outside of the TomoBEAR pipeline because of the tools used and a lot of manual intervention needed to accurately process this data set at the StA processing stage, for details see our preprint:
+</br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. **[Preprint]** 2023. bioRxiv doi: [10.1101/2023.01.10.523437](https://www.biorxiv.org/content/10.1101/2023.01.10.523437v1)
+
+Using the outlined approach we were able to achieve 6.2Å in resolution with ~18.3k final particles. The resolution from the [original publication](https://www.nature.com/articles/s41467-023-36372-9) by authors of this data set reached 4.9Å.
+We suggest you to try to process this challenging data set, starting from the example configuration file given below. We find it as a useful exercise for both novice and advanced TomoBEAR users to improve the suggested workflow template to achieve better resolution.
+
+<details>
+<summary><b>The full `JSON` configuration file to setup the processing pipeline and data in `TomoBEAR` (expand to see)</b></summary>
+
+```json
+{
+    "general": {
+        "project_name": "EMPIAR-11306",
+        "project_description": "Ribosome from FIB-milled data of EMPIAR-11306",
+        "data_path": "/path/to/raw/data/*.eer",
+        "processing_path": "/path/for/processing/",
+        "expected_symmetrie": "C1",
+        "aligned_stack_binning": 2,
+        "apix": 1.85,
+        "gpu": [x,x,x,x,x],
+        "binnings": [4, 8, 16],
+        "rotation_tilt_axis": 80,
+        "template_matching_binning": 8,
+        "as_boxes": false
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+        "gain": "/path/to/reference/gain/20220406_175020_EER_GainReference.gain",
+        "eer_sampling": 2,
+        "eer_total_number_of_fractions": 343,
+        "eer_fraction_grouping": 34,
+        "eer_exposure_per_fraction": 0.5,
+        "ft_bin": 2
+    },
+    "CreateStacks": {
+    },
+    "BatchRunTomo": {
+        "ending_step": 6,
+        "skip_steps": [5],
+        "directives": {
+            "comparam.xcorr.tiltxcorr.FilterRadius2": 0.07,
+            "comparam.xcorr.tiltxcorr.FilterSigma1": 0.00,
+            "comparam.xcorr.tiltxcorr.FilterSigma2": 0.02,
+            "comparam.xcorr.tiltxcorr.CumulativeCorrelation": 1,
+            "comparam.xcorr_pt.tiltxcorr.FilterRadius2": 0.07,
+            "comparam.xcorr_pt.tiltxcorr.FilterSigma1": 0.00,
+            "comparam.xcorr_pt.tiltxcorr.FilterSigma2": 0.02,
+            "comparam.xcorr_pt.tiltxcorr.IterateCorrelations": 1,
+            "comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY": "500 500",
+            "comparam.xcorr_pt.tiltxcorr.OverlapOfPatchesXandY": "0.33 0.33",
+            "comparam.xcorr_pt.tiltxcorr.BordersInXandY": "102 102",
+            "runtime.Fiducials.any.trackingMethod": 1,
+            "runtime.AlignedStack.any.eraseGold": 0,
+            "comparam.align.tiltalign.RotOption": -1,
+            "comparam.align.tiltalign.MagOption": 0,
+            "comparam.align.tiltalign.TiltOption": 0,
+            "comparam.align.tiltalign.ProjectionStretch": 0
+        }
+    },
+    "BatchRunTomo": {
+        "starting_step": 8,
+        "ending_step": 8
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 11,
+        "skip_steps": [12],
+        "ending_step": 13
+    },
+    "BinStacks": {
+    },
+    "Reconstruct": {
+        "reconstruction_thickness": 3000,
+        "generate_exact_filtered_tomograms": true,
+        "exact_filter_size": 2500
+    },
+    "DynamoImportTomograms": {
+    },
+    "TemplateGenerationFromFile": {
+        "template_path": "/path/to/template.mrc",
+        "mask_path": "/path/to/mask.mrc",
+        "template_apix": xx.x,
+        "use_smoothed_mask": false,
+        "use_bandpassed_template": false,
+        "use_ellipsoid": false
+    },
+    "StopPipeline": {
+    },
+    "DynamoTemplateMatching": {
+        "cone_range": 360,
+        "cone_sampling": 10,
+        "in_plane_range": 360,
+        "in_plane_sampling": 10,
+        "size_of_chunk": [512, 512, 375]
+    },
+    "TemplateMatchingPostProcessing": {
+        "cc_std": 2.5,
+        "crop_particles": false
+    }
+}
+```
+</details>
+
+In the `TomoBEAR` source code folder you will find a subfolder `configurations/` containing a file `pfib_ribosome_empiar_11306.json`. This file describes the processing pipeline which should be setup by `TomoBEAR` to process the suggested for this exercise data set.
 
 ## HIV1 (EMPIAR-10164)
 
-As the second data set to showcase the capabilities of `TomoBEAR` we have chosen the HIV-1 data set with the number 10164 in the EMPIAR database.
+As the third data set to showcase the capabilities of `TomoBEAR` we have chosen the HIV-1 data set [EMPIAR-10164](https://www.ebi.ac.uk/empiar/EMPIAR-10164/).
 
-You can get the data set from [here](https://www.ebi.ac.uk/empiar/EMPIAR-10164/). In our case we use just the tomograms with the numbers 1, 3, 26, 28, 37 of the data and achieve 5.4Å in resolution with ~15.5k particles which is by now 1.5Å less than the resolution achieved by the original researchers.
+In our case we use just the tomograms with the numbers 1, 3, 26, 28, 37 of the data and achieve 5.4Å in resolution with ~15.5k particles which is by now 1.5Å less than the resolution achieved by the original researchers.
 
-After downloading the data extract it in a folder of your choice. One thing one should note about this data is that it is raw data. It is in the original form you acquire it from the microscope by SerialEM.
+After downloading the data extract it in a folder of your choice. One thing one should note about these data is that it is raw data. It is in the original form you acquire it from the microscope by SerialEM.
 
 Following processing steps need to be applied to get tomograms
 
@@ -461,3 +591,5 @@ Following processing steps need to be applied to get tomograms
 * the tilt stacks need to be assembled assembled
 * the tilt stacks need to be aligned
 * the tomograms need to be reconstructed
+
+In the `TomoBEAR` source code folder you will find a subfolder `configurations/` containing a file `hiv1_empiar_10164_dynamo.json`. This file describes the processing pipeline which should be setup by `TomoBEAR` to process the suggested for this exercise data set.
