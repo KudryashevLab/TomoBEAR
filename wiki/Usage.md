@@ -556,10 +556,14 @@ In order to perform Dynamo-based template matching you need to
           "cone_range": 360,
           "cone_sampling": 10,
           "in_plane_range": 360,
-          "in_plane_sampling": 10
+          "in_plane_sampling": 10,
+          "size_of_chunk": [xxx, xxx, xxx]
     },
   ...
   ```
+  > **Note**
+  > <br/> At a high binning level (e.g. 8 or 16) using the whole volume as a single chunk is more optimal than doing several chunks, so it is important to set the corresponding parameter to the size of the binned tomogram used for template matching.
+
 3. Post-process resulting CC map to get particles table (coordinates + orientations)
   ```json
     ...
@@ -568,7 +572,8 @@ In order to perform Dynamo-based template matching you need to
       },
     ...
   ```
-  By default particles will be also cropped on-the-fly by Dynamo. If you want particles to be reconstructed by SUSAN instead of cropping them by Dynamo, you have to add parameter value `"use_SUSAN": true` to the `"TemplateMatchingPostProcessing"` section. However, if you do not want particles to be cropped at all, you have to add parameter value `"crop_particles": false` to the `"TemplateMatchingPostProcessing"` section. For more detailed instructions on particles generation procedure please refer to the **"Particles generation"** section below.
+
+By default particles will be also cropped on-the-fly by Dynamo. If you want particles to be reconstructed by SUSAN instead of cropping them by Dynamo, you have to add parameter value `"use_SUSAN": true` to the `"TemplateMatchingPostProcessing"` section. However, if you do not want particles to be cropped at all, you have to add parameter value `"crop_particles": false` to the `"TemplateMatchingPostProcessing"` section. For more detailed instructions on particles generation procedure please refer to the **"Particles generation"** section below.
 
 ### Neural network-based particles picking
 
