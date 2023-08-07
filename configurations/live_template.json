@@ -1,0 +1,43 @@
+{
+    "general": {
+        "project_name": "your_project_name",
+        "project_description": "your project name description",
+        "data_path": "/path/to/live/data/folder/prefix*.tif",
+        "processing_path": "/path/to/processing/folder",
+        "expected_symmetrie": "Cx",
+        "gold_bead_size_in_nm": xx,
+        "rotation_tilt_axis": xx,
+        "aligned_stack_binning": 8,
+        "pre_aligned_stack_binning": 8,
+        "reconstruction_thickness": xxxx,
+        "as_boxes": false,
+        "minimum_files": 41,
+        "ft_bin": 2,
+        "listening_time_threshold_in_minutes": 10
+    },
+    "MetaData": {
+    },
+    "SortFiles": {
+    },
+    "MotionCor2": {
+        "method": "SumOnly",
+        "execution_method": "sequential"
+    },
+    "CreateStacks": {
+    },
+    "DynamoTiltSeriesAlignment": {
+        "use_newstack_for_binning": true
+    },
+    "DynamoCleanStacks": {
+    },
+    "BatchRunTomo": {
+        "skip_steps": [4, 7, 9],
+        "ending_step": 13
+    },
+    "BinStacks": {
+    },
+    "Reconstruct": {
+        "generate_exact_filtered_tomograms": true,
+        "exact_filter_size": xxxx
+    }
+}

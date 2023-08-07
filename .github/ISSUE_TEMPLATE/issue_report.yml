@@ -1,0 +1,101 @@
+name: Issue Report
+description: Report a bug, ask for support or make feature request
+title: "Put issue title here"
+labels: ["pending"]
+body:
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue type
+      description: What type of issue would you like to report?
+      multiple: false
+      options:
+        - Bug
+        - Build/Install
+        - Performance
+        - Support
+        - Feature Request
+        - Documentation Feature Request
+        - Documentation Bug
+        - Others
+    validations:
+      required: true
+  - type: dropdown
+    id: tomobear-source
+    attributes:
+      label: TomoBEAR source
+      description: TomoBEAR is used from
+      multiple: true
+      options:
+        - source code (via interactive MATLAB session)
+        - standalone binary (using MATLAB libraries)
+    validations:
+      required: true
+  - type: input
+    id: tomobear-version
+    attributes:
+      label: TomoBEAR version
+      description: Which TomoBEAR version do you use? 
+      placeholder: v0.4.0
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        If you cloned specific branch or commit, please execute "git log --pretty="%H - %cd" -n 1" in your cloned TomoBEAR source code folder and put its output in the field above
+  
+  - type: dropdown
+    id: computing-system
+    attributes:
+      label: Computing system
+      description: Which kind of computing system(s) do you use?
+      multiple: true
+      options:
+        - Standalone GPU workstation
+        - HPC cluster (interactive computing node)
+        - HPC cluster (via scheduler submission)
+    validations:
+      required: true
+  
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue description
+      description: Provide a clear description of what happend and what did you expect to happen.
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    id: configs
+    attributes:
+      label: Input configuration (JSON) file
+      description: Please copy and paste your input configuration (JSON) file. Use 
+      value: "```JSON { ... } ```"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional info
+      description: Add any other context about the problem here (actions to reproduce, log/error messages, example data, additional configurations, screenshots, links/references).
+  
+  - type: input
+    id: gpu-info
+    attributes:
+      label: GPU model and memory 
+      description: if the problem might be related to the GPU parallelization 
+      placeholder: NVIDIA Ampere A40-48GB
+  - type: input
+    id: cuda-info
+    attributes:
+      label: CUDA version(s)
+      description: if the problem might be related to the GPU parallelization 
+      placeholder: CUDA-11.5
+  
+  - type: textarea
+    id: software-info
+    attributes:
+      label: Software setup 
+      description: Give here list of software and their versions (and other relevant info) which may be related to the issue (e.g. MATLAB, IMOD, Dynamo, MotionCor2, AreTomo, Gctf, IsoNet, etc.)   
+      placeholder: MATLAB-2021a, IMOD-4.11.24; Gctf-v1.18; etc.

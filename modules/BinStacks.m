@@ -1,21 +1,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is part of the TomoBEAR software.
-% Copyright (c) 2021-2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
+% Copyright (c) 2021,2022,2023 TomoBEAR Authors <https://github.com/KudryashevLab/TomoBEAR/blob/main/AUTHORS.md>
 % 
 % This program is free software: you can redistribute it and/or modify
-% it under the terms of the GNU Affero General Public License as
-% published by the Free Software Foundation, either version 3 of the
-% License, or (at your option) any later version.
+% it under the terms of the GNU General Public License as published
+% by the Free Software Foundation, either version 3 of the License,
+% or (at your option) any later version.
 % 
 % This program is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU Affero General Public License for more details.
+% GNU General Public License for more details.
 % 
-% You should have received a copy of the GNU Affero General Public License
+% You should have received a copy of the GNU General Public License
 % along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 classdef BinStacks < Module
     methods
@@ -173,7 +172,12 @@ classdef BinStacks < Module
                     %                     end
                 else
                     bin_factor = obj.configuration.binnings(i);
-                    tilt_stacks = getTiltStacks(obj.configuration, true);
+                    if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
+                        tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
+                    else
+                        tilt_stacks = getTiltStacks(obj.configuration, true);
+                    end
+                    
                     tilt_stacks = tilt_stacks(contains({tilt_stacks(:).folder}, sprintf("tomogram_%03d", obj.configuration.set_up.j)));
                    
                     if isempty(tilt_stacks)
@@ -184,17 +188,22 @@ classdef BinStacks < Module
                     [path, name, extension] = fileparts(tilt_stacks.name);
                     
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
-                        xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
-                        obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
-                        xform_command_snippet = " -xform " + xf_file_destination;
+                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                        
+                        %xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
+                        %xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
+                        %obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
+                        %xform_command_snippet = " -xform " + xf_file_destination;
+                        
                         stk_bin_ext = ".ali";
+                        size_command_snippet = "";
                     else
-                        xform_command_snippet = "";
+                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                        %xform_command_snippet = "";
                         stk_bin_ext = ".st";
+                        size_command_snippet = " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin));
                     end
                     
-                    stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
                     stack_destination = obj.output_path + string(filesep) + name + ".st";
                     obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
                    
@@ -208,11 +217,12 @@ classdef BinStacks < Module
                     [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
                     
                     executeCommand("newstack"...
-                        + " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin))...
+                        + size_command_snippet...
+                        ...%+ " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin))...
                         + " -input " + stack_destination...
                         + " -output " + stack_output_path...
                         ...%+ " -xform " + xf_file_destination...
-                        + xform_command_snippet...
+                        ...%+ xform_command_snippet...
                         + " -antialias " + obj.configuration.antialias_filter...
                         + " -bin " + num2str(bin_factor), false, obj.log_file_id);
                     executeCommand("alterheader -del " + apix + "," + apix + "," + apix + "," + " " + stack_output_path, false, obj.log_file_id);

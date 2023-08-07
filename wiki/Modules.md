@@ -4,11 +4,45 @@ and their parameters which can be setup in the JSON configuration file in their
 corresponding blocks.
 
 ## Contents
+- [Modules dependency table](#modules-dependency-table)
 - [Global parameters configuration](#global-parameters-configuration)
 - [Pipeline behavior control modules](#pipeline-behavior-control-modules)
 - [CryoET data processing modules](#cryoet-data-processing-modules)
-- [Template matching-associated modules](#template-matching-associated-modules)
+- [Particles picking-associated modules](#particles-picking-associated-modules)
 - [Subtomogram Averaging modules](#subtomogram-averaging-modules)
+
+## Modules dependency table
+
+Here we provide a table of modules dependencies on the external software.
+
+| Module \ Tool  | IMOD | Dynamo | MotionCor2 | AreTomo | Gctf / CTFIND4 | IsoNet | crYOLO | SUSAN | Anaconda |
+| :------------- | :--- | :---- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| MetaData       | | | | | | | | | |
+| SortFiles      | | | | | | | | | |
+| MotionCor2     | :white_check_mark: | | :white_check_mark: | | | | | | |
+| GridEdgeEraser | | :white_check_mark: | | | | | | | |
+| CreateStacks   | :white_check_mark: | :white_check_mark: | | | | | | |
+| DynamoTiltSeriesAlignment | | :white_check_mark: | | | | | | | |
+| DynamoCleanStacks | :white_check_mark: | :white_check_mark: | | | | | | |
+| AreTomo        | :white_check_mark: | | | :white_check_mark: | | | | | |
+| BatchRunTomo   | :white_check_mark: | | | | | | | | | |
+| GCTFCtfphaseflipCTFCorrection | :white_check_mark: | | | | :white_check_mark: | | | | |
+| BinStacks      | :white_check_mark: | | | | | | | | |
+| Reconstruct    | :white_check_mark: | | | | | | | | |
+| IsoNet         | (:white_check_mark:) | | | | | :white_check_mark: | | | :white_check_mark: |
+| DynamoImportTomograms | | :white_check_mark: | | | | | | | |
+| EMDTemplateGeneration | | :white_check_mark: | | | | | | | |
+| TemplateGenerationFromFile | | :white_check_mark: | | | | | | | |
+| DynamoTemplateMatching | | :white_check_mark: | | | | | | | |
+| TemplateMatchingPostProcessing | | :white_check_mark: | | | | | | (:white_check_mark:) | |
+| crYOLO         | | (:white_check_mark:) | | | | | :white_check_mark: | | :white_check_mark: |
+| GenerateParticles | | :white_check_mark: | | | | | | (:white_check_mark:) | |
+| DynamoAlignmentProject | | :white_check_mark: | | | | | | (:white_check_mark:) | |
+
+Legend:
+* :white_check_mark: - mandatory dependency
+* (:white_check_mark:) - optional dependency
+* empty square - not a dependency / tool is not used in the corresponding module
 
 ## Global parameters configuration
 
@@ -512,7 +546,7 @@ This module performs grid edge identification and erases it for Au grids data.
 The CreateStacks module creates the stacks and normalizes them. There
 are two options for normalization. The default normalization scheme is
 to divide the projections by their frame count. TomoBEAR detects
-automatically if you are using high-dose images and divides them by
+automatically if you are using high-dose images from hybrid StA approach and divides them by
 their corresponding frame count in contrast to low-dose images where the
 frame-count is different.
 
@@ -562,11 +596,8 @@ frame-count is different.
 </br>
 
 The DynamoTiltSeriesAlignment module is using the tilt stacks alignment
-algorithm from dynamo which is the best available algorithm for
-fiducial-based alignment. As default reasonable parameters for many cryo
-ET projects are set. Some of them are dynamically derived. The option to
-override non-dynamically derived parameters is still available and can
-be done in the json configuration file.
+algorithm from dynamo which is the state of the art available algorithm for fiducial-based alignment. As default, reasonable parameters for many cryo-ET projects are set. Some of them are dynamically derived. The option to
+override non-dynamically derived parameters is available via the JSON configuration file. For troubleshooting and optimization of parameters it is possible to go to the processing folder and [use the Dynamo tools as in the Dynamo tutorial](https://wiki.dynamo.biozentrum.unibas.ch/w/index.php/Walkthrough_on_GUI_based_tilt_series_alignment).
 
 **Dependencies**
 </br>
@@ -724,7 +755,7 @@ be done in the json configuration file.
 **Description**
 </br>
 The DynamoCleanStacks module can be run after the
-DynamoTiltSeriesAlignment to automatically clean up the tilt stacks. For
+DynamoTiltSeriesAlignment to automatically clean up the tilt stacks and to remove the projections where DynamoTiltSerieAlignment has not found gold beads. For
 that **DynamoCleanStacks** uses the output from dynamo tilt stacks
 alignment which states on which projections the fiducials could be fit.
 The others are then removed from the tilt stacks for further processing.
@@ -760,7 +791,7 @@ The others are then removed from the tilt stacks for further processing.
 ### AreTomo
 **Description**
 </br>
-This module performs AreTomo-based fiducial-free alignment.
+The AreTomo module uses AreTomo to perform global or local fiducial-free alignment of the tilt stack. In order to optimize alignment parameters, please consult with the corresponding AreTomo documentation.
 
 **Dependencies**
 </br>
@@ -772,24 +803,25 @@ This module performs AreTomo-based fiducial-free alignment.
 </br>
 
 ```json
-  "AreTomo": {
-      "execution_method": "in_order",
-      "input_stack_binning": 1,
-      "reconstruction": false,
-      "weighted_back_projection": true,
-      "tilt_axis_refine_flag": 1,
-      "correct_tilt_axis_offset": 0,
-      "apply_given_tilt_axis_offset": false,
-      "tilt_axis_offset": 0,
-      "align_height_ratio": 0.75,
-      "apply_dose_weighting": false,
-      "sart": "20 5",
-      "roi": "0 0",
-      "roi_file": "",
-      "patch": "0 0",
-      "flip_volume": 1,
-      "flip_intensity": 0,
-      "citation": ""
+    "AreTomo": {
+        "execution_method": "in_order",
+        "input_stack_binning": 1,
+        "reconstruction": false,
+        "weighted_back_projection": true,
+        "tilt_axis_refine_flag": 1,
+        "correct_tilt_axis_offset": 0,
+        "apply_given_tilt_axis_offset": false,
+        "tilt_axis_offset": 0,
+        "align_height_ratio": 0.75,
+        "apply_dose_weighting": false,
+        "sart": "20 5",
+        "roi": "0 0",
+        "roi_file": "",
+        "patch": "0 0",
+        "flip_volume": 1,
+        "flip_intensity": 0,
+        "use_previous_alignment": false,
+        "citation": ""
     }
 ```
 
@@ -798,8 +830,7 @@ This module performs AreTomo-based fiducial-free alignment.
 **Description**
 </br>
 
-The BatchRunTomo module is the most versatile one as it can be setup to
-fulfill all the steps batchruntomo normally can do:
+The BatchRunTomo is a versatile module performing IMOD operations. The detailed description can be found here: Tomography Guide for [IMOD Version 4.11](https://bio3d.colorado.edu/imod/doc/tomoguide.html). TomoBEAR can runs steps of batchruntomo:
 
 -   0: Setup
 -   1: Preprocessing
@@ -984,9 +1015,7 @@ tomoBEAR and should not be replaced or changed by the user.
 
 **Description**
 </br>
-The GCTFCtfphaseflipCTFCorrection module is detecting the CTF for the
-tomograms which are reconstructed for template matching or particle
-cropping.
+The GCTFCtfphaseflipCTFCorrection module is detecting the defocus using Gctf or CTFIND4 on the tilt series which will be further CTF-corrected and used to reconstruct tomograms for template matching or particles generation. The results can be examined in the processing folders. As well, the module can be used for CTF-correction using ctfphaseflip from IMOD.
 
 **Dependencies**
 </br>
@@ -1070,9 +1099,7 @@ cropping.
 ### BinStacks
 **Description**
 </br>
-The BinStacks module is used for binning the stacks to be able to
-reconstruct them with the Reconstruct module which should be used after
-your stacks are binned.
+The BinStacks module is used to bin tilt series stacks to be able to reconstruct them with the Reconstruct module. Stacks with selected binning levels will be produced.
 
 **Dependencies**
 </br>
@@ -1100,6 +1127,7 @@ your stacks are binned.
     "BinStacks":{
         "execution_method": "parallel",
         "use_ctf_corrected_aligned_stack": true,
+        "use_aligned_stack": false,
         "antialias_filter": 6,
         "defocus_tolerance": 20,
         "iWidth": 2,
@@ -1118,11 +1146,7 @@ your stacks are binned.
 **Description**
 </br>
 
-The Reconstruct module should be used after you binned the tilt stacks
-with the BinStacks module or used aligned tilt stack binning option
-greater than one. The module is set up by default to reconstruct binned
-stacks. If you otherwise want to reconstruct unbinned stacks you need to
-set up the Reconstruct module properly.
+The Reconstruct module is used for tomogram reconstruction from aligned tilt stacks. The module is set up by default to reconstruct CTF-corrected binned stacks. If you otherwise want to reconstruct unbinned stacks or non-CTF-corrected stacks (for example, for further 3D CTF-deconvolution by IsoNet) you need to set up the Reconstruct module properly.
 
 **Dependencies**
 </br>
@@ -1168,7 +1192,7 @@ set up the Reconstruct module properly.
 
 **Description**
 </br>
-This module provides functionality of the IsoNet - DL framework for pre-processing, training and prediciton of restored information in the missing wedge region on the reconstructed cryo-elecrtron tomography volumes.
+The IsoNet module provides functionality of the deep learning framework IsoNet used for reconstruction of the missing wedge (MW) region in tomograms. Besides, IsoNet provides an interface for denoising and 3D CTF-deconvolution. TomoBEAR interface includes such IsoNet routines as pre-processing (STAR file preparation, mask creation, CTF-deconvolution), training (refinement) and prediction.
 
 **Dependencies**
 </br>
@@ -1181,7 +1205,7 @@ This module provides functionality of the IsoNet - DL framework for pre-processi
 <summary> Default parameters values <i> (click to expand) </i> </summary>
 
 ```json
-"IsoNet": {
+  "IsoNet": {
         "execution_method": "once",
         "isonet_env": "",
         "repository_path": "",
@@ -1263,16 +1287,16 @@ This module provides functionality of the IsoNet - DL framework for pre-processi
 </details>
 
 
-## Template matching-associated modules
+## Particles picking-associated modules
 
 ### DynamoImportTomograms
 
 **Description**
 </br>
-The DynamoImportTomograms module generates a dynamo catalogue for you
-and inputs the tomograms to that catalogue. After that you can call the
-dynamo catalogue manager (dcm) to generate the models for the tomograms
-or pick in them particles by hand.
+The DynamoImportTomograms module generates a Dynamo Catalogue for user
+and inputs the tomograms to that catalog. After that you can call the
+Dynamo Catalogue Manager (dcm) to generate the models for the tomograms
+or pick particles in them using the functionality of Dynamo Catalogue.
 
 **Dependencies**
 </br>
@@ -1306,10 +1330,9 @@ or pick in them particles by hand.
 **Description**
 </br>
 The EMDTemplateGeneration module is used to automatically download a
-EMDB template which is further down-scaled to match your desired template
-matching binning. Besides that an automated routine to generate the mask
-is also implemented. This module needs to be run before template
-matching is executed.
+EMDB template which is further down-scaled to match the requested template
+matching binning level. Besides that an automated routine to generate the mask is also implemented. Either this module or the module TemplateGenerationFromFile needs to be run before template matching is executed by the DynamoTemplateMatching module.
+
 
 **Dependencies**
 </br>
@@ -1343,7 +1366,8 @@ matching is executed.
 
 **Description**
 </br>
-The concept of this module is the same as in EMDTemplateMatching, with the only difference of taking the template from a user-defined path instead of fetching it directly from EMDB.
+The TemplateGenerationFromFile module imports a map into the TomoBEAR workflow given by a path and scales it properly if the map header contains the correct pixel size; else the pixel size can be input as a parameter through the JSON-based configuration file. Either this module or the module EMDTemplateGeneration needs to be run before template matching is executed by the DynamoTemplateMatching module.
+
 
 **Dependencies**
 </br>
@@ -1377,9 +1401,8 @@ The concept of this module is the same as in EMDTemplateMatching, with the only 
 **Description**
 </br>
 The DynamoTemplateMatching module re-implements the template
-matching from Dynamo but on a GPU. Because of the GPU usage the whole
-thing runs up to 15 times faster than the normal template matching
-implementation of dynamo.
+matching functionality from the Dynamo package, but distributes calculations on the GPU. The GPU-distributed version executes up to 12-15 times faster than the conventional CPU-distributed template matching
+implementation available in Dynamo. In some multi-GPU systems the speed-up may be even non-linear relative to the number of GPUs used.
 
 **Dependencies**
 </br>
@@ -1421,7 +1444,7 @@ implementation of dynamo.
 ### TemplateMatchingPostProcessing
 **Description**
 </br>
-This module creates Dynamo-like table of particles based on the results of the template matching procedure from the module DynamoTemplateMatching. As well, using this module you can extract subtomograms of the identified particles.
+The TemplateMatchingPostProcessing module takes the cross-correlation volumes generated by the DynamoTemplateMatching module and extracts the coordinates from the peaks found in them until a given threshold is reached. This threshold is set by default to a value of 2.5 standard deviations. As well this module could extract the corresponding subtomograms by cropping them from the reconstructed tomograms using Dynamo or reconstruct them directly from the aligned stacks using SUSAN.
 
 **Dependencies**
 </br>
@@ -1474,12 +1497,80 @@ This module creates Dynamo-like table of particles based on the results of the t
 ```
 </details>
 
-## Subtomogram Averaging modules
+### crYOLO
 
-### GenerateParticles.m
 **Description**
 </br>
-This module uses Dynamo-like particles table to either extract Dynamo-like particles from the tomogram or to crop SUSAN-like substacks and make from them particles reconstructions.
+The crYOLO module provides functionality of the deep learning framework crYOLO used for particle coordinate prediction. TomoBEAR interface includes such crYOLO routines as pre-processing (configuration file preparation, filtering), training and prediction. To optimize parameters of the training and prediction please use the corresponding crYOLO documentation (https://cryolo.readthedocs.io/en/stable/index.html).
+
+**Dependencies**
+</br>
+- Anaconda
+- crYOLO (and its Python dependencies)
+- CUDA
+
+</br>
+<details>
+<summary> Default parameters values <i> (click to expand) </i> </summary>
+
+```json
+    "crYOLO": {
+        "execution_method": "once",
+        "cryolo_env": "",
+        "tomograms_to_use": [],
+        "steps_to_execute": {},
+        "steps_to_execute_defaults": {
+            "config": {
+                "cryolo_command": "cryolo_gui.py config",
+                "target_boxsize": 220,
+                "config_json_filepath": "config_cryolo.json",
+                "filter": "LOWPASS",
+                "low_pass_cutoff": 0.1,
+                "janni_model_path": "",
+                "train_mode": false,
+                "train_tomograms_folder": "train_tomograms",
+                "train_tomograms_path": "",
+                "tomograms_binning": -1,
+                "train_annot_folder": "train_annot",
+                "input_size": -1
+            },
+            "train": {
+                "cryolo_command": "cryolo_train.py",
+                "config_json_filepath": "config_cryolo.json",
+                "num_cpu": -1,
+                "early": 15,
+                "warmup": 5
+            },
+            "predict": {
+                "cryolo_command": "cryolo_predict.py",
+                "config_json_filepath": "config_cryolo.json",
+                "trained_model_filepath": "cryolo_model.h5",
+                "threshold": 0.1,
+                "test_tomograms_folder": "test_tomograms",
+                "test_tomograms_path": "",
+                "tomograms_binning": -1,
+                "predict_annot_folder": "predict_annot",
+                "num_cpu": -1,
+                "tracing_search_range": -1,
+                "tracing_memory": -1,
+                "tracing_min_length": -1
+            },
+            "export_annotations": {
+                "raw_prtcl_coords_dir": "predict_annot/COORDS",
+                "per_table_particle_count": -1,
+                "total_particle_count": -1
+            }
+        }
+    }
+```
+</details>
+
+### GenerateParticles
+**Description**
+</br>
+The GenerateParticles module uses Dynamo-like particles tables to extract particles in one of the following ways:
+* crop sub-tomograms from the reconstructed tomograms using Dynamo;
+* reconstruct sub-tomograms from sub-stacks cropped directly from aligned tilt stacks using SUSAN.
 
 **Dependencies**
 </br>
@@ -1509,12 +1600,13 @@ This module uses Dynamo-like particles table to either extract Dynamo-like parti
 ```
 </details>
 
+## Subtomogram Averaging modules
 
 ### DynamoAlignmentProject
 
 **Description**
 </br>
-This module is basically a wrapper for performing Dynamo alignment projects.
+The DynamoAlignmentProject module can be set up to generate the two common Dynamo subtomogram averaging projects: multiple reference alignment (MRA) project and an independent half-set based refinement project. For classification we find it useful to have one or two classes with the correct reference that was used e.g. for template matching and some classes containing only noise (“noise traps”) which will attract suboptimal particles into classes for removal.
 
 **Dependencies**
 </br>

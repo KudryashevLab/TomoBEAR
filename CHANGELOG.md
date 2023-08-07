@@ -2,6 +2,30 @@
 
 All notable changes will be documented in this file.
 
+## v0.4.0 - 2023-08-07
+
+### :rocket: New Features
+* ```crYOLO``` - module wrapping [crYOLO](https://cryolo.readthedocs.io/en/stable/index.html) - DL tool, based on **You Only Look Once (YOLO)** object detection system for predicting particle coordinates (basically picking them) in cryo-electron tomograms
+
+### :arrow_up: Improvements
+* ```IsoNet```: added possibility to post-process IsoNet-corrected tomograms using NAD filtering
+* ```DynamoTemplateMatching```: enabled usage of the tomograms from the custom user-provided path
+* ```AreTomo```:
+  * enabled direct usage of AreTomo alignment parameters from previously executed AreTomo step
+  * enabled parameters: tilt axis offset (pre-tilt) and temporary reconstruction thickness (VolZ)
+
+### :bug: Important fixes
+* ```DynamoTemplateMatching```: fixed bug preventing GPU-enabled speedup
+
+### :exclamation: Important updates
+* **changed license** of the core code base from [`AGPLv3`](https://www.gnu.org/licenses/agpl-3.0.en.html) to [`GPLv3`](https://www.gnu.org/licenses/gpl-3.0.en.html) - changed license to a bit more permissive version in order to allow software maintainers and other TomoBEAR contributors more flexibility in terms of TomoBEAR modifications, needed to provide a TomoBEAR operation over local networks (like institutional intranets and/or shared filesystems);
+* **updated documentation**:
+  * recorded a [set of short 8-12 min video-tutorials](https://www.youtube.com/watch?v=2uizkE616tE&list=PLdMU06ILLrYKjI-Z0qezcNheEtpVulMao&pp=iAQB) on TomoBEAR installation and 80S ribosome (EMPIAR-10064) tutorial;
+  * added [contribution guidelines and tips](https://github.com/KudryashevLab/TomoBEAR/blob/main/CONTRIBUTING.md)
+  * extended ["Usage"](https://github.com/KudryashevLab/TomoBEAR/wiki/Usage) and reviewed ["Installation and Setup"](https://github.com/KudryashevLab/TomoBEAR/wiki/Installation-and-Setup) sections;
+  * added ["External Software"](https://github.com/KudryashevLab/TomoBEAR/wiki/External-Software) section for dependencies installation/citation description.
+
+---
 ## v0.3.0 - 2023-05-22
 
 ### :rocket: New Features
