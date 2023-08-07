@@ -1,5 +1,7 @@
 # TomoBEAR
 
+[![DOI](https://zenodo.org/badge/675692608.svg)](https://zenodo.org/badge/latestdoi/675692608)
+
 **TomoBEAR** is a configurable and customizable modular pipeline for streamlined processing of cryo-electron tomographic data and preliminary subtomogram averaging (StA) based on best practices in the scientific research group of Dr. Misha Kudryashev[^1][^2].
 
 ![TomoBEAR Social Media Logo Image](images/TomoBEAR_gitlogo.png)
