@@ -84,7 +84,8 @@
         "cone_range": 360,
         "cone_sampling": 10,
         "in_plane_range": 360,
-        "in_plane_sampling": 10
+        "in_plane_sampling": 10,
+        "size_of_chunk": [512, 512, 375]
     },
     "TemplateMatchingPostProcessing": {
         "cc_std": 2.5,

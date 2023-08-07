@@ -49,6 +49,8 @@
         "flip_handedness": true
     },
     "DynamoTemplateMatching": {
+        "sampling": 15,
+        "size_of_chunk": [463, 463, 175]
     },
     "TemplateMatchingPostProcessing": {
         "cc_std": 2.5
