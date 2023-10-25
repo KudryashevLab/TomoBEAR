@@ -246,10 +246,15 @@ classdef BinStacks < Module
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
                         defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
-                        splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
-                        ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
+                        
+                        [stack_filepath, stack_filename, stack_ext] = fileparts(stack_output_path);
+                        %splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
+                        %ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
+                        %    + "_" + obj.configuration.ctf_corrected_stack_suffix...
+                        %    + "." + splitted_tilt_stack_path_name(2);
+                        ctf_corrected_stack_destination = stack_filepath + filesep + stack_filename...
                             + "_" + obj.configuration.ctf_corrected_stack_suffix...
-                            + "." + splitted_tilt_stack_path_name(2);
+                            + stack_ext;
                        
                         command = "ctfphaseflip -input " + stack_output_path...
                             + " -output " + ctf_corrected_stack_destination...
@@ -263,9 +268,12 @@ classdef BinStacks < Module
                             + " -cs " + obj.configuration.spherical_aberation...
                             + " -ampContrast " + obj.configuration.ampContrast;
                        
-                        if obj.configuration.use_aligned_stack == false
-                            command = command + " -xform " + xf_file_destination;
-                        end
+                        % NOTE: if stack is aligned, no need to transform
+                        % NOTE: if stack is non-aligned, no need to
+                        % transform since it was not requested
+                        %if obj.configuration.use_aligned_stack == false
+                        %    command = command + " -xform " + xf_file_destination;
+                        %end
                        
                         if obj.configuration.set_up.gpu > 0 && versionGreaterThan(obj.configuration.environment_properties.imod_version, "4.10.9")
                             command = command + " -gpu " + obj.configuration.set_up.gpu;
