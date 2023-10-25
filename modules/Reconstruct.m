@@ -304,15 +304,14 @@ classdef Reconstruct < Module
                 tlt_out = fopen(tlt_out_name, "w");
                 
                 if obj.configuration.correct_angles == "center"
-                    tlt_in = fopen(tlt_file{1}, "r");
-                    
-                    tlt_out_name = obj.output_path + string(filesep) + name + ".tlt";
-                    tlt_out = fopen(tlt_out_name, "w");
-                    
-                    high_tilt = fgetl(tlt_in);
+                    high_tilt = str2double(fgetl(tlt_in));
                     % TODO:DIRTY -> code clean
+                    low_tilt = high_tilt;
                     while ~feof(tlt_in)
-                        low_tilt = fgetl(tlt_in);
+                        low_tilt_new = str2double(fgetl(tlt_in));
+                        if ~isnan(low_tilt_new)
+                            low_tilt = low_tilt_new;
+                        end
                     end
                     fclose(tlt_in);
                     
@@ -321,7 +320,7 @@ classdef Reconstruct < Module
                     tlt_in = fopen(tlt_file{1}, "r");
                     while ~feof(tlt_in)
                         % TODO: needs to be tested
-                        tilt_adjusted = num2str(fgetl(tlt_in)) + shift;
+                        tilt_adjusted = str2double(fgetl(tlt_in)) + shift;
                         fprintf(tlt_out, "%.2f\n", tilt_adjusted);
                     end
                 elseif obj.configuration.correct_angles == "subtract"
