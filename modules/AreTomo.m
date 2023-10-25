@@ -94,7 +94,7 @@ classdef AreTomo < Module
                 if obj.configuration.correct_pretilt_flag ~= -1
                     tilt_axis_offset_command_snippet = " -TiltCor " + num2str(obj.configuration.correct_pretilt_flag);
                     pretilt_angle_to_use = -obj.configuration.pretilt_tilt_axis;
-                    if pretilt_angle_to_use == 0
+                    if pretilt_angle_to_use ~= 0
                         tilt_axis_offset_command_snippet = tilt_axis_offset_command_snippet + " " + num2str(pretilt_angle_to_use);
                     end
                 else
@@ -125,7 +125,7 @@ classdef AreTomo < Module
                     + ") is lower than required input_stack_binning (=" + num2str(obj.configuration.input_stack_binning) + ") !");
             end
             
-            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
+            stack_source = string(tilt_stacks(obj.configuration.set_up.j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.j).name);
             
             % Generate aligned stack of the requested binning level
             stack_destination = obj.output_path + filesep + obj.name + ".ali";
@@ -194,7 +194,7 @@ classdef AreTomo < Module
             % Generate aligned unbinned stack using alignment parameters
             % previously detected at the requested binning level
             tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
-            stack_source = string(tilt_stacks(obj.configuration.set_up.adjusted_j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.adjusted_j).name);
+            stack_source = string(tilt_stacks(obj.configuration.set_up.j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.j).name);
             stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
             
             if obj.configuration.use_previous_alignment == false
