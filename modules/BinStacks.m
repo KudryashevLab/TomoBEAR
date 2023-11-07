@@ -186,10 +186,10 @@ classdef BinStacks < Module
                     end
                     
                     [path, name, extension] = fileparts(tilt_stacks.name);
-                    
+                    stack_destination = obj.output_path + string(filesep) + name + ".st";
                     if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
                         stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
-                        
+                        obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
                         %xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         %xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         %obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
@@ -199,13 +199,15 @@ classdef BinStacks < Module
                         size_command_snippet = "";
                     else
                         stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                        obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
+                        [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
                         %xform_command_snippet = "";
                         stk_bin_ext = ".st";
                         size_command_snippet = " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin));
                     end
                     
-                    stack_destination = obj.output_path + string(filesep) + name + ".st";
-                    obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
+                    %stack_destination = obj.output_path + string(filesep) + name + ".st";
+                    %obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
                    
                     %                     for j = 1:length(obj.configuration.binnings)
                     binned_stack_suffix = "bin_" + num2str(obj.configuration.binnings(i));
