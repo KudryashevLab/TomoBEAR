@@ -188,7 +188,8 @@ classdef CreateStacks < Module
                 for i = 1:length(motion_corrected_files)
                     [path, name, extension] = fileparts(motion_corrected_files{i});
                     
-                    path_parts = strsplit(path, string(filesep));
+                    %path_parts = strsplit(path, string(filesep));
+                    path_parts = strsplit(obj.output_path, string(filesep));
                     
                     % TODO: delete if unneeded
                     %previous_step_output_folder_parts = strsplit(configuration.previous_step_output_folder, string(filesep));
@@ -219,8 +220,9 @@ classdef CreateStacks < Module
                     %angle = str2double(splitted_name(obj.configuration.angle_position));
                     %angle = str2double(splitted_name(obj.configuration.angle_position + 1));
                     % TODO: fix angles
-                    angle = str2double(splitted_name(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).adjusted_angle_position));
-                    
+                    %angle = str2double(splitted_name(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).adjusted_angle_position));
+                    angles = sort(obj.configuration.tilt_angles);
+                    angle = angles(i);
                     
                     tilt_index_angle_mapping(1,i) = i;
                     tilt_index_angle_mapping(2,i) = angle;
@@ -412,7 +414,6 @@ classdef CreateStacks < Module
                 error("ERROR: unknown normalization method!");
             end
             obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).tilt_stack_files_normalized = output_stack_list;
-            
             % NOTE: tilt_stack_files_normalized should not be deleted 
             % here because might be used on the DynamoCleanStacks step!
             %obj.temporary_files = output_stack_list;
@@ -425,6 +426,8 @@ classdef CreateStacks < Module
             
             disp("INFO: Creating Stack!");
             % TODO: add "-tilt" parameter to include angles in meta data
+            
+                    
             executeCommand("newstack " + strjoin(output_stack_list, " ") + " " + stack_output_path, false, obj.log_file_id);
 
             if isfield(obj.configuration, "apix")
@@ -525,4 +528,3 @@ classdef CreateStacks < Module
         end
     end
 end
-
