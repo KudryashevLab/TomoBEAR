@@ -183,29 +183,29 @@ classdef BinStacks < Module
                     if isempty(tilt_stacks)
                         obj.status = 0;
                         return;
+                    elseif length(tilt_stacks) > 1
+                        tilt_stacks = tilt_stacks(1);
                     end
                     
                     [path, name, extension] = fileparts(tilt_stacks.name);
+                    stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
+                    stack_destination = obj.output_path + string(filesep) + name + ".st";
+                    obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
+                    [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
+                    %stk_bin_ext = ".ali";
                     
-                    if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true
-                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
-                        
+                    if obj.configuration.use_ctf_corrected_aligned_stack == true || obj.configuration.use_aligned_stack == true    
                         %xf_file_source = getXfOrAlnFilePaths(obj.configuration, obj.output_path, obj.name);
                         %xf_file_destination = obj.output_path + string(filesep) + name + ".xf";
                         %obj.temporary_files(end + 1) = createSymbolicLink(xf_file_source, xf_file_destination, obj.log_file_id);
                         %xform_command_snippet = " -xform " + xf_file_destination;
-                        
                         stk_bin_ext = ".ali";
                         size_command_snippet = "";
                     else
-                        stack_source = tilt_stacks.folder + string(filesep) + tilt_stacks.name;
                         %xform_command_snippet = "";
                         stk_bin_ext = ".st";
                         size_command_snippet = " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin));
                     end
-                    
-                    stack_destination = obj.output_path + string(filesep) + name + ".st";
-                    obj.temporary_files(end + 1) = createSymbolicLink(stack_source, stack_destination, obj.log_file_id);
                    
                     %                     for j = 1:length(obj.configuration.binnings)
                     binned_stack_suffix = "bin_" + num2str(obj.configuration.binnings(i));
@@ -214,7 +214,6 @@ classdef BinStacks < Module
                     stack_output_path = obj.output_path + string(filesep) + name + "_" + binned_stack_suffix + stk_bin_ext;
                     
                     obj.dynamic_configuration.tomograms.(field_names{obj.configuration.set_up.j}).binned_stacks{i} = stack_output_path;
-                    [width, height, z] = getHeightAndWidthFromHeader(stack_destination, -1);
                     
                     executeCommand("newstack"...
                         + size_command_snippet...

@@ -267,6 +267,7 @@ You may want to try to use the following example of the end section of `JSON` fi
     "BinStacks":{
         "binnings": [1],
         "use_ctf_corrected_aligned_stack": false,
+        "use_aligned_stack": true,
         "run_ctf_phaseflip": true
     },
     "Reconstruct": {

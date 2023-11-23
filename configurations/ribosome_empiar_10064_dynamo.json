@@ -130,6 +130,7 @@
     "BinStacks":{
         "binnings": [1],
         "use_ctf_corrected_aligned_stack": false,
+        "use_aligned_stack": true,
         "run_ctf_phaseflip": true
     },
     "Reconstruct": {
