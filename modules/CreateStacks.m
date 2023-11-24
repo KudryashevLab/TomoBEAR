@@ -188,7 +188,7 @@ classdef CreateStacks < Module
                 for i = 1:length(motion_corrected_files)
                     [path, name, extension] = fileparts(motion_corrected_files{i});
                     
-                    path_parts = strsplit(path, string(filesep));
+                    path_parts = strsplit(obj.output_path, string(filesep));
                     
                     % TODO: delete if unneeded
                     %previous_step_output_folder_parts = strsplit(configuration.previous_step_output_folder, string(filesep));
