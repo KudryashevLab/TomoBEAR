@@ -66,7 +66,11 @@ classdef CreateStacks < Module
                 output = createSymbolicLink(source, destination, obj.log_file_id);
                 slice_destination_folder = obj.output_path + string(filesep) + slice_folder;
                 [success, message, message_id] = mkdir(slice_destination_folder);
+                % ATTENTION: the extended header is omitted here (-strip)
+                % since Dynamo dread assumes no extended header
+                % however it will be transfered afterwards
                 output = executeCommand("newstack -split 1 -append mrc "...
+                    + "-strip "...
                     + destination + " "...
                     + slice_destination_folder + string(filesep) + field_names{obj.configuration.set_up.j}...
                     + "_" + obj.configuration.slice_suffix + "_", false, obj.log_file_id);
@@ -127,6 +131,8 @@ classdef CreateStacks < Module
             %                 'tokens', 'tokenExtents');
             %             tok_tilt_p3_frames = str2num(tok_tilt_p3_frames{1});
             
+            path_parts = strsplit(obj.output_path, string(filesep));
+            stack_output_path = obj.output_path + string(filesep) + path_parts(end) + ".st";
             
             if obj.configuration.normalization_method == "mean_std"
                 
@@ -186,9 +192,7 @@ classdef CreateStacks < Module
                 output_stack_list = string([]);
                 %tilt_index_angle_mapping.(strjoin(splitted_name(1:configuration.angle_position-2), "_")) = zeros(4,length(partial_input_mrc_list));
                 for i = 1:length(motion_corrected_files)
-                    [path, name, extension] = fileparts(motion_corrected_files{i});
-                    
-                    path_parts = strsplit(obj.output_path, string(filesep));
+                    [~, name, ~] = fileparts(motion_corrected_files{i});
                     
                     % TODO: delete if unneeded
                     %previous_step_output_folder_parts = strsplit(configuration.previous_step_output_folder, string(filesep));
@@ -203,7 +207,6 @@ classdef CreateStacks < Module
                     end
                     projection_output_path = obj.output_path + string(filesep) + name + "_" + obj.configuration.normalized_postfix + ".mrc";
                     projection_input_path = motion_corrected_files{i};
-                    stack_output_path = obj.output_path + string(filesep) + path_parts(end) + ".st";
                     %         else
                     %             projection_output_path = obj.input_path + string(filesep) + name + "_" + configuration.normalized_postfix + ".mrc";
                     %             projection_input_path = obj.input_path + string(filesep) + name + extension;
@@ -219,8 +222,11 @@ classdef CreateStacks < Module
                     %angle = str2double(splitted_name(obj.configuration.angle_position));
                     %angle = str2double(splitted_name(obj.configuration.angle_position + 1));
                     % TODO: fix angles
-                    angle = str2double(splitted_name(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).adjusted_angle_position));
-                    
+                    if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "adjusted_angle_position")
+                        angle = str2double(splitted_name(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).adjusted_angle_position));
+                    else
+                        angle = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).sorted_angles(i);
+                    end
                     
                     tilt_index_angle_mapping(1,i) = i;
                     tilt_index_angle_mapping(2,i) = angle;
@@ -275,9 +281,6 @@ classdef CreateStacks < Module
                     %                         medfilt_border_image = conv2(double(border_image), kernel, 'same');
                     %                         medfilt_border_image(medfilt_border_image < 0.0000000001) = 0;
                 end
-                path_parts = strsplit(obj.output_path, string(filesep));
-                % TODO: refactor to outside of loop
-                stack_output_path = obj.output_path + string(filesep) + path_parts(end) + ".st";
                 
                 if isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "motion_corrected_even_files")
                     stack_output_path_even = obj.output_path + string(filesep) + path_parts(end) + "_even.st";
@@ -296,7 +299,7 @@ classdef CreateStacks < Module
                 end
                 
                 for i = 1:length(motion_corrected_files)
-                    [path, name, extension] = fileparts(motion_corrected_files{i});
+                    [~, name, ~] = fileparts(motion_corrected_files{i});
                     
                     
                     % TODO: check if needed here
@@ -426,7 +429,18 @@ classdef CreateStacks < Module
             disp("INFO: Creating Stack!");
             % TODO: add "-tilt" parameter to include angles in meta data
             executeCommand("newstack " + strjoin(output_stack_list, " ") + " " + stack_output_path, false, obj.log_file_id);
-
+            
+            % tarnsferring extended header info from original stacks
+            % to the main header part (titles) in processed stack
+            if isfield(obj.configuration, "tilt_stacks") && obj.configuration.tilt_stacks == true
+                stack_input_path = obj.output_path + string(filesep) + field_names{obj.configuration.set_up.j} + "_link.st";
+                extheader_lines = getExtendedHeaderNaive(stack_input_path);
+                for lines_idx=length(extheader_lines):-1:1
+                    extheader_line = extheader_lines{lines_idx};
+                    executeCommand("alterheader -title " + string('"') + extheader_line + string('"') + " -position 1 " + stack_output_path, false, obj.log_file_id);
+                end
+            end
+            
             if isfield(obj.configuration, "apix")
                 apix = obj.configuration.apix * obj.configuration.ft_bin;
             else

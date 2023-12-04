@@ -568,6 +568,8 @@ else
                 end
             end
             dynamic_configuration.tomograms.(tomogram_name).high_dose = unique(dynamic_configuration.tomograms.(tomogram_name).dose) >= 2;
+        elseif isfield(dynamic_configuration, "tilt_stacks") && dynamic_configuration.tilt_stacks == true
+            dynamic_configuration.tomograms.(tomogram_name).sorted_angles = sort(configuration.tilt_angles);
         end
         
         dynamic_configuration.tomograms.(tomogram_name).prefix = dynamic_configuration.original_files(tomogram_file_indices(1)).prefix;
