@@ -143,23 +143,15 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         + " "...
                         + obj.name + "_" + obj.configuration.slice_suffix + "_";
                     if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, obj.name)
-                        view_index_max = max(abs(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)));
                         angle_min_abs = min(abs(tilt_index_angle_mapping));
                         angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
-                        if view_index_max < 10
-                            file = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
-                        else
-                            file = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
-                        end
+                        fmt = num2str(obj.configuration.slice_digits,'%%0%dd');
+                        file = sprintf(fmt, obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
                     else
-                        view_index_max = max(abs(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)));
                         angle_min_abs = min(abs(tilt_index_angle_mapping));
                         angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
-                        if view_index_max < 10
-                            file = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
-                        else
-                            file = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
-                        end
+                        fmt = num2str(obj.configuration.slice_digits,'%%0%dd');
+                        file = sprintf(fmt, obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
                     end
                     command = command + file + ".mrc";
                     output = executeCommand(command, false, obj.log_file_id);
@@ -199,23 +191,15 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     disp("INFO: Starting CTFFIND estimation on " + obj.name + "!");
                     
                     if isfield(obj.configuration, "tilt_index_angle_mapping") && isfield(obj.configuration.tilt_index_angle_mapping, obj.name)
-                        view_index_max = max(abs(obj.configuration.tilt_index_angle_mapping.(obj.name)(4,:)));
                         angle_min_abs = min(abs(tilt_index_angle_mapping));
                         angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
-                        if view_index_max < 10
-                            view = sprintf("%d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
-                        else
-                            view = sprintf("%02d", obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
-                        end
+                        fmt = num2str(obj.configuration.slice_digits,'%%0%dd');
+                        view = sprintf(fmt, obj.configuration.tilt_index_angle_mapping.(obj.name)(4,tilt_index_angle_mapping == angle_min));
                     else
-                        view_index_max = max(abs(obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:)));
                         angle_min_abs = min(abs(tilt_index_angle_mapping));
                         angle_min = tilt_index_angle_mapping(abs(tilt_index_angle_mapping) == angle_min_abs);
-                        if view_index_max < 10
-                            view = sprintf("%d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
-                        else
-                            view = sprintf("%02d", obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
-                        end
+                        fmt = num2str(obj.configuration.slice_digits,'%%0%dd');
+                        view = sprintf(fmt, obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,tilt_index_angle_mapping == angle_min));
                     end
                     input_filename = obj.name + "_" + obj.configuration.slice_suffix + "_" + view;
                     output_filename = input_filename + "_" + obj.configuration.ctffind_output_suffix;
@@ -277,6 +261,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     if obj.configuration.do_EPA == true
                         command = command + " --do_EPA";
                     end
+
                     command = command + " " + obj.name + "*.mrc";
                     output = executeCommand(command, false, obj.log_file_id);
 
@@ -346,16 +331,8 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                     
                     view_list = dir(slice_folder + string(filesep) + obj.name + "_*.mrc");
                     
-                    %view_indices = obj.configuration.tomograms.(obj.name).tilt_index_angle_mapping(4,:);
-                    %if view_index_max < 10
-                    %    view_indices_str = sprintfc('%d',view_indices);
-                    %else
-                    %    view_indices_str = sprintfc('%02d',view_indices);
-                    %end
-                    
                     for idx=1:length(view_list)
                         [~, input_filename, ~] = fileparts(view_list(idx).name);
-                        %input_filename = obj.name + "_" + obj.configuration.slice_suffix + "_" + view_index_str;
                         output_filename = input_filename + "_" + obj.configuration.ctffind_output_suffix;
                         command = command_head...
                             + " " + input_filename + ".mrc"...

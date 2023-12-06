@@ -91,6 +91,7 @@
         "tomogram_begin": 0,
         "tomogram_end": 0,
         "tomogram_step": 1,
+        "slice_digits": 2,
         "aligned_stack_binning": 4,
         "pre_aligned_stack_binning": 4,
         "template_matching_binning": 16,

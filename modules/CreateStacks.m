@@ -238,7 +238,7 @@ classdef CreateStacks < Module
                     
                     % TODO: determine if stack has high dose image automatically, then
                     % flag can be ommited
-                    if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{2}\.0", "match")) && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
+                    if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{" + num2str(obj.configuration.slice_digits) + "}\.0", "match")) && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
                         tilt_index_angle_mapping(5,i) = 1;
                         executeCommand("newstack"...
                             + " -in " + projection_input_path...
@@ -353,12 +353,12 @@ classdef CreateStacks < Module
                     end
                     
                     if ~isfield(obj.configuration, "tilt_stacks") || obj.configuration.tilt_stacks ~= true
-                        if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{2}\.0", "match")) && isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "high_dose") && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
+                        if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{" + num2str(obj.configuration.slice_digits) + "}\.0", "match")) && isfield(obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}), "high_dose") && obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose == true
                             tilt_index_angle_mapping(5,i) = 1;
                             normalized_micrograph = micrograph ./ obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).high_dose_frames;
                             tilt_index_angle_mapping(6,i) = 1;
                         else
-                            if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{2}\.0", "match"))
+                            if ~isempty(regexp(motion_corrected_files{i}, "_[+-]*0{" + num2str(obj.configuration.slice_digits) + "}\.0", "match"))
                                 tilt_index_angle_mapping(5,i) = 1;
                             else
                                 tilt_index_angle_mapping(5,i) = 0;
