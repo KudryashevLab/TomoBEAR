@@ -225,6 +225,8 @@
     "Reconstruct": {
         "execution_method": "in_order",
         "reconstruct": "binned",
+        "sirt_iter": -1,
+        "fake_sirt_iter": -1,
         "use_ctf_corrected_stack": true,
         "generate_exact_filtered_tomograms": false,
         "exact_filter_size": 1500,

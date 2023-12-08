@@ -359,6 +359,11 @@ classdef Reconstruct < Module
                     + " -TILTFILE " + tlt_out_name...
                     + " -THICKNESS " + obj.configuration.reconstruction_thickness;
                 
+                if isfield(obj.configuration, "sirt_iter") && (obj.configuration.sirt_iter >= 1)
+                    command = command + " -SIRTIterations " + obj.configuration.sirt_iter;
+                elseif isfield(obj.configuration, "fake_sirt_iter") && (obj.configuration.fake_sirt_iter >= 1)
+                    command = command + " -FakeSIRTiterations " + obj.configuration.fake_sirt_iter;
+                end
                 
                 if obj.configuration.set_up.gpu > 0
                     command = command + " -UseGPU " + obj.configuration.set_up.gpu ;
@@ -441,6 +446,12 @@ classdef Reconstruct < Module
                         + " -OutputFile " + tomogram_destination...
                         + " -TILTFILE " + tlt_out_name...
                         + " -THICKNESS " + num2str(obj.configuration.reconstruction_thickness / splitted_binning, '%.f');
+                    
+                    if isfield(obj.configuration, "sirt_iter") && (obj.configuration.sirt_iter >= 1)
+                        command = command + " -SIRTIterations " + obj.configuration.sirt_iter;
+                    elseif isfield(obj.configuration, "fake_sirt_iter") && (obj.configuration.fake_sirt_iter >= 1)
+                        command = command + " -FakeSIRTiterations " + obj.configuration.fake_sirt_iter;
+                    end
                     
                     if isfield(obj.configuration, "exclude_lists") && isfield(obj.configuration.exclude_lists, field_names{obj.configuration.set_up.j})
                         command = command + " -EXCLUDELIST2 " + strjoin(strsplit(num2str(obj.configuration.exclude_lists.(field_names{obj.configuration.set_up.j})')), ",");
