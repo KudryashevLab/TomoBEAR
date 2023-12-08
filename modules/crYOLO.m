@@ -376,12 +376,22 @@ classdef crYOLO < Module
         function command_output = executeCrYOLOCommand(obj, params_string, cryolo_command)
             if obj.configuration.use_conda == true
                 python_run_script_snippet = "LD_LIBRARY_PATH=" + obj.configuration.conda_path + string(filesep) + "lib:$LD_LIBRARY_PATH_COPY"...
-                    + " conda run -n " + obj.configuration.cryolo_env; 
+                    + " conda run";
+                if ~contains(obj.configuration.cryolo_env, filesep)
+                    python_run_script_snippet = python_run_script_snippet + " -n " + obj.configuration.cryolo_env;
+                else
+                    python_run_script_snippet = python_run_script_snippet + " -p " + obj.configuration.cryolo_env;
+                end
             end
- 
-            cryolo_command_snippet = obj.configuration.conda_path + string(filesep) + "envs"...
+            
+            if ~contains(obj.configuration.cryolo_env, filesep)
+                cryolo_command_snippet = obj.configuration.conda_path + string(filesep) + "envs"...
                 + string(filesep) + obj.configuration.cryolo_env + string(filesep) + "bin"...
                 + string(filesep) + cryolo_command;
+            else
+                cryolo_command_snippet = obj.configuration.cryolo_env + string(filesep) + "bin"...
+                + string(filesep) + cryolo_command;
+            end
             python_run_script_snippet = python_run_script_snippet + " python " + cryolo_command_snippet;
             command_output = executeCommand(python_run_script_snippet + " " + params_string, false, obj.log_file_id);
         end

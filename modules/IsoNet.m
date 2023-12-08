@@ -377,7 +377,12 @@ classdef IsoNet < Module
         function command_output = executeIsoNetCommand(obj, params_string)
             python_run_script_snippet = "PYTHONPATH=" + fullfile(obj.configuration.repository_path, '..');
             if obj.configuration.use_conda == true
-                python_run_script_snippet = python_run_script_snippet + " LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run -n " + obj.configuration.isonet_env; 
+                python_run_script_snippet = python_run_script_snippet + " LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run";
+                if ~contains(obj.configuration.isonet_env, filesep)
+                    python_run_script_snippet = python_run_script_snippet + " -n " + obj.configuration.isonet_env;
+                else
+                    python_run_script_snippet = python_run_script_snippet + " -p " + obj.configuration.isonet_env;
+                end
             end
             python_run_script_snippet = python_run_script_snippet + " python " + obj.configuration.repository_path + filesep + "bin/isonet.py";
             command_output = executeCommand(python_run_script_snippet + " " + params_string, false, obj.log_file_id);
