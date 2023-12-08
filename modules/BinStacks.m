@@ -244,7 +244,8 @@ classdef BinStacks < Module
                    
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-                        defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
+                        defocus_file_struct = getDefocusFiles(obj.configuration, '.defocus');
+                        defocus_file = defocus_file_struct{obj.configuration.set_up.j}.folder + string(filesep) + defocus_file_struct{obj.configuration.set_up.j}.name;
                         
                         [stack_filepath, stack_filename, stack_ext] = fileparts(stack_output_path);
                         %splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
@@ -368,7 +369,8 @@ classdef BinStacks < Module
 
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-                        defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
+                        defocus_file_struct = getDefocusFiles(obj.configuration, '.defocus');
+                        defocus_file = defocus_file_struct{obj.configuration.set_up.j}.folder + string(filesep) + defocus_file_struct{obj.configuration.set_up.j}.name;
                         splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
                         ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
                             + obj.configuration.ctf_corrected_stack_suffix...
@@ -475,7 +477,8 @@ classdef BinStacks < Module
                    
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-                        defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
+                        defocus_file_struct = getDefocusFiles(obj.configuration, '.defocus');
+                        defocus_file = defocus_file_struct{obj.configuration.set_up.j}.folder + string(filesep) + defocus_file_struct{obj.configuration.set_up.j}.name;
                         splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
                         ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
                             + obj.configuration.ctf_corrected_stack_suffix...
@@ -586,7 +589,8 @@ classdef BinStacks < Module
                    
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-                        defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
+                        defocus_file_struct = getDefocusFiles(obj.configuration, '.defocus');
+                        defocus_file = defocus_file_struct{obj.configuration.set_up.j}.folder + string(filesep) + defocus_file_struct{obj.configuration.set_up.j}.name;
                         splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
                         ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
                             + obj.configuration.ctf_corrected_stack_suffix...
@@ -674,7 +678,8 @@ classdef BinStacks < Module
                    
                     if obj.configuration.run_ctf_phaseflip == true
                         tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
-                        defocus_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "defocus");
+                        defocus_file_struct = getDefocusFiles(obj.configuration, '.defocus');
+                        defocus_file = defocus_file_struct{obj.configuration.set_up.j}.folder + string(filesep) + defocus_file_struct{obj.configuration.set_up.j}.name;
                         splitted_tilt_stack_path_name = strsplit(stack_output_path, ".");
                         ctf_corrected_stack_destination = splitted_tilt_stack_path_name(1)...
                             + obj.configuration.ctf_corrected_stack_suffix...
