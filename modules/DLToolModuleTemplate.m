@@ -157,7 +157,7 @@ classdef DLToolModuleTemplate < Module
         % Case #1: DL tool is cloned from GitHub repository
         % (with dependencies being installed by user in the separate conda env)
         % Example tool: IsoNet
-         function command_output = executeDLToolCommand(obj, params_string)
+         function command_output = executeDLToolCommand_1(obj, params_string)
             python_run_script_snippet = "PYTHONPATH=" + fullfile(obj.configuration.repository_path, '..');
 
             % Add to command string non-interactive conda environment call
@@ -174,7 +174,7 @@ classdef DLToolModuleTemplate < Module
         % Case #2: DL tool is installed via conda as a package
         % (with dependencies coming along with the tool in the same conda env)
         % Example tool: crYOLO
-        function command_output = executeDLToolCommand(obj, params_string, tool_script)
+        function command_output = executeDLToolCommand_2(obj, params_string, tool_script)
             
             % Add to command string non-interactive conda environment call
             if obj.configuration.use_conda == true
