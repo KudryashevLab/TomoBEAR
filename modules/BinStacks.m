@@ -204,7 +204,7 @@ classdef BinStacks < Module
                     else
                         %xform_command_snippet = "";
                         stk_bin_ext = ".st";
-                        size_command_snippet = " -size " + floor(height / (obj.configuration.binnings(i) / obj.configuration.ft_bin)) + "," + floor(width / (obj.configuration.binnings(i) / obj.configuration.ft_bin));
+                        size_command_snippet = " -size " + floor(width / obj.configuration.binnings(i)) + "," + floor(height / obj.configuration.binnings(i));
                     end
                    
                     %                     for j = 1:length(obj.configuration.binnings)
