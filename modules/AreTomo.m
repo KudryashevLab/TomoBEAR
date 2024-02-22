@@ -141,7 +141,11 @@ classdef AreTomo < Module
             if obj.configuration.use_previous_alignment == false
                 [~,filename,fileext] = fileparts(stack_source);
                 alignment_file_out = obj.output_path + filesep + filename + fileext + ".aln";
-                alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
+                if obj.configuration.input_stack_binning == 1
+                    alignment_file_destination = obj.output_path + filesep + obj.name + ".aln";
+                else
+                    alignment_file_destination = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".aln";
+                end
                 movefile(alignment_file_out, alignment_file_destination);
             end
             
@@ -174,37 +178,29 @@ classdef AreTomo < Module
                 end
             end
             
-            % NOTE: GENERATE UNBINNED ALIGNED STACK
+            % NOTE: rename XF file
+            if obj.configuration.input_stack_binning > 1
+                xf_file_raw_path = obj.output_path + filesep + obj.name + ".xf";
+                xf_file_path = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".xf";
+                movefile(xf_file_raw_path, xf_file_path);
+            end
             
-            % Get list of views to exclude according to aligned stack
-            xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
-            xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
+            % NOTE: GENERATE ALIGNED STACK AT PRE-ALIGNMENT BINNING
             
-            fid = fopen(xf_file_path, 'rt');
-            txt = textscan(fid, '%s', 'Delimiter', '\n');
-            fclose(fid);
-
-            txt = txt{1}(~cellfun(@isempty, txt{1}));
-            % NOTE: dirty! rewrite using regexp or other search patterns
-            unit_transform_string = '1.000     0.000     0.000     1.000      0.00      0.00';
-            exclude_mask = contains(txt, unit_transform_string);
-            exclude_views = find(exclude_mask);
-            exclude_views = exclude_views'; 
-
-            % Generate aligned unbinned stack using alignment parameters
-            % previously detected at the requested binning level
-            tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
-            stack_source = string(tilt_stacks(obj.configuration.set_up.j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.j).name);
-            stack_destination_unbinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(1) + ".ali";
+            % Generate aligned stack at pre-ali binning using alignment
+            % params previously detected at the requested binning level
+            %tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
+            %stack_source = string(tilt_stacks(obj.configuration.set_up.j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.j).name);
+            stack_destination_prebinned = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".ali";
             
             if obj.configuration.use_previous_alignment == false
-                aln_file = dir(obj.output_path + filesep + obj.name + ".aln");
+                aln_file = dir(obj.output_path + filesep + obj.name + "*.aln");
                 aln_file_path = aln_file(1).folder + string(filesep) + aln_file(1).name;
             end
             
             executeCommand(obj.configuration.aretomo_command...
                 + " -InMrc " + stack_source...
-                + " -OutMrc " + stack_destination_unbinned...
+                + " -OutMrc " + stack_destination_prebinned...
                 + " -VolZ 0 -OutBin 1"...
                 + " -Gpu " + num2str(gpu_number) + " "...
                 + " -AlnFile " + aln_file_path...
@@ -219,23 +215,43 @@ classdef AreTomo < Module
 %                     + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -ImagesAreBinned 1.0 -AdjustOrigin"...
 %                     + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
 %                     + " -TaperAtFill 1,0");
+            
+            % Get list of views to exclude according to aligned stack
+            xf_file = dir(obj.output_path + filesep + obj.name + "*.xf");
+            xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
+            
+            fid = fopen(xf_file_path, 'rt');
+            txt = textscan(fid, '%s', 'Delimiter', '\n');
+            fclose(fid);
 
-            % Exclude views from generated unbinned stack
+            txt = txt{1}(~cellfun(@isempty, txt{1}));
+            % NOTE: dirty! rewrite using regexp or other search patterns
+            unit_transform_string = '1.000     0.000     0.000     1.000      0.00      0.00';
+            exclude_mask = contains(txt, unit_transform_string);
+            exclude_views = find(exclude_mask);
+            exclude_views = exclude_views'; 
+            
+            % Exclude views from generated pre-ali-bin aligned stack
             if ~isempty(exclude_views)
-                status = system("excludeviews -StackName " + stack_destination_unbinned...
+                status = system("excludeviews -StackName " + stack_destination_prebinned...
                     + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
             end
             
-            folder_destination = obj.configuration.aligned_tilt_stacks_folder;
-            filename_link_destination = obj.name + ".ali";
-
+            if obj.configuration.input_stack_binning == 1
+                folder_destination = obj.configuration.aligned_tilt_stacks_folder;
+                filename_link_destination = obj.name + ".ali";
+            else
+                folder_destination = obj.configuration.binned_aligned_tilt_stacks_folder;
+                filename_link_destination = obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".ali";
+            end
+            
             path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + folder_destination + filesep + obj.name;
             link_destination = path_destination + filesep + filename_link_destination;
             if exist(path_destination, "dir")
                 rmdir(path_destination, "s");
             end
             mkdir(path_destination);
-            createSymbolicLink(stack_destination_unbinned, link_destination, obj.log_file_id);
+            createSymbolicLink(stack_destination_prebinned, link_destination, obj.log_file_id);
             
             % Write unit transform matrix if local ali was applied
             if local_ali == true
@@ -255,6 +271,50 @@ classdef AreTomo < Module
                     fprintf(fid, "%s\n", unit_transform_string);
                 end
                 fclose(fid);
+            end
+            
+            % generate unbinned stack if both
+            % - global ali only was applied
+            % - pre-ali binning was > 1
+            if local_ali == false && obj.configuration.aligned_stack_binning > 1
+                % prepare XF file with unbinned transformations
+                xf_file_bin_path = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".xf";
+                xf_file_unbin_path = obj.output_path + filesep + obj.name + ".xf";
+                
+                xf_matrix_bin = readmatrix(xf_file_bin_path, 'FileType', 'text');
+                xf_matrix_unbin = xf_matrix_bin;
+                xf_matrix_unbin(:,end-1:end) = xf_matrix_bin(:,end-1:end) * obj.configuration.input_stack_binning;
+                writematrix(xf_matrix_unbin,xf_file_unbin_path, 'FileType', 'text', 'Delimiter', 'tab');
+                
+                % generate unbinned aligned stack
+                tilt_stacks = getTiltStacksFromStandardFolder(obj.configuration, true);
+                stack_source_raw = string(tilt_stacks(obj.configuration.set_up.j).folder) + string(filesep) + string(tilt_stacks(obj.configuration.set_up.j).name);
+                stack_destination_ali = obj.output_path + filesep + obj.name + "_bin_1.ali";
+                
+                [~, size_to_output] = system("header -s " + stack_source_raw);
+                size_to_output = str2num(size_to_output);
+
+                status = system("newstack -InputFile " + stack_source_raw...
+                    + " -OutputFile " + stack_destination_ali...
+                    + " -TransformFile " + xf_file_unbin_path...
+                    + " -OffsetsInXandY 0.0,0.0 -BinByFactor 1 -AdjustOrigin"...
+                    + " -SizeToOutputInXandY " + num2str(size_to_output(2)) + "," + num2str(size_to_output(1))...
+                    + " -TaperAtFill 1,0");
+                
+                % exclude views from generated unbinned aligned stack
+                if ~isempty(exclude_views)
+                    status = system("excludeviews -StackName " + stack_destination_ali...
+                        + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
+                end
+                
+                % softlink unbinned aligned stack
+                path_destination = obj.configuration.processing_path + filesep + obj.configuration.output_folder + filesep + obj.configuration.aligned_tilt_stacks_folder + filesep + obj.name;
+                link_destination = path_destination + filesep + obj.name + ".ali";
+                if exist(path_destination, "dir")
+                    rmdir(path_destination, "s");
+                end
+                mkdir(path_destination);
+                createSymbolicLink(stack_destination_ali, link_destination, obj.log_file_id);
             end
             
             %TODO: provide the same data as after fiducial-based alignment
