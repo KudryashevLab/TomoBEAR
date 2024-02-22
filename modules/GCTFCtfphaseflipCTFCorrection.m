@@ -65,6 +65,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
             if obj.configuration.use_aligned_stack == true
                 if ~isempty(getAlignedTiltStacksFromStandardFolder(obj.configuration, true))
                     tilt_stacks = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
+                    tilt_stacks = tilt_stacks(contains({tilt_stacks(:).folder}, sprintf("tomogram_%03d", obj.configuration.set_up.j)));
                 elseif ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
                     tilt_stacks = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
                 elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last"))
@@ -465,6 +466,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 % NOTE: run Ctfphaseflip CTF-correction always on aligned stack
                 if ~isempty(getAlignedTiltStacksFromStandardFolder(obj.configuration, true))
                     tilt_stacks_ali = getAlignedTiltStacksFromStandardFolder(obj.configuration, true);
+                    tilt_stacks_ali = tilt_stacks_ali(contains({tilt_stacks_ali(:).folder}, sprintf("tomogram_%03d", obj.configuration.set_up.j)));
                 elseif ~isempty(getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali"))
                     tilt_stacks_ali = getFilePathsFromLastBatchruntomoRun(obj.configuration, "ali");
                 elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","ali","last"))
