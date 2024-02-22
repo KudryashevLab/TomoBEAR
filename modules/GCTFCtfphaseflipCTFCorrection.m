@@ -183,7 +183,7 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                         obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = upper_l;
                     else
                         obj.dynamic_configuration.global_lower_defocus_average_in_angstrom = obj.dynamic_configuration.global_lower_defocus_average_in_angstrom + lower_l / 2;
-                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = obj.dynamic_configuration.global_uppper_defocus_average_in_angstrom + upper_l / 2;
+                        obj.dynamic_configuration.global_upper_defocus_average_in_angstrom = obj.dynamic_configuration.global_upper_defocus_average_in_angstrom + upper_l / 2;
                     end
                 else %if obj.configuration.ctf_estimation_method == "ctffind"
                     if isfield(obj.configuration, "apix")
