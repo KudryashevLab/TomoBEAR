@@ -285,6 +285,9 @@ classdef Reconstruct < Module
                     tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
                 elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","rawtlt","last"))
                     tlt_file = getFilesFromLastModuleRun(obj.configuration,"AreTomo","rawtlt","last");
+                    [path_tlt, name_tlt, ext_tlt] = fileparts(tlt_file{1});
+                    % get the corrected tilt files (only included views)
+                    tlt_file{1} = path_tlt + filesep + name_tlt + ".trunc" + ext_tlt;
                 else
                     error("ERROR: RAWTLT tilt files were requiested, but were not found!");
                 end
@@ -296,6 +299,9 @@ classdef Reconstruct < Module
                     tlt_file = getFilePathsFromLastBatchruntomoRun(obj.configuration, "tlt");
                 elseif ~isempty(getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last"))
                     tlt_file = getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last");
+                    [path_tlt, name_tlt, ext_tlt] = fileparts(tlt_file{1});
+                    % get the corrected tilt files (only included views)
+                    tlt_file{1} = path_tlt + filesep + name_tlt + ".trunc" + ext_tlt;
                 else
                     error("ERROR: TLT tilt files are required, but were not found!");
                 end
