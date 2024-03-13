@@ -340,6 +340,11 @@ classdef Reconstruct < Module
                         angle_num = str2double(tmp) + str2double(align_offset);
                         fprintf(tlt_out, "%.2f\n", angle_num);
                     end
+                else
+                     while ~feof(tlt_in)
+                        tilt = str2double(fgetl(tlt_in));
+                        fprintf(tlt_out, "%.2f\n", tilt);
+                    end
                 end
                 fclose(tlt_in);
                 fclose(tlt_out);
