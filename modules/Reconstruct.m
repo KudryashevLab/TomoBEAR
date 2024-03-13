@@ -320,7 +320,7 @@ classdef Reconstruct < Module
                     tlt_in = fopen(tlt_file{1}, "r");
                     while ~feof(tlt_in)
                         % TODO: needs to be tested
-                        tilt_adjusted = str2double(fgetl(tlt_in)) + shift;
+                        tilt_adjusted = str2double(fgetl(tlt_in)) - shift;
                         fprintf(tlt_out, "%.2f\n", tilt_adjusted);
                     end
                 elseif obj.configuration.correct_angles == "subtract"
