@@ -414,6 +414,7 @@ classdef Reconstruct < Module
             
             
             if exist("binned_aligned_tilt_stacks", "var")
+                binned_aligned_tilt_stacks = binned_aligned_tilt_stacks(contains({binned_aligned_tilt_stacks.name}, "bin_" + obj.configuration.binnings));
                 binned_aligned_tilt_stacks = binned_aligned_tilt_stacks(find(contains({binned_aligned_tilt_stacks.name}, name)));
                 for j = 1:length(binned_aligned_tilt_stacks)
                     name_splitted = strsplit(binned_aligned_tilt_stacks(j).name, ".");
