@@ -229,13 +229,39 @@ classdef AreTomo < Module
             unit_transform_string = '1.000     0.000     0.000     1.000      0.00      0.00';
             exclude_mask = contains(txt, unit_transform_string);
             exclude_views = find(exclude_mask);
-            exclude_views = exclude_views'; 
+            if ~isempty(exclude_views)
+                exclude_views = exclude_views';
+                exclude_views_path = obj.output_path + filesep + obj.name + "_excludeviews.txt";
+                writematrix(exclude_views,exclude_views_path, 'FileType', 'text', 'Delimiter', ' ');
+            end
+            
+            % write corrected rawtlt (views kept by AreTomo)
+            tlt_file_path = obj.output_path + filesep + obj.name + ".rawtlt";
+            tlt_angles = readmatrix(tlt_file_path, 'FileType', 'text', 'Delimiter', '\n');
+            if ~isempty(exclude_views)
+                tlt_angles_trunc = tlt_angles(~exclude_mask);
+            else
+                tlt_angles_trunc = tlt_angles;
+            end
+            tlt_trunc_file_path = obj.output_path + filesep + obj.name + ".trunc.rawtlt";
+            writematrix(tlt_angles_trunc, tlt_trunc_file_path, 'FileType', 'text');
+            
+            % write corrected tlt (views kept by AreTomo)
+            tlt_file_path = obj.output_path + filesep + obj.name + ".tlt";
+            tlt_angles = readmatrix(tlt_file_path, 'FileType', 'text', 'Delimiter', '\n');
+            if ~isempty(exclude_views)
+                tlt_angles_trunc = tlt_angles(~exclude_mask);
+            else
+                tlt_angles_trunc = tlt_angles;
+            end
+            tlt_trunc_file_path = obj.output_path + filesep + obj.name + ".trunc.tlt";
+            writematrix(tlt_angles_trunc, tlt_trunc_file_path, 'FileType', 'text');
             
             % Exclude views from generated pre-ali-bin aligned stack
-            if ~isempty(exclude_views)
-                status = system("excludeviews -StackName " + stack_destination_prebinned...
-                    + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
-            end
+            %if ~isempty(exclude_views)
+            %    status = system("excludeviews -StackName " + stack_destination_prebinned...
+            %        + " -ViewsToExclude " + strjoin(string(exclude_views), ','));
+            %end
             
             if obj.configuration.input_stack_binning == 1
                 folder_destination = obj.configuration.aligned_tilt_stacks_folder;
