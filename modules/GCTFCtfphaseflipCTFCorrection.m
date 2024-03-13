@@ -52,7 +52,13 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
                 apix = obj.configuration.tomograms.(field_names{obj.configuration.set_up.j}).apix * obj.configuration.ft_bin;
                 printVariable(apix);
             end
-            tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last");
+            
+            if obj.configuration.use_rawtlt == true
+                tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","rawtlt","last");
+            else
+                tilt_files = getFilesFromLastModuleRun(obj.configuration,"AreTomo","tlt","last");
+            end
+            
             if ~isempty(tilt_files)
                 tilt_files{1} = strrep(tilt_files{1}, "._", "_");
             elseif isempty(tilt_files)
