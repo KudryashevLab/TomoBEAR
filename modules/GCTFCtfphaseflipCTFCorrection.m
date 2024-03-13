@@ -61,6 +61,9 @@ classdef GCTFCtfphaseflipCTFCorrection < Module
             
             if ~isempty(tilt_files)
                 tilt_files{1} = strrep(tilt_files{1}, "._", "_");
+                [path_tlt, name_tlt, ext_tlt] = fileparts(tilt_files{1});
+                % get the corrected tilt files (only included views)
+                tilt_files{1} = path_tlt + filesep + name_tlt + ".trunc" + ext_tlt;
             elseif isempty(tilt_files)
                 if obj.configuration.use_rawtlt == true
                     tilt_files = getFilePathsFromLastBatchruntomoRun(obj.configuration, "rawtlt");
