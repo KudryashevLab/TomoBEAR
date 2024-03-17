@@ -51,6 +51,10 @@ for i = 1:length(mrc_path)
 end
 
 if counter == 1
+    [original_files, tif_flag] = getOriginalSTs(configuration);
+end
+
+if isempty(original_files) || (iscell(original_files) && isempty(original_files{1}))
     [original_files, tif_flag] = getOriginalTIFs(configuration);
 end
 
