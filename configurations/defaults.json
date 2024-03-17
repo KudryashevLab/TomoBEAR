@@ -505,6 +505,7 @@
         "execution_method": "once",
         "template_emd_number": "",
         "mask_emd_filename": "",
+        "template_pixel_size_A": -1,
         "template_bandpass_cut_on_fourier_pixel": 2,
         "template_bandpass_cut_off_resolution_in_angstrom": 20,
         "template_bandpass_smoothing_pixels": 3,

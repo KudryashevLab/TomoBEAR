@@ -74,8 +74,11 @@ classdef EMDTemplateGeneration < Module
                 template = template(:,:,end:-1:1);
             end
             
-            template_pixel_size = getPixelSizeFromHeader(map_path, obj.log_file_id);
-            
+            if obj.configuration.template_pixel_size_A ~= -1
+                template_pixel_size = obj.configuration.template_pixel_size_A;
+            else
+                template_pixel_size = getPixelSizeFromHeader(map_path, obj.log_file_id);
+            end
             
             %for i = 1:length(obj.configuration.binning)
             binning_factor = obj.configuration.template_matching_binning; %/ obj.configuration.aligned_stack_binning;
