@@ -2168,52 +2168,51 @@ classdef DynamoAlignmentProject < Module
             %             end
             if obj.configuration.classes > 1 %&& obj.configuration.swap_particles == true
                 dynamo_execute_project(char(project_name));
-                visualizations_path = obj.output_path + filesep + "visualizations";
-                [SUCCESS, MESSAGE, MESSAGEID] = mkdir(obj.output_path + filesep + "visualizations");
-                paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
-                iteration_path = dir(paths{1} + filesep + "*" + filesep + "*" + filesep + "results" + filesep + "ite_*");
                 
-                for h = 1:length(iteration_path) - 1
-                    tab_all_path = dir(string(iteration_path(h).folder) + filesep + iteration_path(h).name + filesep + "averages" + filesep + "*.tbl");
-                    tables = {char(string(tab_all_path(1).folder) + string(filesep) + tab_all_path(1).name)};
-                    tbl = dread(tables{1});
-                    tomogram_numbers = unique(tbl(:, 20));
-                    
-                    for i = 1:length(tomogram_numbers)
-                        tom = i;
-                        tbl_tom_sel = tbl(:, 20) == tom;
-                        tbl_tom = tbl(tbl_tom_sel,:);
-                        if size(tbl_tom, 1) > 0
-                            f = figure('visible', 'off');
-                            plot3(tbl_tom(:, 24), tbl_tom(:, 25), tbl_tom(:, 26), '.');
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
-                            saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
-                            close(f);
-                            for j = 1:obj.configuration.classes
-                                cls = j;
-                                tbl_cls_sel = tbl(:, 34) == cls;
-                                tbl_tom_cls = tbl((tbl_tom_sel & tbl_cls_sel),:);
-                                if size(tbl_tom_cls, 1) > 0
-                                    f = figure('visible', 'off');
-                                    plot3(tbl_tom_cls(:, 24), tbl_tom_cls(:, 25), tbl_tom_cls(:, 26), '.');
-                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
-                                    saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
-                                    close(f);
+                if obj.configuration.plot_results == true
+                    visualizations_path = obj.output_path + filesep + "visualizations";
+                    [SUCCESS, MESSAGE, MESSAGEID] = mkdir(obj.output_path + filesep + "visualizations");
+                    paths = getFilesFromLastModuleRun(obj.configuration, "DynamoAlignmentProject", "", "last");
+                    iteration_path = dir(paths{1} + filesep + "*" + filesep + "*" + filesep + "results" + filesep + "ite_*");
+
+                    for h = 1:length(iteration_path) - 1
+                        tab_all_path = dir(string(iteration_path(h).folder) + filesep + iteration_path(h).name + filesep + "averages" + filesep + "*.tbl");
+                        tables = {char(string(tab_all_path(1).folder) + string(filesep) + tab_all_path(1).name)};
+                        tbl = dread(tables{1});
+                        tomogram_numbers = unique(tbl(:, 20));
+
+                        for i = 1:length(tomogram_numbers)
+                            tom = i;
+                            tbl_tom_sel = tbl(:, 20) == tom;
+                            tbl_tom = tbl(tbl_tom_sel,:);
+                            if size(tbl_tom, 1) > 0
+                                f = figure('visible', 'off');
+                                plot3(tbl_tom(:, 24), tbl_tom(:, 25), tbl_tom(:, 26), '.');
+                                saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "fig");
+                                saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i, "png");
+                                close(f);
+                                for j = 1:obj.configuration.classes
+                                    cls = j;
+                                    tbl_cls_sel = tbl(:, 34) == cls;
+                                    tbl_tom_cls = tbl((tbl_tom_sel & tbl_cls_sel),:);
+                                    if size(tbl_tom_cls, 1) > 0
+                                        f = figure('visible', 'off');
+                                        plot3(tbl_tom_cls(:, 24), tbl_tom_cls(:, 25), tbl_tom_cls(:, 26), '.');
+                                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "fig");
+                                        saveas(f, visualizations_path + filesep + "iteration_" + h + "_tomogram_" + i + "_class_" + j, "png");
+                                        close(f);
+                                    end
                                 end
                             end
                         end
                     end
-                    
                 end
-                
             else
-                
                 if ~contains(string(project_name), "_eo")
                     dynamo_execute_project(char(string(project_name) + "_eo"));
                 else
                     dynamo_execute_project(char(string(project_name)));
                 end
-                
             end
             
             %             fid = fopen(obj.output_path + filesep + "SUCCESS_" + binning, "w");

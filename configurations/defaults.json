@@ -837,7 +837,8 @@
         "SUSAN_binning": 0,
         "ctf_correction_method": "defocus_file",
         "bandpass_method": "angles",
-        "exclude_projections": 0
+        "exclude_projections": 0,
+        "plot_results": false
     },
     "PolishParticlesAndEstimateResolution": {
         "execution_method": "once",
