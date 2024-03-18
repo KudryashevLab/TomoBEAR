@@ -171,8 +171,11 @@ classdef IsoNet < Module
                     defocus_file_path = defocus_file{1}.folder + string(filesep) + defocus_file{1}.name; 
                     defocus_ave = obj.getAverageDefocusFromDefocusFile(defocus_file_path);
                     
+                    % convert from nm (IMOD defocus file) to A (IsoNet)
+                    defocus_ave_A = defocus_ave * 10;
+                    
                     % NOTE: 4th column is tomogram global defocus
-                    fprintf(new_star_fid, '%s\t%s\t%s\t%.2f\t%s\t%s\n',flsp{1},flsp{2},flsp{3},defocus_ave,flsp{5},flsp{6});
+                    fprintf(new_star_fid, '%s\t%s\t%s\t%.2f\t%s\t%s\n',flsp{1},flsp{2},flsp{3},defocus_ave_A,flsp{5},flsp{6});
                 else
                     break
                 end
@@ -377,12 +380,18 @@ classdef IsoNet < Module
         function command_output = executeIsoNetCommand(obj, params_string)
             python_run_script_snippet = "PYTHONPATH=" + fullfile(obj.configuration.repository_path, '..');
             if obj.configuration.use_conda == true
-                python_run_script_snippet = python_run_script_snippet + " LD_LIBRARY_PATH=" + obj.configuration.conda_path + filesep + "lib:$LD_LIBRARY_PATH conda run";
+                ld_library_path_conda_lib = obj.configuration.conda_path + filesep + "lib";
+                %cudnn_lib_path = "lib/python3.9/site-packages/nvidia/cudnn/lib";
                 if ~contains(obj.configuration.isonet_env, filesep)
-                    python_run_script_snippet = python_run_script_snippet + " -n " + obj.configuration.isonet_env;
+                    env_reference_snippet = " conda run -n " + obj.configuration.isonet_env;
+                    %ld_library_path_isonet_cudnn = obj.configuration.conda_path + filesep + "envs" + filesep + obj.configuration.isonet_env + filesep + cudnn_lib_path;
                 else
-                    python_run_script_snippet = python_run_script_snippet + " -p " + obj.configuration.isonet_env;
+                    env_reference_snippet = " conda run -p " + obj.configuration.isonet_env;
+                    %ld_library_path_isonet_cudnn = obj.configuration.isonet_env + filesep + cudnn_lib_path;
                 end
+                %ld_library_path_snippet = " LD_LIBRARY_PATH=" + ld_library_path_conda_lib + ":" + ld_library_path_isonet_cudnn + ":$LD_LIBRARY_PATH";
+                ld_library_path_snippet = " LD_LIBRARY_PATH=" + ld_library_path_conda_lib + ":$LD_LIBRARY_PATH";
+                python_run_script_snippet = python_run_script_snippet + ld_library_path_snippet + env_reference_snippet;
             end
             python_run_script_snippet = python_run_script_snippet + " python " + obj.configuration.repository_path + filesep + "bin/isonet.py";
             command_output = executeCommand(python_run_script_snippet + " " + params_string, false, obj.log_file_id);
