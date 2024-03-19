@@ -1,0 +1,21 @@
+{
+    "general": {
+        ...
+        "mask_bandpass": [0, 4, 4]
+    },
+    ...
+    "EMDTemplateGeneration": {
+        "template_emd_number": "15636",
+        "mask_emd_filename": "emd_15636_msk_1.map",
+        "template_pixel_size_A": 1.85
+    },
+    "DynamoTemplateMatching": {
+        "size_of_chunk": [512, 512, 375],
+        "sampling": 15
+    },
+    "TemplateMatchingPostProcessing": {
+        "particle_count": 500,
+        "cc_std":2.5
+    }
+    ...
+}

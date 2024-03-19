@@ -1,0 +1,104 @@
+{
+    "general": {
+        "project_name": "RyR1",
+        "project_description": "RyR1 from EMPIAR-10452",
+        "data_path": "/path/to/raw/data/empiar10452.raw/*.st",
+        "processing_path": "/parent/path/for/tomobear/project/empiar10452",
+        "expected_symmetrie": "C4",
+        "binnings": [4, 8],
+        "gpu": [x,x,x,x],
+        "template_matching_binning": 8,
+        "gold_bead_size_in_nm": 10,
+        "apix": 1.8,
+        "reconstruction_thickness": 1200,
+        "tilt_angles": [-60,-57,-54,-51,-48,-45,-42,-39,-36,-33,-30,-27,-24,-21,-18,-15,-12,-9,-6,-3,0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60],
+        "as_boxes": false
+    },
+    "MetaData": {
+    },
+    "CreateStacks": {
+    },
+    "DynamoTiltSeriesAlignment": {
+    },
+    "DynamoCleanStacks": {
+    },
+    "BatchRunTomo": {
+        "skip_steps": [4],
+        "ending_step": 6
+    },
+    "StopPipeline": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 8,
+        "ending_step": 8
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+    },
+    "BatchRunTomo": {
+        "starting_step": 10,
+        "ending_step": 13
+    },
+    "BinStacks": {
+    },
+    "StopPipeline": {
+    },
+    "Reconstruct": {
+        "exclude_lists": {
+            "tomogram_001": [36,37],
+            "tomogram_002": [1,2,3,4,36,37,38,39],
+            "tomogram_003": [1,2,3,4,32,33,34,35,36],
+            "tomogram_004": [1,2,33,34,35,36,37],
+            "tomogram_005": [1,31,32,33,34],
+            "tomogram_006": [1,2,3,33,34]
+        },
+        "reconstruct": "binned"
+    },
+    "StopPipeline": {
+    },
+    "EMDTemplateGeneration": {
+        "template_emd_number": "10840",
+        "template_pixel_size_A": 1.8
+    },
+    "DynamoTemplateMatching": {
+        "size_of_chunk": [479, 463, 150],
+        "sampling": 10
+    },
+    "TemplateMatchingPostProcessing": {
+        "particle_count": 250,
+        "cc_std":2.5
+    },
+    "StopPipeline": {
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 4,
+        "use_noise_classes": true,
+        "use_symmetrie": false,
+        "sampling": 16,
+        "atand_factor": 1.2
+    },
+    "DynamoAlignmentProject": {
+        "iterations": 3,
+        "classes": 3,
+        "use_noise_classes": true,
+        "use_symmetrie": false,
+        "sampling": 12,
+        "atand_factor": 1.2,
+        "binning": 4,
+        "selected_classes": [1]
+    },
+    "StopPipeline": {
+    },
+    "DynamoAlignmentProject": {
+        "classes": 1,
+        "iterations": 1,
+        "use_noise_classes": false,
+        "use_symmetrie": false,
+        "sampling": 12,
+        "swap_particles": false,
+        "selected_classes": [2],
+        "binning": 4,
+        "atand_factor": 1.2,
+        "threshold":0.8
+    }
+}

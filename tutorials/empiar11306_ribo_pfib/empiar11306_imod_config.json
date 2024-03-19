@@ -1,16 +1,16 @@
 {
     "general": {
-        "project_name": "EMPIAR-11306",
-        "project_description": "Ribosome from FIB-milled data of EMPIAR-11306",
-        "data_path": "/path/to/raw/data/*.eer",
-        "processing_path": "/path/for/processing/",
+        "project_name": "Ribosome",
+        "project_description": "Ribosome from plasma-FIB-milled data from EMPIAR-11306",
+        "data_path": "/path/to/raw/data/empiar11306.raw/*.eer",
+        "processing_path": "/parent/path/for/tomobear/project/empiar11306",
         "expected_symmetrie": "C1",
-        "aligned_stack_binning": 2,
         "apix": 1.85,
-        "gpu": [x,x,x,x,x],
+        "gpu": [x, x, x, x],
         "binnings": [4, 8, 16],
         "rotation_tilt_axis": 80,
         "template_matching_binning": 8,
+        "reconstruction_thickness": 2000,
         "as_boxes": false
     },
     "MetaData": {
@@ -18,7 +18,7 @@
     "SortFiles": {
     },
     "MotionCor2": {
-        "gain": "/path/to/reference/gain/20220406_175020_EER_GainReference.gain",
+        "gain": "/path/to/raw/data/empiar11306.raw/20220406_175020_EER_GainReference.gain",
         "eer_sampling": 2,
         "eer_total_number_of_fractions": 343,
         "eer_fraction_grouping": 34,
@@ -39,9 +39,9 @@
             "comparam.xcorr_pt.tiltxcorr.FilterSigma1": 0.00,
             "comparam.xcorr_pt.tiltxcorr.FilterSigma2": 0.02,
             "comparam.xcorr_pt.tiltxcorr.IterateCorrelations": 1,
-            "comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY": "500 500",
+            "comparam.xcorr_pt.tiltxcorr.SizeOfPatchesXandY": "250 250",
             "comparam.xcorr_pt.tiltxcorr.OverlapOfPatchesXandY": "0.33 0.33",
-            "comparam.xcorr_pt.tiltxcorr.BordersInXandY": "102 102",
+            "comparam.xcorr_pt.tiltxcorr.BordersInXandY": "51 51",
             "runtime.Fiducials.any.trackingMethod": 1,
             "runtime.AlignedStack.any.eraseGold": 0,
             "comparam.align.tiltalign.RotOption": -1,
@@ -50,11 +50,14 @@
             "comparam.align.tiltalign.ProjectionStretch": 0
         }
     },
+    "StopPipeline": {
+    },
     "BatchRunTomo": {
         "starting_step": 8,
         "ending_step": 8
     },
     "GCTFCtfphaseflipCTFCorrection": {
+        "use_rawtlt": false
     },
     "BatchRunTomo": {
         "starting_step": 11,
@@ -64,31 +67,9 @@
     "BinStacks": {
     },
     "Reconstruct": {
-        "reconstruction_thickness": 3000,
         "generate_exact_filtered_tomograms": true,
-        "exact_filter_size": 2500
-    },
-    "DynamoImportTomograms": {
-    },
-    "TemplateGenerationFromFile": {
-        "template_path": "/path/to/template.mrc",
-        "mask_path": "/path/to/mask.mrc",
-        "template_apix": xx.x,
-        "use_smoothed_mask": false,
-        "use_bandpassed_template": false,
-        "use_ellipsoid": false
-    },
-    "StopPipeline": {
-    },
-    "DynamoTemplateMatching": {
-        "cone_range": 360,
-        "cone_sampling": 10,
-        "in_plane_range": 360,
-        "in_plane_sampling": 10,
-        "size_of_chunk": [512, 512, 375]
-    },
-    "TemplateMatchingPostProcessing": {
-        "cc_std": 2.5,
-        "crop_particles": false
+        "exact_filter_size": 1000,
+        "use_rawtlt": false,
+        "correct_angles": "none"
     }
 }

@@ -1,0 +1,45 @@
+{
+    "general": {
+        "project_name": "Ribosome",
+        "project_description": "Ribosome from plasma-FIB-milled data from EMPIAR-11306",
+        "data_path": "/parent/path/for/tomobear/project/empiar11306/output/tilt_stacks/*/*.st",
+        "processing_path": "/parent/path/for/tomobear/project/empiar11306",
+        "expected_symmetrie": "C1",
+        "output_folder": "output_aretomo",
+        "scratch_folder": "scratch_aretomo",
+        "apix": 1.85,
+        "gpu": [x,x,x,x],
+        "binnings": [4, 8, 16],
+        "rotation_tilt_axis": 80,
+        "template_matching_binning": 8,
+        "reconstruction_thickness": 2000,
+        "as_boxes": false,
+        "pretilt_tilt_axis": -16
+    },
+    "CreateStacks": {
+    },
+    "BinStacks": {
+        "binnings": [4],
+        "use_ctf_corrected_aligned_stack": false,
+        "use_aligned_stack": false
+    },
+    "AreTomo": {
+        "input_stack_binning": 4,
+        "patch": "0 0"
+    },
+    "StopPipeline": {
+    },
+    "GCTFCtfphaseflipCTFCorrection": {
+        "run_ctf_phase_flip": true,
+        "use_aligned_stack": true,
+        "use_rawtlt": false
+    },
+    "BinStacks": {
+    },
+    "Reconstruct": {
+        "generate_exact_filtered_tomograms": true,
+        "exact_filter_size": 1000,
+        "use_rawtlt": false,
+        "correct_angles": "none"
+    }
+}

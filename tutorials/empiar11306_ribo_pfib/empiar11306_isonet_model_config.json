@@ -1,0 +1,76 @@
+1. PREPARE NON-CTF-CORRECTED TOMOGRAMS
+{
+    ...
+    "BinStacks": {
+        "binnings": [8],
+        "use_ctf_corrected_aligned_stack": false,
+        "use_aligned_stack": true
+    },
+    "Reconstruct": {
+        "binnings": [8],
+        "use_ctf_corrected_stack": false,
+        "use_rawtlt": false,
+        "correct_angles": "none"
+    }
+    ...
+}
+
+2.A. PREPROCESS & PREDICT USING PRE-TAINED MODEL
+{
+  "IsoNet": {
+      "steps_to_execute": {
+          "prepare_star": {
+              "tomograms_binning": 8
+          },
+          "deconv": {
+              "ncpu": 12,
+              "snrfalloff": 0.7,
+              "deconvstrength": 1.2
+          },
+          "predict": {
+              "model": "/path/to/results/model_iter30.h5"
+          }
+      }
+}
+
+2.B. PREPROCESS & TRAIN & PREDICT
+{
+    ...
+    "IsoNet": {
+        "steps_to_execute": {
+            "prepare_star": {
+                "tomograms_binning": 8
+            },
+            "deconv": {
+                "ncpu": 12,
+                "snrfalloff": 0.7,
+                "deconvstrength": 1.2
+            },
+            "make_mask": {
+            },
+            "extract": {
+            }
+        }
+    },
+    "StopPipeline": {
+    },
+    "IsoNet": {
+        "steps_to_execute": {
+            "refine": {
+                "subtomo_star": "../XX_IsoNet_1/subtomo.star",
+                "iterations": 30,
+                "noise_start_iter": [10,15,20,25],
+                "noise_level": [0.05,0.1,0.15,0.2]
+            }
+        }
+    },
+    "IsoNet": {
+        "steps_to_execute": {
+            "predict": {
+                "star_file": "../XX_IsoNet_1/tomograms.star",
+                "model": "../XX_IsoNet_1/results/model_iter30.h5"
+            }
+        }
+    },
+    ...
+}
