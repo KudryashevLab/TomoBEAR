@@ -281,7 +281,7 @@ classdef AreTomo < Module
             
             % Write unit transform matrix if local ali was applied
             if local_ali == true
-                xf_file = dir(obj.output_path + filesep + obj.name + ".xf");
+                xf_file = dir(obj.output_path + filesep + obj.name + "*.xf");
                 xf_file_path = xf_file(1).folder + string(filesep) + xf_file(1).name;
 
                 if isfile(xf_file_path)
