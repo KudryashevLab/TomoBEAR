@@ -1489,7 +1489,7 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     %                 end
                     
-                    while (inplane_sampling > atand(1 / (size(template, 1) / 2)) / obj.configuration.atand_factor) || iterations == 0
+                    while (inplane_sampling > atand(obj.configuration.atand_factor / (size(template, 1) / 2))) || iterations == 0
                         %                     if skipped_iterations < iterations_to_skip
                         %                         %                         if obj.configuration.sampling == 0
                         %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
@@ -1723,7 +1723,7 @@ classdef DynamoAlignmentProject < Module
                     %                     end
                     %                 end
                     
-                    while inplane_sampling > atand(1 / (size(template, 1) / 2)) / obj.configuration.atand_factor || iterations == 0
+                    while (inplane_sampling > atand(obj.configuration.atand_factor / (size(template, 1) / 2))) || iterations == 0
                         %                     if skipped_iterations < iterations_to_skip
                         %                         %                         if obj.configuration.sampling == 0
                         %                         %                             if obj.configuration.in_plane_sampling < atand(1/(size(template,1)/2))/2 % asind(1/size(template,1))
@@ -2060,9 +2060,9 @@ classdef DynamoAlignmentProject < Module
                 end
                 
                 card.apix = apix * binning;
-                card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_template_initial.sel'];
-                card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_table_initial.sel'];
-                card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings/multisettings_fmask_initial.sel'];
+                card.file_template_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings']; %/multisettings_template_initial.sel'];
+                card.file_table_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings']; %/multisettings_table_initial.sel'];
+                card.file_fmask_initial = [char(alignment_project_folder_path) '/' char(project_name) '/settings']; %/multisettings_fmask_initial.sel'];
                 
                 if obj.configuration.mask_path ~= ""
                     card.file_mask = mask_em_files{1};
