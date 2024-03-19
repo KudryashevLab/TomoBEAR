@@ -124,8 +124,13 @@ classdef EMDTemplateGeneration < Module
             else
                 band_passed_template = template;
             end
-            mask = dbandpass(-template, obj.configuration.mask_bandpass);
             
+            available_mask = dir(available_mask_path);
+            if ~isempty(available_mask)
+                mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));
+            else
+                mask = dbandpass(-template, obj.configuration.mask_bandpass);
+            end
             
             % TODO: need better criterion or check values
             %
@@ -236,18 +241,25 @@ classdef EMDTemplateGeneration < Module
             available_mask = dir(available_mask_path);
             if ~isempty(available_mask)
                 fprintf("INFO: writing chosen EMD mask (%s)...\n", obj.configuration.mask_emd_filename);
-                mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));                
-                rescaled_mask = obj.rescale_volume(mask, "", scaling_ratio, "CPU");
+                %mask = dread(char(available_mask.folder + string(filesep) + available_mask.name));                
+                %rescaled_mask = obj.rescale_volume(mask, "", scaling_ratio, "CPU");
+                
+                %{
+                rescaled_mask = dynamo_rescale(mask, template_pixel_size, rescaled_pixelsize);
                 rescaled_mask = makeEvenVolumeDimensions(rescaled_mask);
                 
                 bandpassed_mask = dbandpass(mask, obj.configuration.mask_bandpass);
                 
-                rescaled_bandpasse_mask = obj.rescale_volume(bandpassed_mask, "", scaling_ratio, "CPU");
-                rescaled_bandpasse_mask = makeEvenVolumeDimensions(rescaled_bandpasse_mask);
+                %rescaled_bandpassed_mask = obj.rescale_volume(bandpassed_mask, "", scaling_ratio, "CPU");
+                rescaled_bandpassed_mask = dynamo_rescale(bandpassed_mask, template_pixel_size, rescaled_pixelsize);
+                rescaled_bandpassed_mask = makeEvenVolumeDimensions(rescaled_bandpassed_mask);
                 %mask = gather(real(ifftn(fftn(rescaled_template) .* mask_band_pass_filter)));
-                dwrite(rescaled_bandpasse_mask, mask_smoothed_destination)
+                dwrite(rescaled_bandpassed_mask, mask_smoothed_destination)
                 dwrite(rescaled_mask, mask_binarized_destination)
-
+                %}
+                dwrite(mask_binarized, mask_binarized_destination);
+                dwrite(mask_binarized_smoothed_cleaned, mask_smoothed_destination);
+                
                 createSymbolicLink(available_mask.folder + string(filesep) + "bandpassed_"  + available_mask.name + ".mrc", mask_link_destination, obj.log_file_id);
                 if obj.configuration.use_smoothed_mask == true
                     createSymbolicLink(mask_smoothed_destination, mask_link_destination, obj.log_file_id);
