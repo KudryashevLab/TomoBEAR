@@ -167,7 +167,8 @@ classdef AreTomo < Module
             createSymbolicLink(stack_destination, link_destination, obj.log_file_id);
             
             % NOTE: Move IMOD-compatible files one level up
-            imod_folder = obj.output_path + filesep + obj.name + ".ali_Imod";
+            imod_folder_dir = dir(obj.output_path + filesep + obj.name + "*_Imod");
+            imod_folder = imod_folder_dir(1).folder + string(filesep) + imod_folder_dir(1).name;
             if isfolder(imod_folder)
                 imod_files = dir(imod_folder + string(filesep) + obj.name + "*.*");
                 for file_id = 1:length(imod_files) 
@@ -177,12 +178,16 @@ classdef AreTomo < Module
                     movefile(imod_file_out, imod_file_destination);
                 end
             end
+
             
             % NOTE: rename XF file
             if obj.configuration.input_stack_binning > 1
-                xf_file_raw_path = obj.output_path + filesep + obj.name + ".xf";
+                xf_file_raw = dir(obj.output_path + filesep + obj.name + "*.xf");
+                xf_file_raw_path = xf_file_raw(1).folder + string(filesep) + xf_file_raw(1).name;
                 xf_file_path = obj.output_path + filesep + obj.name + "_bin_" + num2str(obj.configuration.input_stack_binning) + ".xf";
-                movefile(xf_file_raw_path, xf_file_path);
+                if ~exist(xf_file_path, "file")
+                    movefile(xf_file_raw_path, xf_file_path);
+                end
             end
             
             % NOTE: GENERATE ALIGNED STACK AT PRE-ALIGNMENT BINNING
