@@ -9,8 +9,6 @@
 Implementation details and benchmarks you can find in our publication:
 </br> Balyschew N, Yushkevich A, Mikirtumov V, Sanchez RM, Sprink T, Kudryashev M. Streamlined Structure Determination by Cryo-Electron Tomography and Subtomogram Averaging using TomoBEAR. *Nat Commun* **14**, 6543 (2023). doi: [10.1038/s41467-023-42085-w](https://www.nature.com/articles/s41467-023-42085-w)
 
-> **Warning**
-> <br/> This software is currently in pre-release state. New features may still appear and refactoring may still take place between all the current and future 0.x.y versions until 1.0.0 will be ready to be released. Binaries are not currently shipped.
 
 ## Contents
 
